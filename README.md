@@ -7,7 +7,7 @@
 - 文章を単純なプレーンテキストで書いている(一部青空形式程度の規則)
 - WEBで公開するために、簡単にhtmlファイルにしたい
 - 同人誌として組版する際に、CSS組版を使用したい
-  - VivliostyleViewerでの解釈を想定
+  - [VivliostyleViewer](https://vivliostyle.org/)での解釈を想定
 - 「WEB表示用のファイル」「組版データ」「生原稿」を別のファイルにせず1ソースとしたい
 - WindowsやMac用のリッチなアプリが使えない環境
   - Chromebookとか、RaspberryPieとか
