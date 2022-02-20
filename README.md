@@ -14,7 +14,7 @@
   - [VivliostyleViewer](https://vivliostyle.org/)での解釈を想定
 - 「WEB表示用のファイル」「組版データ」「生原稿」を別のファイルにせず1ソースとしたい
 - WindowsやMac用のリッチなアプリが使えない環境
-  - Chromebookとか、RaspberryPieとか
+  - Chromebookとか、RaspberryPiとか
 
 ## 注意
 - htmlを生成する際、段落と、カッコ類の扱いについて、かなりイロモノな設定を行う想定のhtmlを生成します。
