@@ -7,8 +7,6 @@ touch ${destFile}                                  #出力先ファイルを生�
 # 改行→改行タグ
 ## crlf→lf してから cr|lf→<br>+lfに
 filecontent=$( cat ${tgtFile} )
-(echo -e "${filecontent//$'\r\n'/$'\n'}")>${destFile}
-filecontent=$( cat ${destFile} )
-(echo -e "${filecontent//[$'\r'|$'\n']/<br>$'\n'}")>${destFile}
+(echo -e "${filecontent//$'\r\n'/$'\n'}") | (echo -e "${filecontent//[$'\r'|$'\n']/<br>$'\n'}")>${destFile}
 
 filecontent=$( cat ${destFile} )
