@@ -1,2 +1,1 @@
-test/ruby/tmp2.txt
-test/ruby/tmp.txt
+tmp*.*

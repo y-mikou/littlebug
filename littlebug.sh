@@ -14,4 +14,7 @@ filecontent=$( cat ${destFile} )
 sed -z 's/\r\n/\n/g' ${tgtFile} | sed -z 's/[\r\n]/<br>\n/g' >tmp.txt
 
 ## 行頭<br>を、<br class="blankline">に
-sed -e '/^<br>/c <br class="blankline">' tmp.txt >${destFile}
+sed -e '/^<br>/c <br class="blankline">' tmp.txt >tmp2.txt
+
+##{母字|ルビ}となっているものを<rb>母字<rt>ルビ</t></rb>へ
+sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<rb>\1<rt>\2<\/rt><\/rb>/g' tmp2.txt >${destFile}
