@@ -16,7 +16,7 @@ filecontent=$( cat ${destFile} )
 
 # 改行→改行タグ
 # crlf→lf してから cr|lf→<br>+lfに
-( (echo -e "${filecontent//$'\r\n'/$'\n'}") | (echo -e "${filecontent//[$'\r'|$'\n']/<br>$'\n'}") ) >tmp.txt
+( (echo -e "${filecontent//$'\r\n'/$'\n'}") | (echo -e "${filecontent//[$'\r'$'\n']/<br>$'\n'}") ) >tmp.txt
 
 ## 行頭<br>を、<br class="blankline">に
 (sed -e '/^<br>/c <br class="blankline">' tmp.txt ) >${destFile}
