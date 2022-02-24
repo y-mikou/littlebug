@@ -7,16 +7,11 @@ destFile=${tgtFile/".txt"/"_littlebugResult.html"} #出力ファイルの指定�
 touch ${destFile}                                  #出力先ファイルを生成
 
 filecontent=$( cat ${destFile} )
-# 1行パイプラインを同時にメンテしていく。
-#filecontent=$( cat ${tgtFile} )
-#  ( (echo -e "${filecontent//$'\r\n'/$'\n'}") | (echo -e "${filecontent//[$'\r'$'\n']/<br>$'\n'}") ) \
-#| sed -e '/^<br>/c <br class="blankline">' \
-#> ${destFile}
-
 
 # 改行→改行タグ
 # crlf→lf してから cr|lf→<br>+lfに
-( (echo -e "${filecontent//$'\r\n'/$'\n'}") | (echo -e "${filecontent//[$'\r'$'\n']/<br>$'\n'}") ) >tmp.txt
+#echo -e "${filecontent//$'\r\n'/$'\n'}") | echo -e "${filecontent//[$'\r'$'\n']/<br>$'\n'}" >tmp.txt
+sed -z 's/\r\n/\n/g' ${tgtFile} | sed -z 's/[\r\n]/<br>\n/g' >${destFile}
 
 ## 行頭<br>を、<br class="blankline">に
-(sed -e '/^<br>/c <br class="blankline">' tmp.txt ) >${destFile}
+#(sed -e '/^<br>/c <br class="blankline">' tmp.txt ) >${destFile}
