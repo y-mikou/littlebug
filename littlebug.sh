@@ -17,4 +17,7 @@ sed -z 's/\r\n/\n/g' ${tgtFile} | sed -z 's/[\r\n]/<br>\n/g' >tmp.txt
 sed -e '/^<br>/c <br class="blankline">' tmp.txt >tmp2.txt
 
 ##{母字|ルビ}となっているものを<rb>母字<rt>ルビ</t></rb>へ
-sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<rb>\1<rt>\2<\/rt><\/rb>/g' tmp2.txt >${destFile}
+sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<rb>\1<rt>\2<\/rt><\/rb>/g' tmp2.txt >tmp.txt
+
+##《《母字》》となっているものを<span class="emphasis">母字</span>へ
+sed -e 's/《《\([^《]\+\)》》/<span class="emphasis">\1<\/span>/g' tmp.txt >${destFile}
