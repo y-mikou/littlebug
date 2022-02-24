@@ -9,7 +9,7 @@ touch ${destFile}                                  #出力先ファイルを生�
 filecontent=$( cat ${destFile} )
 # 1行パイプラインを同時にメンテしていく。
 #filecontent=$( cat ${tgtFile} )
-#  ( (echo -e "${filecontent//$'\r\n'/$'\n'}") | (echo -e "${filecontent//[$'\r'|$'\n']/<br>$'\n'}") ) \
+#  ( (echo -e "${filecontent//$'\r\n'/$'\n'}") | (echo -e "${filecontent//[$'\r'$'\n']/<br>$'\n'}") ) \
 #| sed -e '/^<br>/c <br class="blankline">' \
 #> ${destFile}
 
