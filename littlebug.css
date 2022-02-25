@@ -1,10 +1,20 @@
 @charset "UTF-8";
 /*issueに沿って実装追加*/
 
+/*空行*/
 br.ltlbg_blankline{
     all:initial
 }
 
+/*改ページ*/
 div.ltlbg_newpage{
     page-break-after: always;
+}
+
+/*二倍化。自動変換対象ではないが、～などを伸ばすのにも使える。*/
+span.ltlbg_wSize{
+    display: inline-block;
+    transform-origin: left;
+    transform: scale(1.5, 1) translateX(3px);
+    margin-right: 1em;
 }

@@ -23,4 +23,7 @@ sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<rb>\1<rt>\2<\/rt><\/rb>/g' tmp2.txt >tmp.
 sed -e 's/《《\([^《]\+\)》》/<span class="emphasis">\1<\/span>/g' tmp.txt >tmp2.txt
 
 ## [newpage\]を、<br class="blankline">に
-sed -e '/\[newpage\]/c <div class="ltlbg_newpage">' tmp2.txt >${destFile}
+sed -e '/\[newpage\]/c <div class="ltlbg_newpage">' tmp2.txt >tmp.txt
+
+## ――を―へ | ―を<br class="wSize">―</span>に
+sed -e 's/――/―/g' tmp.txt | sed -e 's/―/<span class="ltlbg_wSize">―<\/span>/g' >${destFile}
