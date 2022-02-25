@@ -20,4 +20,7 @@ sed -e '/^<br>/c <br class="blankline">' tmp.txt >tmp2.txt
 sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<rb>\1<rt>\2<\/rt><\/rb>/g' tmp2.txt >tmp.txt
 
 ##《《母字》》となっているものを<span class="emphasis">母字</span>へ
-sed -e 's/《《\([^《]\+\)》》/<span class="emphasis">\1<\/span>/g' tmp.txt >${destFile}
+sed -e 's/《《\([^《]\+\)》》/<span class="emphasis">\1<\/span>/g' tmp.txt >tmp2.txt
+
+## 行頭<br>を、<br class="blankline">に
+sed -e '/\[newpage\]/c <div class="ltlbg_newpage">' tmp2.txt >${destFile}

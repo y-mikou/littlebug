@@ -4,3 +4,7 @@
 br.blankline{
     all:initial
 }
+
+div.ltlbg_newpage{
+    page-break-after: always;
+}
