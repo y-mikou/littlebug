@@ -11,7 +11,13 @@ filecontent=$( cat ${destFile} )
 # 改行→改行タグ
 # crlf→lf してから cr|lf→<br>+lfに
 #echo -e "${filecontent//$'\r\n'/$'\n'}") | echo -e "${filecontent//[$'\r'$'\n']/<br>$'\n'}" >tmp.txt
-sed -z 's/\r\n/\n/g' ${tgtFile} | sed -z 's/[\r\n]/<br>\n/g' >${destFile}
+sed -z 's/\r\n/\n/g' ${tgtFile} | sed -z 's/[\r\n]/<br>\n/g' >tmp.txt
 
 ## 行頭<br>を、<br class="blankline">に
-#(sed -e '/^<br>/c <br class="blankline">' tmp.txt ) >${destFile}
+sed -e '/^<br>/c <br class="blankline">' tmp.txt >tmp2.txt
+
+##{母字|ルビ}となっているものを<rb>母字<rt>ルビ</t></rb>へ
+sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<rb>\1<rt>\2<\/rt><\/rb>/g' tmp2.txt >tmp.txt
+
+##《《母字》》となっているものを<span class="emphasis">母字</span>へ
+sed -e 's/《《\([^《]\+\)》》/<span class="emphasis">\1<\/span>/g' tmp.txt >${destFile}
