@@ -23,7 +23,7 @@ sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby>\1<rt>\2<\/rt><\/ruby>/g' tmp2.txt >
 sed -e 's/《《\([^《]\+\)》》/<span class="emphasis">\1<\/span>/g' tmp.txt >tmp2.txt
 
 ## [newpage\]を、<br class="blankline">に
-sed -e '/\[newpage\]/c <div class="ltlbg_newpage">' tmp2.txt >tmp.txt
+sed -e '/\[newpage\]/c <div class="ltlbg_newpage"></div>' tmp2.txt >tmp.txt
 
 ## ――を―へ | ―を<br class="wSize">―</span>に
 sed -e 's/――/―/g' tmp.txt | sed -e 's/―/<span class="ltlbg_wSize">―<\/span>/g' >${destFile}
