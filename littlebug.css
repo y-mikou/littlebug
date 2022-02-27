@@ -1,15 +1,30 @@
 @charset "UTF-8";
 /*issueに沿って実装追加*/
 
-/*空行*/
-br.ltlbg_blankline{
-    all:initial
+/*命名のみのクラス。
+  html側で仕様を宣言されているが、littlebugでの付与を明示する目的しかないもの。
+  実際に独自のスタイリングはしていない。
+  必要になった場合は、ここからアンコメントして記述する。
+
+改行
+br.ltlbg_br{
 }
+
+空行
+br.ltlbg_blankline{
+}
+
+ルビ
+ruby.ltlbg_ruby{
+}
+
+*/
 
 /*改ページ*/
 div.ltlbg_newpage{
     page-break-after: always;
 }
+
 
 /*二倍化。自動変換対象ではないが、～などを伸ばすのにも使える。*/
 span.ltlbg_wSize{
@@ -22,4 +37,9 @@ span.ltlbg_wSize{
 /*太字*/
 span.ltlbg_bold{
     font-weight:bold;
+}
+
+/*傍点 デフォルトはゴマなので、必要であれば変える*/
+span.ltlbg_emphasis{
+    text-emphasis-style: filled sesame;
 }
