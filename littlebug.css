@@ -18,3 +18,8 @@ span.ltlbg_wSize{
     transform: scale(1.5, 1) translateX(3px);
     margin-right: 1em;
 }
+
+/*太字*/
+span.ltlbg_bold{
+    font-weight:bold;
+}
