@@ -13,7 +13,7 @@ filecontent=$( cat ${destFile} )
 #echo -e "${filecontent//$'\r\n'/$'\n'}") | echo -e "${filecontent//[$'\r'$'\n']/<br>$'\n'}" >tmp.txt
 sed -z 's/\r\n/\n/g' ${tgtFile} | sed -z 's/[\r\n]/<br>\n/g' >tmp.txt
 
-## 行頭<br>を、<br class="blankline">に
+## 行頭<br>を、<br class="ltlbg_blankline">に
 sed -e '/^<br>/c <br class="blankline">' tmp.txt >tmp2.txt
 
 ##{母字|ルビ}となっているものを<rb>母字<rt>ルビ</t></rb>へ
@@ -22,8 +22,11 @@ sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby>\1<rt>\2<\/rt><\/ruby>/g' tmp2.txt >
 ##《《母字》》となっているものを<span class="emphasis">母字</span>へ
 sed -e 's/《《\([^《]\+\)》》/<span class="emphasis">\1<\/span>/g' tmp.txt >tmp2.txt
 
-## [newpage\]を、<br class="blankline">に
+## [newpage\]を、<br class="ltlbg_blankline">に
 sed -e '/\[newpage\]/c <div class="ltlbg_newpage"></div>' tmp2.txt >tmp.txt
 
-## ――を―へ | ―を<br class="wSize">―</span>に
-sed -e 's/――/―/g' tmp.txt | sed -e 's/―/<span class="ltlbg_wSize">―<\/span>/g' >${destFile}
+## ――を―へ | ―を<br class="ltlbg_wSize">―</span>に
+sed -e 's/――/―/g' tmp.txt | sed -e 's/―/<span class="ltlbg_wSize">―<\/span>/g' >tmp2.txt
+
+## **太字**を<br class="ltlbg_wSize">―</span>に
+sed -e 's/\*\*\([^\*]\+\)\*\*/<span class="ltlbg_bold">\1<\/span>/g' tmp2.txt  >${destFile}
