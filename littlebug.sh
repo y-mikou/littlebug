@@ -10,17 +10,17 @@ filecontent=$( cat ${destFile} )
 
 # 改行→改行タグ
 # crlf→lf してから cr|lf→<br>+lfに
-#echo -e "${filecontent//$'\r\n'/$'\n'}") | echo -e "${filecontent//[$'\r'$'\n']/<br>$'\n'}" >tmp.txt
-sed -z 's/\r\n/\n/g' ${tgtFile} | sed -z 's/[\r\n]/<br>\n/g' >tmp.txt
+#echo -e "${filecontent//$'\r\n'/$'\n'}") | echo -e "${filecontent//[$'\r'$'\n']/<br class="ltlbg_br">$'\n'}" >tmp.txt
+sed -z 's/\r\n/\n/g' ${tgtFile} | sed -z 's/[\r\n]/<br class="ltlbg_br">\n/g' >tmp.txt
 
 ## 行頭<br>を、<br class="ltlbg_blankline">に
-sed -e '/^<br>/c <br class="blankline">' tmp.txt >tmp2.txt
+sed -e '/^<br>/c <br class="ltlbg_blankline">' tmp.txt >tmp2.txt
 
-##{母字|ルビ}となっているものを<rb>母字<rt>ルビ</t></rb>へ
-sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby>\1<rt>\2<\/rt><\/ruby>/g' tmp2.txt >tmp.txt
+##{母字|ルビ}となっているものを<ruby class="ltlbg_ruby">母字<rt>ルビ</t></ruby>へ
+sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby class="ltlbg_ruby">\1<rt>\2<\/rt><\/ruby>/g' tmp2.txt >tmp.txt
 
-##《《母字》》となっているものを<span class="emphasis">母字</span>へ
-sed -e 's/《《\([^《]\+\)》》/<span class="emphasis">\1<\/span>/g' tmp.txt >tmp2.txt
+##《《母字》》となっているものを<span class="ltlbg_emphasis">母字</span>へ
+sed -e 's/《《\([^《]\+\)》》/<span class="ltlbg_emphasis">\1<\/span>/g' tmp.txt >tmp2.txt
 
 ## [newpage\]を、<br class="ltlbg_blankline">に
 sed -e '/\[newpage\]/c <div class="ltlbg_newpage"></div>' tmp2.txt >tmp.txt
