@@ -43,3 +43,10 @@ span.ltlbg_bold{
 span.ltlbg_emphasis{
     text-emphasis-style: filled sesame;
 }
+
+/*章タイトル*/
+span.ltlbg_sectionName{
+    display: inline-block;
+    line-height: 2rem;
+    font-size: 1.6em;
+}
