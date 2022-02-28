@@ -65,7 +65,7 @@ littlebug.css -.一定の表示保証.-> 文章データ.html
     - [でんでんマークダウン](https://conv.denshochan.com/markdown)
     - [Pixiv小説特殊タグ](https://www.pixiv.help/hc/ja/articles/235584168-%E5%B0%8F%E8%AA%AC%E4%BD%9C%E5%93%81%E3%81%AE%E6%9C%AC%E6%96%87%E5%86%85%E3%81%AB%E4%BD%BF%E3%81%88%E3%82%8B%E7%89%B9%E6%AE%8A%E3%82%BF%E3%82%B0%E3%81%A8%E3%81%AF-)
     - [カクヨム記法](https://kakuyomu.jp/help/entry/notation)
-    に寄せようとしています
+    <br>に寄せようとしています
 - WEBで公開するために、簡単にhtmlファイルにしたい人
 - 同人誌として組版する際に、CSS組版を使用したい人
   - [VivliostyleViewer](https://vivliostyle.org/)での解釈を想定
@@ -78,6 +78,7 @@ littlebug.css -.一定の表示保証.-> 文章データ.html
 - 生html(とCSS)が出力されるので、そのままWEBサイトの素材にもできる
 - 小説みたいなレイアウトの日本語文章に機能を絞っている
 - 変換後のHTMLタグに本アプリで出力したことを明示するクラスを必ず付与しており、テキストエディタなどでの後からのメンテナンスで目印にできる
+  - これによって、当アプリによって付与されたタグ除去を含む可逆変換を実現しています
 
 ## デメリット
 - でんでんマークダウン、VFM、Pixiv小説、カクヨム、複数の形式を継ぎ接ぎしているのでそれなりの学習コストがある
