@@ -1,0 +1,14 @@
+html {
+    /* 組み方向 */
+    /* 縦 */ writing-mode: vertical-rl;
+    /* 横    writing-mode: horizontal-tb; */ 
+
+    orphans: 1;
+    widows: 1;
+}
+
+/* 縦中横 */
+span.ltlbg_tcy {
+    text-combine-upright: all;
+    display: inline-block;
+}

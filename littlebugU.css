@@ -1,15 +1,6 @@
 @charset "UTF-8";
 /*issueに沿って実装追加*/
 
-html {
-    /* 組み方向 */
-    /* 縦 */ writing-mode: vertical-rl;
-    /* 横    writing-mode: horizontal-tb; */ 
-
-    orphans: 1;
-    widows: 1;
-}
-
 /*命名のみのクラス。
   html側で仕様を宣言されているが、littlebugでの付与を明示する目的しかないもの。
   実際に独自のスタイリングはしていない。
@@ -58,10 +49,4 @@ span.ltlbg_sectionName{
     display: inline-block;
     line-height: 2rem;
     font-size: 1.6em;
-}
-
-/* 縦中横 */
-span.ltlbg_tcy {
-    text-combine-upright: all;
-    display: inline-block;
 }
