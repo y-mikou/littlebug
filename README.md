@@ -15,28 +15,28 @@
 
 ## 変換の要約
 
-| 効果         | txtマークアップ    | htmlタグ(とClass)                                          | 備考                           |
-| ------------ | ------------------ | ---------------------------------------------------------- | ------------------------------ |
-| 作品タイトル | (ファイル名)       | `<title class="ltlbg_noveltitle">作品タイトル</title>`     | 特記するスタイルなし           |
-|              |                    | `<h1 class="ltlbg_noveltitle">作品タイトル</h1>`           | 特記するスタイルなし           |
-| 改行         | 改行コード         | `<br class="ltlbg_br">`                                    | 特記するスタイルなし           |
-| 空行         | 行頭の改行コード   | `<br class="ltlbg_blankline">`                             | 特記するスタイルなし           |
-| ルビ         | `{母字｜ルビ}`     | `<ruby class="ltlbg_ruby">母字<tr>ルビ</tr></ruby>`        | 特記するスタイルなし           |
-| 傍点         | `《《傍点》》`     | `<span class="ltlbg_emphasis">傍点対象</span>`             | 黒ゴマ点﹅                     |
-| 太字         | `**傍点**`         | `<span class="ltlbg_bold">太字対象</span>`                 | `b`,`em`,`strong`,`mark`でない |
-| 縦中横       | `^XX^`             | `<span class="ltlbg_tcy">XX</span>`                        | text-combine-upright: all;     |
-| 踊り字縦     | `〱`or`／＼`       | `<span class="ltlbg_odori1h"></span>`                      | transform: rotateする          |
-|              |                    | `<span class="ltlbg_odori2h"></span>`                      | transform: rotateする          |
-| 踊り字横     |                    | `<span class="ltlbg_odori1v"></span>`                      | transform: rotateする          |
-|              |                    | `<span class="ltlbg_odori2v"></span>`                      | transform: rotateする          |
-| ダーシ       | `―`or`――`       | `<span class="ltlbg_wSize">―</span>`                      | 倍サイズ1文字で。他でも使用可  |
-| 章タイトル   | `$`or`◆`or`■`    | `<h2 class="ltlbg_sectionname">章タイトル</h2>`            | 特記するスタイルなし           |
-| 章区切り     | `[capter:章index]` | `<section class="ltlbg_section" id="章index">…</section>` | 特記するスタイルなし           |
-| 改ページ     | `[newpage]`        | `<div class="ltlbg_newpage"></div>`                        | page-break:all;                |
-| 「会話」     | 「…」             | `<span class="ltlbg_talk">…</span>`                       | ぶら下がり指定                 |
-| （思考）     | （…）             | `<span class="ltlbg_think">…</span>`                      | ぶら下がり指定                 |
-| 〝強調〟     | 〝…〟             | `<span class="ltlbg_wqote">…</span>`                      | ぶら下がり指定                 |
-| 半角ズレ修正 | 奇数長の半角文字列 | `<span class="ltlbg_fixlength">…</span >`                 | margin-right:0.5em             |
+| 効果         | txtマークアップ    | htmlタグとClass(閉じ省略)                    | 備考                        |
+| ------------ | ------------------ | -------------------------------------------- | --------------------------- |
+| 作品タイトル | (ファイル名)       | `<title class="ltlbg_noveltitle">`           | 特記するスタイルなし        |
+|              |                    | `<h1 class="ltlbg_noveltitle">`              | 特記するスタイルなし        |
+| 改行         | 改行コード         | `<br class="ltlbg_br">`                      | 特記するスタイルなし        |
+| 空行         | 行頭の改行コード   | `<br class="ltlbg_blankline">`               | 特記するスタイルなし        |
+| ルビ         | `{母字｜ルビ}`     | `<ruby class="ltlbg_ruby">,<tr>`             | 特記するスタイルなし        |
+| 傍点         | `《《傍点》》`     | `<span class="ltlbg_emphasis">`              | 黒ゴマ点﹅                  |
+| 太字         | `**傍点**`         | `<span class="ltlbg_bold">`                  | 特記するスタイルなし        |
+| 縦中横       | `^XX^`             | `<span class="ltlbg_tcy">`                   | text-combine-upright: all;  |
+| 踊り字縦     | `〱`or`／＼`       | `<span class="ltlbg_odori1h">`               | transform: rotateする       |
+|              |                    | `<span class="ltlbg_odori2h">`               | transform: rotateする       |
+| 踊り字横     |                    | `<span class="ltlbg_odori1v">`               | transform: rotateする       |
+|              |                    | `<span class="ltlbg_odori2v">`               | transform: rotateする       |
+| ダーシ       | `―`or`――`       | `<span class="ltlbg_wSize">`                 | 倍サイズ1文字で。―以外も可 |
+| 章タイトル   | `$`or`◆`or`■`    | `<h2 class="ltlbg_sectionname">`             | 特記するスタイルなし        |
+| 章区切り     | `[capter:章idx]`   | `<section class="ltlbg_section" id="章idx">` | 特記するスタイルなし        |
+| 改ページ     | `[newpage]`        | `<div class="ltlbg_newpage">`                | page-break:all;             |
+| 「会話」     | 「…」             | `<span class="ltlbg_talk">`                  | ぶら下がり指定              |
+| （思考）     | （…）             | `<span class="ltlbg_think">`                 | ぶら下がり指定              |
+| 〝強調〟     | 〝…〟             | `<span class="ltlbg_wqote">`                 | ぶら下がり指定              |
+| 半角ズレ修正 | 奇数長の半角文字列 | `<span class="ltlbg_fixlen">`                | margin-right:0.5em          |
 
 ※マークアップに`or`を含むものは完全に可逆変換にならない(いずれか一つに収斂される)
 
