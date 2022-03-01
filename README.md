@@ -10,7 +10,8 @@
 
 - [VFM](https://github.com/vivliostyle/vfm)
 - [でんでんマークダウン](https://conv.denshochan.com/markdown)
-みたいな**可逆**変換をするシェルスクリプトです。
+
+みたいな変換を**可逆で**おこなうシェルスクリプトです。
 
 
 ## 変換の要約
