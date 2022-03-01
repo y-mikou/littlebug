@@ -21,9 +21,9 @@
 |              |                    | `<h1 class="ltlbg_noveltitle">`              |
 | 改行         | 改行コード         | `<br class="ltlbg_br">`                      |
 | 空行         | 行頭改行コード     | `<br class="ltlbg_blankline">`               |
-| ルビ         | `{母字｜ルビ}`     | `<ruby class="ltlbg_ruby">,<tr>`             |
+| ルビ         | `{母字｜ルビ}`     | `<ruby class="ltlbg_ruby">`,`<tr>`           |
 | 傍点         | `《《傍点》》`     | `<span class="ltlbg_emphasis">`              |
-| 太字         | `**傍点**`         | `<span class="ltlbg_bold">`                  |
+| 太字         | `**太字**`         | `<span class="ltlbg_bold">`                  |
 | 縦中横       | `^XX^`             | `<span class="ltlbg_tcy">`                   |
 | 踊り字縦     | `〱`or`／＼`       | `<span class="ltlbg_odori1h">`               |
 |              |                    | `<span class="ltlbg_odori2h">`               |
