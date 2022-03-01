@@ -1,11 +1,44 @@
 要件を抽出/明確化中です
 
 # テキスト⇔HTML相互変換「リトルバグ」
+
 一定程度規則に則って書かれたただのテキスト(.txt)に対し、CSS組版とWEB表示のソースを作り分ける素材となるHTMLタグを付与する。あるいはそれを除去してただのテキストに戻す。
 
 特に、小説のような形式で書かれた日本語文章に特化する。
 
 専用のCSSを用意し、htmlに対して付与する情報ではそれを使用する。専用CSSは組版用/WEB表示用それぞれで競合しないようクラス分けを行う。
+
+- [VFM](https://github.com/vivliostyle/vfm)
+- [でんでんマークダウン](https://conv.denshochan.com/markdown)
+みたいな**可逆**変換をするシェルスクリプトです。
+
+
+## 変換の要約
+
+| 効果         | txtマークアップ    | htmlタグ(とClass)                                        | 備考                           |
+| ------------ | ------------------ | -------------------------------------------------------- | ------------------------------ |
+| 作品タイトル | (ファイル名)       | <title class="ltlbg_noveltitle">作品タイトル</title>     | 特記するスタイルなし           |
+|              |                    | <h1 class="ltlbg_noveltitle">作品タイトル</h1>           | 特記するスタイルなし           |
+| 改行         | 改行コード         | <br class="ltlbg_br">                                    | 特記するスタイルなし           |
+| 空行         | 行頭の改行コード   | <br class="ltlbg_blankline">                             | 特記するスタイルなし           |
+| ルビ         | `{母字｜ルビ}`     | <ruby class="ltlbg_ruby">母字<tr>ルビ</tr></ruby>        | 特記するスタイルなし           |
+| 傍点         | `《《傍点》》`     | <span class="ltlbg_emphasis">傍点対象</span>             | 黒ゴマ点﹅                     |
+| 太字         | `**傍点**`         | <span class="ltlbg_bold">太字対象</span>                 | `b`,`em`,`strong`,`mark`でない |
+| 縦中横       | `^XX^`             | <span class="ltlbg_tcy">XX</span>                        | text-combine-upright: all;     |
+| 踊り字縦     | `〱`or`／＼`       | <span class="ltlbg_odori1h"></span>                      | transform: rotateする          |
+|              |                    | <span class="ltlbg_odori2h"></span>                      | transform: rotateする          |
+| 踊り字横     |                    | <span class="ltlbg_odori1v"></span>                      | transform: rotateする          |
+|              |                    | <span class="ltlbg_odori2v"></span>                      | transform: rotateする          |
+| ダーシ       | `―`or`――`       | <span class="ltlbg_wSize">―</span>                      | 倍サイズ1文字で。他でも使用可  |
+| 章タイトル   | `$`or`◆`or`■`    | <h2 class="ltlbg_sectionname">章タイトル</h2>            | 特記するスタイルなし           |
+| 章区切り     | `[capter:章index]` | <section class="ltlbg_section" id="章index">…</section> | 特記するスタイルなし           |
+| 改ページ     | `[newpage]`        | <div class="ltlbg_newpage"></div>                        | page-break:all;                |
+| 「会話」     | 「…」             | <span class="ltlbg_talk">…</span>                       | ぶら下がり指定                 |
+| （思考）     | （…）             | <span class="ltlbg_think">…</span>                      | ぶら下がり指定                 |
+| 〝強調〟     | 〝…〟             | <span class="ltlbg_wqote">…</span>                      | ぶら下がり指定                 |
+| 半角ズレ修正 | 奇数長の半角文字列 | <span class="ltlbg_fixlength">…</span >                 | margin-right:0.5em             |
+
+※マークアップに`or`を含むものは完全に可逆変換にならない(いずれか一つに収斂される)
 
 ## 雑な目的
 - でんでんエディタでは対応が厳しいサイズの変換したいのでFile読込んでFile出力したい
@@ -340,6 +373,7 @@ htmlにおいては`見出し`と混同されがちだが、明確に区別す�
 ```
 　当人もあまり甘うまくないと思ったものか、ある日その友人で
 　美学とかを　やっている人が来た時に下しものような話をして
+
 　いるのを聞いた。
 
 「どうも甘うまくかけないものだね。人のを見ると何でもないよ
@@ -390,8 +424,10 @@ htmlからtxtへ変換する際には、`括弧クラス`を判断して該当�
 - txt
   - そのまま記述されている
   - 但し、`縦中横クラス`が適用されていないもの
+  - かつ、奇数文字数の文字列
 - html
   - `偶数長化処理`を施す
+  - 右に半角1文字分のマージンを指定
 
 ### 偶数長化処理
 独自のものなので記載する。
