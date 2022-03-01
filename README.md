@@ -20,7 +20,7 @@
 | 作品タイトル | (ファイル名)       | `<title class="ltlbg_noveltitle">`           |
 |              |                    | `<h1 class="ltlbg_noveltitle">`              |
 | 改行         | 改行コード         | `<br class="ltlbg_br">`                      |
-| 空行         | 行頭の改行コード   | `<br class="ltlbg_blankline">`               |
+| 空行         | 行頭改行コード     | `<br class="ltlbg_blankline">`               |
 | ルビ         | `{母字｜ルビ}`     | `<ruby class="ltlbg_ruby">,<tr>`             |
 | 傍点         | `《《傍点》》`     | `<span class="ltlbg_emphasis">`              |
 | 太字         | `**傍点**`         | `<span class="ltlbg_bold">`                  |
@@ -30,7 +30,7 @@
 | 踊り字横     |                    | `<span class="ltlbg_odori1v">`               |
 |              |                    | `<span class="ltlbg_odori2v">`               |
 | ダーシ       | `―`or`――`       | `<span class="ltlbg_wSize">`                 | 
-| 章タイトル   | `$`or`◆`or`■`    | `<h2 class="ltlbg_sectionname">`             | 
+| 章タイトル   | 行頭`$`or`◆`or`■`| `<h2 class="ltlbg_sectionname">`             | 
 | 章区切り     | `[capter:章idx]`   | `<section class="ltlbg_section" id="章idx">` |
 | 改ページ     | `[newpage]`        | `<div class="ltlbg_newpage">`                |
 | 「会話」     | 「…」             | `<span class="ltlbg_talk">`                  |
