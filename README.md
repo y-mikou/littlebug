@@ -18,39 +18,44 @@
 
 それぞれの詳細は、[txtと.htmlの約物定義](#.txtと.htmlの約物定義)以降に記載しています。
 
-### 実装予定
-| 効果         | txtマークアップ     | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
-| ------------ | ------------------- | -------------------------------------------- | -----------------
-| 作品タイトル | (ファイル名)        | `<title class="ltlbg_noveltitle">`           | 利用想定無し
-|              |                     | `<h1 class="ltlbg_noveltitle">`              | 利用想定無し
-| 改行         | 改行コード          | `<br class="ltlbg_br">`                      | 特殊style無し
-| 空行         | 行頭改行コード      | `<br class="ltlbg_blankline">`               | 特殊style無し
-| ルビ         | `{母字｜ルビ}`      | `<ruby class="ltlbg_ruby">`,`<tr>`           | 母字距離変更不可
-| 傍点         | `《《傍点》》`      | `<span class="ltlbg_emphasis">`              | 黒ゴマ
-| 太字         | `**太字**`          | `<span class="ltlbg_bold">`                  | font-weight:bold
-| 縦中横       | `^XX^`              | `<span class="ltlbg_tcy">`                   | 半角2字のみ
-| 横書踊字     | `／＼`or`〱`        | `<span class="ltlbg_odori1v">`               | 1字目"〵"_左90度回転
-|              |                     | `<span class="ltlbg_odori2v">`               | 2字目"〳"_右90度回転
-| ダーシ       | `―`or`――`        | `<span class="ltlbg_wSize">`                 | 1字を長さ倍
-| 段落         | 行頭全角空白        | `<p class="ltlbg_p">`                        | 先頭空白除去、空行挿入
-| 章タイトル   | 行頭`$`or`◆`or`■` | `<h2 class="ltlbg_sectionname">`             | 2字幅行に大Font
-| 章区切り     | `[capter:章idx]`    | `<section class="ltlbg_section" id="章idx">` | 章idxは必須でない
-| 改ページ     | `[newpage]`         | `<div class="ltlbg_newpage">`                | breakAfter:Allの空div
-| 線           | `---`               | `<hr class="ltlbg_hr">`                      | 特殊style無し
-| 「会話」     | 行頭`「`から`」`    | `<span class="ltlbg_talk">`                  | ぶら下がりIndent
-| （思考）     | 行頭`（`から`）`    | `<span class="ltlbg_think">`                 | ぶら下がりIndent
-| 〝強調〟     | 行頭`〝`から`〟`    | `<span class="ltlbg_wqote">`                 | ぶら下がりIndent
-| 半角ズレ修正 | 奇数長の半角文字列  | `<span class="ltlbg_lenfil">`                | 右merginに0.5em
-| 回転対応     | `[^字^]`            | `<span class="ltlbg_rotate">`                | 全半角1字。1em幅確保、回転
-| 字幅対応     | `[-字-]`            | `<span class="ltlbg_lenfix">`                | 全半角1字。1em幅確保
-
 ※マークアップに`or`を含むものは完全に可逆変換にならない(いずれか一つに収斂される)
 
-### 検討中
-| 効果         | txtマークアップ     | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
-| ------------ | ------------------- | -------------------------------------------- | -----------------
-| アへ声       | `(h`から`h)`        | `<span class="ltlbg_ahe">`                   | 字間サイズ傾き位置を乱す？
-| エロ濁点     | `゛`                | `<span class="ltlbg_dakten">`                | 直前の1字と縦中横？
+### 実装予定の変換
+| 効果         | txtマークアップ      | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
+| ------------ | -------------------- | -------------------------------------------- | -----------------
+| 作品タイトル | (ファイル名)         | `<title class="ltlbg_noveltitle">`           | 利用想定無し
+|              |                      | `<h1 class="ltlbg_noveltitle">`              | 利用想定無し
+| 改行         | 改行コード           | `<br class="ltlbg_br">`                      | 特殊style無し
+| 空行         | 行頭改行コード       | `<br class="ltlbg_blankline">`               | 特殊style無し
+| ルビ         | `{母字｜ルビ}`       | `<ruby class="ltlbg_ruby">`,`<tr>`           | 母字距離変更不可
+| 傍点         | `《《傍点》》`       | `<span class="ltlbg_emphasis">`              | 黒ゴマ
+| 太字         | `**太字**`           | `<span class="ltlbg_bold">`                  | font-weight:bold
+| 縦中横       | `^XX^`               | `<span class="ltlbg_tcy">`                   | 半角2字のみ
+| ダーシ       | `―`or`――`         | `<span class="ltlbg_wSize">`                 | 1字を長さ倍
+| 章タイトル   | 行頭`§`or`◆`or`■` | `<h2 class="ltlbg_sectionname">`             | 2字幅行に大Font
+| 章区切り     | `[capter:章idx]`     | `<section class="ltlbg_section" id="章idx">` | 章idxは必須でない
+| 改ページ     | `[newpage]`          | `<div class="ltlbg_newpage">`                | breakAfter:Allの空div
+| 線           | `---`                | `<hr class="ltlbg_hr">`                      | 特殊style無し
+
+### 実装予定の、当アプリの特徴的な変換
+| 効果         | txtマークアップ      | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
+| ------------ | -------------------- | -------------------------------------------- | -----------------
+| 段落         | 行頭全角空白         | `<p class="ltlbg_p">`                        | 先頭空白除去、空行挿入
+| 横書踊字     | `／＼`or`〱`         | `<span class="ltlbg_odori1v">`               | 1字目"〵"_左90度回転
+|              |                      | `<span class="ltlbg_odori2v">`               | 2字目"〳"_右90度回転
+| 「会話」     | 行頭`「`から`」`     | `<span class="ltlbg_talk">`                  | ぶら下がりIndent
+| （思考）     | 行頭`（`から`）`     | `<span class="ltlbg_think">`                 | ぶら下がりIndent
+| 〝強調〟     | 行頭`〝`から`〟`     | `<span class="ltlbg_wqote">`                 | ぶら下がりIndent
+| 半角ズレ修正 | 奇数長の半角文字列   | `<span class="ltlbg_lenfil">`                | 右merginに0.5em
+| 回転対応     | `[^字^]`             | `<span class="ltlbg_rotate">`                | 全半角1字。1em幅確保、回転
+| 字幅対応     | `[-字-]`             | `<span class="ltlbg_lenfix">`                | 全半角1字。1em幅確保
+
+### 検討中の変換
+他では絶対実装されないのでやりたいけど後回し
+| 効果         | txtマークアップ      | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
+| ------------ | -------------------- | -------------------------------------------- | -----------------
+| アへ声       | `(h`から`h)`         | `<span class="ltlbg_ahe">`                   | 字間サイズ傾き位置を乱す？
+| エロ濁点     | `゛`                 | `<span class="ltlbg_dakten">`                | 直前の1字と縦中横？
 
 
 ## 雑な目的
@@ -257,7 +262,7 @@ htmlにおいては`見出し`と混同されがちだが、明確に区別す�
 
 ## ■章タイトルについて
 - txtでの章タイトル
-  - `$`か`◆`か`■`の章を指定する文字で始まる1行
+  - `§`か`◆`か`■`の章を指定する文字で始まる1行
   - これらの文字の直後に現れる空白1文字(全角半角問わない)は除去する。なければそのまま。
 - htmlでの章タイトル
   - `章タイトルクラス`を指定した`h2`タグに囲まれた範囲
@@ -339,7 +344,7 @@ htmlにおいては`見出し`と混同されがちだが、明確に区別す�
 
 ## ■縦中横について
 - txt
-  - `^yoko^`による形式(でんでんマークダウン型式)
+  - `^yo^`による形式(でんでんマークダウン型式)、**半角2文字限定**
 - html
   - `縦中横クラス`を指定した`span`タグ
 
@@ -490,7 +495,7 @@ htmlからtxtへ変換する際には、`括弧クラス`を判断して該当�
 デフォルトは90度回転。
 
 - txt
-  - [^字^]
+  - `[^字^]`
 - html
   - `回転クラス`を指定した`span`タグ
   - `1文字幅クラス`同様に、幅の調整も含む。
@@ -498,7 +503,7 @@ htmlからtxtへ変換する際には、`括弧クラス`を判断して該当�
 ## ■文字幅の強制一致
 主に横書きで使用することを想定
 - txt
-  - [-字-]
+  - `[-字-]`
 - html
   - `1文字幅クラス`を指定した`span`タグ
 
