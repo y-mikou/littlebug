@@ -6,3 +6,15 @@ html {
     orphans: 1;
     widows: 1;
 }
+
+/*踊り字*/
+span.ltlbg_odori1::after{
+    display: inline-block;
+    transform: rotate(90deg);
+    content: "〵";
+}
+span.ltlbg_odori2::before{
+    display: inline-block;
+    transform: rotate(90deg);
+    content: "〳";
+}
