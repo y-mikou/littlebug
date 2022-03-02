@@ -27,7 +27,7 @@
 |              |                      | `<h1 class="ltlbg_noveltitle">`              | 利用想定無し
 | 改行         | 改行コード           | `<br class="ltlbg_br">`                      | 特殊style無し
 | 空行         | 行頭改行コード       | `<br class="ltlbg_blankline">`               | 特殊style無し
-| ルビ         | `{母字｜ルビ}`       | `<ruby class="ltlbg_ruby">`,`<tr>`           | 母字距離変更不可
+| ルビ         | `{母字｜ルビ}`       | `<ruby class="ltlbg_ruby">`,`<tr>`           | 特殊style無し
 | 傍点         | `《《傍点》》`       | `<span class="ltlbg_emphasis">`              | 黒ゴマ
 | 太字         | `**太字**`           | `<span class="ltlbg_bold">`                  | font-weight:bold
 | 縦中横       | `^XX^`               | `<span class="ltlbg_tcy">`                   | 半角2字のみ
@@ -200,7 +200,7 @@ littlebug.css -.一定の表示保証.-> 文章データ.html
 
 ---
 
-# .txtと.htmlの約物定義
+# .txtと.htmlの約物、特殊文字の定義
 可逆変換を実現するため、なるべく多義性を持たないよう対定義する。
 
 ## ■改行について
@@ -349,6 +349,14 @@ htmlにおいては`見出し`と混同されがちだが、明確に区別す�
   - `縦中横クラス`を指定した`span`タグ
 
 ※`縦中横`は縦書き用の表現なので、横書きでは特に何もおこらない。
+
+## 水平(垂直)線について
+- txt
+  - `---`のみの行
+- html
+  - `hr`タグ
+
+一般的な区切り線だが、見た目のみのものとする。章や段落などの構造の区切りとしての機能は持たせない。
 
 ## ■カッコ類について
 ### 定義
