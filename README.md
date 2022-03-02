@@ -15,28 +15,27 @@
 
 ## 変換の要約
 
-| 効果         | txtマークアップ    | htmlタグとClass(閉じ省略)                    |
-| ------------ | ------------------ | -------------------------------------------- |
-| 作品タイトル | (ファイル名)       | `<title class="ltlbg_noveltitle">`           |
-|              |                    | `<h1 class="ltlbg_noveltitle">`              |
-| 改行         | 改行コード         | `<br class="ltlbg_br">`                      |
-| 空行         | 行頭改行コード     | `<br class="ltlbg_blankline">`               |
-| ルビ         | `{母字｜ルビ}`     | `<ruby class="ltlbg_ruby">`,`<tr>`           |
-| 傍点         | `《《傍点》》`     | `<span class="ltlbg_emphasis">`              |
-| 太字         | `**太字**`         | `<span class="ltlbg_bold">`                  |
-| 縦中横       | `^XX^`             | `<span class="ltlbg_tcy">`                   |
-| 踊り字縦     | `〱`or`／＼`       | `<span class="ltlbg_odori1h">`               |
-|              |                    | `<span class="ltlbg_odori2h">`               |
-| 踊り字横     |                    | `<span class="ltlbg_odori1v">`               |
-|              |                    | `<span class="ltlbg_odori2v">`               |
-| ダーシ       | `―`or`――`       | `<span class="ltlbg_wSize">`                 | 
-| 章タイトル   | 行頭`$`or`◆`or`■`| `<h2 class="ltlbg_sectionname">`             | 
-| 章区切り     | `[capter:章idx]`   | `<section class="ltlbg_section" id="章idx">` |
-| 改ページ     | `[newpage]`        | `<div class="ltlbg_newpage">`                |
-| 「会話」     | 「…」             | `<span class="ltlbg_talk">`                  |
-| （思考）     | （…）             | `<span class="ltlbg_think">`                 |
-| 〝強調〟     | 〝…〟             | `<span class="ltlbg_wqote">`                 |
-| 半角ズレ修正 | 奇数長の半角文字列 | `<span class="ltlbg_fixlen">`                |
+| 効果         | txtマークアップ    | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
+| ------------ | ------------------ | -------------------------------------------- | -----------------
+| 作品タイトル | (ファイル名)       | `<title class="ltlbg_noveltitle">`           | 利用想定無
+|              |                    | `<h1 class="ltlbg_noveltitle">`              | 利用想定無
+| 改行         | 改行コード         | `<br class="ltlbg_br">`                      | 特殊style無
+| 空行         | 行頭改行コード     | `<br class="ltlbg_blankline">`               | 特殊style無
+| ルビ         | `{母字｜ルビ}`     | `<ruby class="ltlbg_ruby">`,`<tr>`           | 母字距離変更不可
+| 傍点         | `《《傍点》》`     | `<span class="ltlbg_emphasis">`              | 黒ゴマ
+| 太字         | `**太字**`         | `<span class="ltlbg_bold">`                  | font-weight:bold
+| 縦中横       | `^XX^`             | `<span class="ltlbg_tcy">`                   | 表示崩れ制御無
+| 横書踊字     |                    | `<span class="ltlbg_odori1v">`               | 1字目_回転
+|              |                    | `<span class="ltlbg_odori2v">`               | 2字目_回転
+| ダーシ       | `―`or`――`       | `<span class="ltlbg_wSize">`                 | 1字を長さ倍
+| 章タイトル   | 行頭`$`or`◆`or`■`| `<h2 class="ltlbg_sectionname">`             | 2字幅行に大Font
+| 章区切り     | `[capter:章idx]`   | `<section class="ltlbg_section" id="章idx">` | 章idxは必須でない
+| 改ページ     | `[newpage]`        | `<div class="ltlbg_newpage">`                | breakAfter:Allの空div
+| 「会話」     | 「…」             | `<span class="ltlbg_talk">`                  | ぶら下がりIndent
+| （思考）     | （…）             | `<span class="ltlbg_think">`                 | ぶら下がりIndent
+| 〝強調〟     | 〝…〟             | `<span class="ltlbg_wqote">`                 | ぶら下がりIndent
+| 半角ズレ修正 | 奇数長の半角文字列 | `<span class="ltlbg_fixlen">`                | 右merginに0.5em
+| 記号ズレ修正 | 縦書回転しない文字 | `<span class="ltlbg_rote">`                  | 1字のみ。1em、回転
 
 ※マークアップに`or`を含むものは完全に可逆変換にならない(いずれか一つに収斂される)
 
