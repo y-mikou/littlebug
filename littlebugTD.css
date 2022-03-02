@@ -12,3 +12,13 @@ span.ltlbg_tcy {
     text-combine-upright: all;
     display: inline-block;
 }
+
+/*踊り字*/
+span.ltlbg_odori1::after{
+    display: inline-block;
+    content: "〳";
+}
+span.ltlbg_odori2::before{
+    display: inline-block;
+    content: "〵";
+}
