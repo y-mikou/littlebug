@@ -36,7 +36,7 @@
 | （思考）     | （…）             | `<span class="ltlbg_think">`                 | ぶら下がりIndent
 | 〝強調〟     | 〝…〟             | `<span class="ltlbg_wqote">`                 | ぶら下がりIndent
 | 半角ズレ修正 | 奇数長の半角文字列 | `<span class="ltlbg_lenfil">`                | 右merginに0.5em
-| 回転対応     | [^字^]             | `<span class="ltlbg_rotate">`                  | 1字。1em幅確保、回転
+| 回転対応     | [^字^]             | `<span class="ltlbg_rotate">`                | 1字。1em幅確保、回転
 | 字幅対応     | [-字-]             | `<span class="ltlbg_lenfix">`                | 1字。1em幅確保
 
 ※マークアップに`or`を含むものは完全に可逆変換にならない(いずれか一つに収斂される)
