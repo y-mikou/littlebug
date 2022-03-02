@@ -41,8 +41,8 @@
 | 効果         | txtマークアップ      | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
 | ------------ | -------------------- | -------------------------------------------- | -----------------
 | 段落         | 行頭全角空白         | `<p class="ltlbg_p">`                        | 先頭空白除去、空行挿入
-| 横書踊字     | `／＼`or`〱`         | `<span class="ltlbg_odori1v">`               | 1字目"〵"_左90度回転
-|              |                      | `<span class="ltlbg_odori2v">`               | 2字目"〳"_右90度回転
+| 横書踊字     | `／＼`or`〱`         | `<span class="ltlbg_odori1">`                | 1字目"〵"_左90度回転
+|              |                      | `<span class="ltlbg_odori2">`                | 2字目"〳"_右90度回転
 | 「会話」     | 行頭`「`から`」`     | `<span class="ltlbg_talk">`                  | ぶら下がりIndent
 | （思考）     | 行頭`（`から`）`     | `<span class="ltlbg_think">`                 | ぶら下がりIndent
 | 〝強調〟     | 行頭`〝`から`〟`     | `<span class="ltlbg_wqote">`                 | ぶら下がりIndent
