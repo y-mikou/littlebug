@@ -43,4 +43,7 @@ sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odor
 | sed -e 's/id=\([^>]\+\)\+>/id="\1">/' \
 | sed -z 's/<section class="ltlbg_section"\( id="[^"]\+"\)\?>\n<br class="ltlbg_br">/<section class="ltlbg_section"\1>/g' \
 | sed -z '1,/<\/section>\n/s/<\/section>\n//' \
-| sed -z 's/$/<\/section>\n/' >${destFile}
+| sed -z 's/$/<\/section>\n/' >tmp.txt
+
+## ---を<span class="ltlbg_hr">へ。
+sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' tmp.txt >${destFile}
