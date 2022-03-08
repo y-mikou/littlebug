@@ -6,6 +6,9 @@ tgtFile=${1}                                       #引数で指定されたフ�
 destFile=${tgtFile/".txt"/"_littlebugResult.html"} #出力ファイルの指定する
 touch ${destFile}                                  #出力先ファイルを生成
 
+# sed -iが何故かエラーになるので、tmpファイルで実装していく。
+# 開発中は各置換を目視しやすいように、目的ごとに分割するが、最終的にワンライナーに置き換える予定
+
 ## 半角SPを<span class="ltlbg_sSp">へ。
 sed -z 's/\ /<span class="ltlbg_sSp"><\/span>/g' ${tgtFile} >tmp2.txt
 
