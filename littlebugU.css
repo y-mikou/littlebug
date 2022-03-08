@@ -58,3 +58,8 @@ span.ltlbg_sectionName{
     line-height: 2rem;
     font-size: 1.6em;
 }
+
+/*半角SP*/
+span.ltlbg_sSp{
+    margin-right: 0.5em;
+}
