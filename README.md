@@ -34,7 +34,7 @@
 | 縦中横       | `^XX^`               | `<span class="ltlbg_tcy">`                   | 半角2字のみ
 | ダーシ       | `―`or`――`         | `<span class="ltlbg_wSize">`                 | 1字を長さ倍
 | 章タイトル   | 行頭`§`or`◆`or`■` | `<h2 class="ltlbg_sectionname">`             | 2字幅行に大Font
-| 章区切り     | `[capter:章idx]`     | `<section class="ltlbg_section" id="章idx">` | 章idxは必須でない
+| 章区切り     | `[chapter:章idx]`    | `<section class="ltlbg_section" id="章idx">` | 章idxは必須でない
 | 改ページ     | `[newpage]`          | `<div class="ltlbg_newpage">`                | breakAfter:Allの空div
 | 線           | `---`                | `<hr class="ltlbg_hr">`                      | 特殊style無し
 
