@@ -6,9 +6,12 @@ tgtFile=${1}                                       #引数で指定されたフ�
 destFile=${tgtFile/".txt"/"_littlebugResult.html"} #出力ファイルの指定する
 touch ${destFile}                                  #出力先ファイルを生成
 
+## 半角SPを<span class="ltlbg_sSp">へ。
+sed -z 's/\ /<span class="ltlbg_sSp"><\/span>/g' ${tgtFile} >tmp2.txt
+
 # 改行→改行タグ
 # crlf→lf してから cr|lf→<br>+lfに
-sed -z 's/\r\n/\n/g' ${tgtFile} | sed -z 's/[\r\n]/<br class="ltlbg_br">\n/g' >tmp.txt
+sed -z 's/\r\n/\n/g' tmp2.txt | sed -z 's/[\r\n]/<br class="ltlbg_br">\n/g' >tmp.txt
 
 ## 行頭<br>を、<br class="ltlbg_blankline">に
 sed -e '/^<br>/c <br class="ltlbg_blankline">' tmp.txt >tmp2.txt
