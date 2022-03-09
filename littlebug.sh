@@ -10,7 +10,10 @@ touch ${destFile}                                  #出力先ファイルを生�
 # 開発中は各置換を目視しやすいように、目的ごとに分割するが、最終的にワンライナーに置き換える予定
 
 ## 半角SPを<span class="ltlbg_sSp">へ。
-sed -z 's/\ /<span class="ltlbg_sSp"><\/span>/g' ${tgtFile} >tmp2.txt
+sed -z 's/\ /<span class="ltlbg_sSp"><\/span>/g' ${tgtFile} >tmp.txt
+
+## 行頭以外の全角SPを<span class="ltlbg_wSp">へ。
+sed -e 's/\(.\)　/\1<span class="ltlbg_wSp"><\/span>/g' tmp.txt >tmp2.txt
 
 # 改行→改行タグ
 # crlf→lf してから cr|lf→<br>+lfに
