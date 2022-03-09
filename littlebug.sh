@@ -55,7 +55,7 @@ sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odor
 | sed -z '1,/<\/section>\n/s/<\/section>\n//' \
 | sed -z 's/$/<\/section>\n/' \
 | sed -z 's/<section class="ltlbg_section">\n<section class="ltlbg_section"/<section class="ltlbg_section"/g' \
-| sed -z 's/<\/section>\n<\/section>/<\/section>/g' >tmp.txt
+| sed -z 's/<\/section>\n<\/section>/\n<\/section>/g' >tmp.txt
 
 ## ---を<span class="ltlbg_hr">へ。
 sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' tmp.txt >${destFile}
