@@ -9,11 +9,25 @@ touch ${destFile}                                  #出力先ファイルを生�
 # sed -iが何故かエラーになるので、tmpファイルで実装していく。
 # 開発中は各置換を目視しやすいように、目的ごとに分割するが、最終的にワンライナーに置き換える予定
 
+
+##########################################################################################
+# 文章中に登場するスペース類はすべてタグへ置換する。
+# 以降登場するスペース類はhtml上の区切り文字としてのスペースのみで、置換対象ではない
+# 以降でスペースを置換したい場合は、空白クラスのタグを置換すること
+##########################################################################################
+
 ## 半角SPを<span class="ltlbg_sSp">へ。
-sed -z 's/\ /<span class="ltlbg_sSp"><\/span>/g' ${tgtFile} >tmp.txt
+sed -z 's/\ /<span class="ltlbg_sSp"><\/span>/g' ${tgtFile} >tmp2.txt
 
 ## 行頭以外の全角SPを<span class="ltlbg_wSp">へ。
-sed -e 's/\(.\)　/\1<span class="ltlbg_wSp"><\/span>/g' tmp.txt >tmp2.txt
+sed -e 's/\(.\)　/\1<span class="ltlbg_wSp"><\/span>/g' tmp2.txt >tmp.txt
+
+## 特定の記号のあとに全角SPを挿入する。直後に閉じ括弧類がある場合は回避する
+  sed -e 's/\([！？♥♪☆\!\?]\+\)\(<span class="ltlbg_wSp"><\/span>\)\?/\1\<span class="ltlbg_wSp"><\/span>/g' tmp.txt \
+| sed -e 's/<span class="ltlbg_wSp"><\/span>\([」）〟]\)/\1/g' >tmp2.txt
+
+##文章中スペース類置換ここまで###########################################################
+
 
 # 改行→改行タグ
 # crlf→lf してから cr|lf→<br>+lfに
@@ -53,7 +67,7 @@ sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odor
 | sed -e 's/id=\([^>]\+\)\+>/id="\1">/' \
 | sed -z 's/<section class="ltlbg_section"\( id="[^"]\+"\)\?>\n<br class="ltlbg_br">/<section class="ltlbg_section"\1>/g' \
 | sed -z '1,/<\/section>\n/s/<\/section>\n//' \
-| sed -z 's/$/<\/section>\n/' \
+| sed -z 's/$/\n<\/section>\n/' \
 | sed -z 's/<section class="ltlbg_section">\n<section class="ltlbg_section"/<section class="ltlbg_section"/g' \
 | sed -z 's/<\/section>\n<\/section>/\n<\/section>/g' >tmp.txt
 
