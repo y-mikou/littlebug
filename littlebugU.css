@@ -63,3 +63,8 @@ span.ltlbg_sectionName{
 span.ltlbg_sSp{
     margin-right: 0.5em;
 }
+
+/*全角SP*/
+span.ltlbg_wSp{
+    margin-right: 1.0em;
+}
