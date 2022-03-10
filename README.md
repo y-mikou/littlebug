@@ -53,7 +53,7 @@
 | 全角空白     | 行頭以外の全角空白   | `<span class="ltlbg_wSP">`                   | 全角空白。1em幅確保
 | 半角空白     | 半角空白             | `<span class="ltlbg_sSP">`                   | 半角空白。0.5em幅確保
 | 後ろ空白     | ！や？               | `<span class="ltlbg_aSP">`                   | 記号の直後に強制全角空白
-| 多重記号     | ！や？の重なり       | `<span class="ltlbg_smbltcy">`               | 2字のみ。強制半角縦中横化
+| 多重記号     | ！や？の重なり       | `<span class="ltlbg_tcy">`                   | 2字のみ。強制半角縦中横化
 
 ### 検討中の変換
 他では絶対実装されないのでやりたいけど後回し
