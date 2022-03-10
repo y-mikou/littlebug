@@ -72,4 +72,7 @@ sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odor
 | sed -z 's/<\/section>\n<\/section>/\n<\/section>/g' >tmp.txt
 
 ## ---を<span class="ltlbg_hr">へ。
-sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' tmp.txt >${destFile}
+sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' tmp.txt >tmp2.txt
+
+## 英数字2文字を<span class="ltlbg_smbltcy">にする
+sed -z 's/\([^a-zA-Z0-9]\)\([a-zA-Z0-9]\{2\}\)\([^a-zA-Z0-9]\)/\1<span class="ltlbg_tcy">\2<\/span>\3/g' tmp2.txt >${destFile}

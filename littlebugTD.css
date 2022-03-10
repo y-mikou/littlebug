@@ -22,3 +22,13 @@ span.ltlbg_odori2::before{
     display: inline-block;
     content: "〵";
 }
+
+/*半角SP*/
+span.ltlbg_sSp{
+    margin-bottom: 0.5em;
+}
+
+/*全角SP*/
+span.ltlbg_wSp{
+    margin-bottom: 1.0em;
+}
