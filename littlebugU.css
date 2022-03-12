@@ -59,6 +59,15 @@ span.ltlbg_sectionName{
     font-size: 1.6em;
 }
 
+/*段落*/
 p.ltlbg_p{
     margin-top: 1em;
+}
+
+/*1文字幅*/
+span.ltlbg_wdfix{
+    display: inline-block;
+    text-align: center;
+    width: 1em;
+    height: 1em;
 }
