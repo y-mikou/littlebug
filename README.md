@@ -21,46 +21,51 @@
 
 ※マークアップに`or`を含むものは完全に可逆変換にならない(いずれか一つに収斂される)
 
-### 実装予定の変換
-| 効果         | txtマークアップ      | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
-| ------------ | -------------------- | -------------------------------------------- | -----------------
-| 作品タイトル | (ファイル名)         | `<title class="ltlbg_noveltitle">`           | 利用想定無し
-|              |                      | `<h1 class="ltlbg_noveltitle">`              | 利用想定無し
-| 改行         | 改行コード           | `<br class="ltlbg_br">`                      | 特殊style無し
-| 空行         | 行頭改行コード       | `<br class="ltlbg_blankline">`               | 特殊style無し
-| ルビ         | `{母字｜ルビ}`       | `<ruby class="ltlbg_ruby">`,`<tr>`           | 特殊style無し
-| 傍点         | `《《傍点》》`       | `<span class="ltlbg_emphasis">`              | 黒ゴマ
-| 太字         | `**太字**`           | `<span class="ltlbg_bold">`                  | font-weight:bold
-| 縦中横       | `^XX^`               | `<span class="ltlbg_tcy">`                   | 半角2字のみ
-| ダーシ       | `―`or`――`         | `<span class="ltlbg_wSize">`                 | 1字を長さ倍
-| 章タイトル   | 行頭`§`or`◆`or`■` | `<h2 class="ltlbg_sectionname">`             | 2字幅行に大Font
-| 章区切り     | `[chapter:章idx]`    | `<section class="ltlbg_section" id="章idx">` | 章idxは必須でない
-| 改ページ     | `[newpage]`          | `<div class="ltlbg_newpage">`                | breakAfter:Allの空div
-| 線           | `---`                | `<hr class="ltlbg_hr">`                      | 特殊style無し
+### 変換概要
+| 効果             | txtマークアップ      | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
+| ---------------- | -------------------- | -------------------------------------------- | -----------------
+| 作品タイトル     | (ファイル名)         | `<title class="ltlbg_noveltitle">`           | 利用想定無し
+|                  |                      | `<h1 class="ltlbg_noveltitle">`              | 利用想定無し
+| 改行             | 改行コード           | `<br class="ltlbg_br">`                      | 特殊style無し
+| 空行             | 行頭改行コード       | `<br class="ltlbg_blankline">`               | 特殊style無し
+| ルビ             | `{母字｜ルビ}`       | `<ruby class="ltlbg_ruby">`,`<tr>`           | 特殊style無し
+| 傍点             | `《《傍点》》`       | `<span class="ltlbg_emphasis">`              | 黒ゴマ
+| 太字             | `**太字**`           | `<span class="ltlbg_bold">`                  | font-weight:bold
+| 縦中横           | `^XX^`               | `<span class="ltlbg_tcy">`                   | 半角2字のみ
+| ダーシ           | `―`or`――`         | `<span class="ltlbg_wSize">`                 | 1字を長さ倍
+| 章タイトル       | 行頭`§`or`◆`or`■` | `<h2 class="ltlbg_sectionname">`             | 2字幅行に大Font
+| 章区切り         | `[chapter:章idx]`    | `<section class="ltlbg_section" id="章idx">` | 章idxは必須でない
+| 改ページ         | `[newpage]`          | `<div class="ltlbg_newpage">`                | breakAfter:Allの空div
+| 線               | `---`                | `<hr class="ltlbg_hr">`                      | 特殊style無し
+| 段落             | 行頭全角空白         | `<p class="ltlbg_p">`                        | 先頭空白除去、空行挿入
+| 踊字             | `／＼`or`〱`         | `<span class="ltlbg_odori1">`                | 1字目。横書時回転
+|                  |                      | `<span class="ltlbg_odori2">`                | 2字目。横書時回転
+| 「会話」         | 行頭`「`から`」`     | `<span class="ltlbg_talk">`                  | ぶら下がりIndent
+| （思考）         | 行頭`（`から`）`     | `<span class="ltlbg_think">`                 | ぶら下がりIndent
+| 〝強調〟         | 行頭`〝`から`〟`     | `<span class="ltlbg_wqote">`                 | ぶら下がりIndent
+| 半角ズレ修正     | 奇数長の半角文字列   | `<span class="ltlbg_lenfil">`                | 右marginに0.5em
+| 回転対応         | `[^字^]`             | `<span class="ltlbg_rotate">`                | 全半角1字。1em幅確保、回転
+| 字幅対応         | `[-字-]`             | `<span class="ltlbg_lenfix">`                | 全半角1字。1em幅確保
+| 右大不等号       | `<`                  | `&lt;`                                       | クラスなし
+| 左大不等号       | `>`                  | `&gt;`                                       | クラスなし
+| アンパサンド     | `&`                  | `&amp;`                                      | クラスなし
+| ダブルクォート   | `"`                  | `&quot;`                                     | クラスなし
+| シングルクォート | `'`                  | `&#39;`                                      | クラスなし
+| 全角空白         | 行頭以外の全角空白   | `<span class="ltlbg_wSP">`                   | 全角空白。1em幅確保
+| 半角空白         | 半角空白             | `<span class="ltlbg_sSP">`                   | 半角空白。0.5em幅確保
+| 後ろ空白         | ！や？               | `<span class="ltlbg_wSP">`                   | 記号の直後に強制全角空白
+| 多重記号         | ！や？の重なり       | `<span class="ltlbg_tcy">`                   | 2字のみ。強制半角縦中横化
 
-### 実装予定の、当アプリの特徴的な変換
-| 効果         | txtマークアップ      | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
-| ------------ | -------------------- | -------------------------------------------- | -----------------
-| 段落         | 行頭全角空白         | `<p class="ltlbg_p">`                        | 先頭空白除去、空行挿入
-| 踊字         | `／＼`or`〱`         | `<span class="ltlbg_odori1">`                | 1字目。横書時回転
-|              |                      | `<span class="ltlbg_odori2">`                | 2字目。横書時回転
-| 「会話」     | 行頭`「`から`」`     | `<span class="ltlbg_talk">`                  | ぶら下がりIndent
-| （思考）     | 行頭`（`から`）`     | `<span class="ltlbg_think">`                 | ぶら下がりIndent
-| 〝強調〟     | 行頭`〝`から`〟`     | `<span class="ltlbg_wqote">`                 | ぶら下がりIndent
-| 半角ズレ修正 | 奇数長の半角文字列   | `<span class="ltlbg_lenfil">`                | 右marginに0.5em
-| 回転対応     | `[^字^]`             | `<span class="ltlbg_rotate">`                | 全半角1字。1em幅確保、回転
-| 字幅対応     | `[-字-]`             | `<span class="ltlbg_lenfix">`                | 全半角1字。1em幅確保
-| 全角空白     | 行頭以外の全角空白   | `<span class="ltlbg_wSP">`                   | 全角空白。1em幅確保
-| 半角空白     | 半角空白             | `<span class="ltlbg_sSP">`                   | 半角空白。0.5em幅確保
-| 後ろ空白     | ！や？               | `<span class="ltlbg_aSP">`                   | 記号の直後に強制全角空白
-| 多重記号     | ！や？の重なり       | `<span class="ltlbg_tcy">`                   | 2字のみ。強制半角縦中横化
+`クラスなし`を指定しているものは、htmlからtxtに直すとき、当アプリで返還されたものか否かに関わらず変換前の文字に戻す。
 
+慣例的に、半角SPには`&nbsp;`、全角SPには`&emsp;`を用いるが、本来の意味ではないため使用しない。
+    
 ### 検討中の変換
 他では絶対実装されないのでやりたいけど後回し
-| 効果         | txtマークアップ      | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
-| ------------ | -------------------- | -------------------------------------------- | -----------------
-| アへ声       | `(h`から`h)`         | `<span class="ltlbg_ahe">`                   | 字間サイズ傾き位置を乱す？
-| エロ濁点     | `゛`                 | `<span class="ltlbg_dakten">`                | 直前の1字と縦中横？
+| 効果             | txtマークアップ      | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
+| ---------------- | -------------------- | -------------------------------------------- | -----------------
+| アへ声           | `(h`から`h)`         | `<span class="ltlbg_ahe">`                   | 字間サイズ傾き位置を乱す？
+| エロ濁点         | `゛`                 | `<span class="ltlbg_dakten">`                | 直前の1字と縦中横？
 
 
 ## 雑な目的
@@ -85,9 +90,7 @@
 
 それを避けるために、簡易なタグ(VFM準拠だがもう少し簡易かつ、小説のような日本語文章に特化)なものとして残すことで、文章データのソースを単一ファイルで残す。
 
-これを実現する一連の正規表現置換のトランザクション化を期待するもの。
-
-VFMは、Markdownの「HTMLコードはそのままHTMLコードとして出力する」の仕様を踏襲しているため、ここで作成された.htmlファイルを.mdにリネームしてVFMで扱うMarkdownファイルとして扱い、VFMでの追加修飾の原版とすることも可能と考えている。
+これを実現する一連の変換の簡略化を期待するもの。
 
 ``` mermaid
 flowchart LR
@@ -142,6 +145,7 @@ littlebug.css -.一定の表示保証.-> 文章データ.html
 
 ## 注意
 - **ぶっちゃけ自分用です**
+- htmlタグが含まれたファイルをhtmlに変換しようとすると、多分ファイルが壊れます
 - htmlを生成する際、段落と、カッコ類の扱いについて、かなりイロモノな設定を行う想定のhtmlを生成します。
   - [■カッコ類について](#■カッコ類について)
   - [段落の表現](#段落の表現)
@@ -173,6 +177,9 @@ littlebug.css -.一定の表示保証.-> 文章データ.html
    生成するのではなく、ここに同梱する。
 
 ## スコープアウト
+- すでにhtmlタグが含まれたファイルを、txtとして当アプリに入力してhtmlへ変換すること
+  - 多分変換が壊れる
+  - そのうち対応したい
 - htmlのタグを挿入するにあたり、組版後の縦書きと横書きを意識すること(デフォルトは横書き)
   - これは組版をするものではない
   - とはいえ縦横で必要な約物/記号/表示が異なることはあるため、一定程度区別する
