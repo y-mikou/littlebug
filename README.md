@@ -45,7 +45,7 @@
 | 〝強調〟         | 行頭`〝`から`〟`     | `<span class="ltlbg_wqote">`                 | ぶら下がりIndent
 | 半角ズレ修正     | 奇数長の半角文字列   | `<span class="ltlbg_lenfil">`                | 右marginに0.5em
 | 回転対応         | `[^字^]`             | `<span class="ltlbg_rotate">`                | 全半角1字。1em幅確保、回転
-| 字幅対応         | `[-字-]`             | `<span class="ltlbg_lenfix">`                | 全半角1字。1em幅確保
+| 字幅対応         | `[-字-]`             | `<span class="ltlbg_wdfix">`                 | 全半角1字。1em幅確保
 | 右大不等号       | `<`                  | `&lt;`                                       | クラスなし
 | 左大不等号       | `>`                  | `&gt;`                                       | クラスなし
 | アンパサンド     | `&`                  | `&amp;`                                      | クラスなし

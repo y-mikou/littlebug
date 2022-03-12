@@ -14,13 +14,12 @@ touch ${destFile}                                  #出力先ファイルを生�
 ##########################################################################################
 # 特殊文字など、htmlタグに含まれることが多いものを先に置換する
 ##########################################################################################
-
 ## 「<」(半角)を「&lt;」へ変換
 ## 「>」(半角)を「&gt;」へ変換
 ## 「&」(半角)を「&amp;」へ変換
 ## 「'」(半角)を「&quot;」へ変換
 ## 「"」(半角)を「&#39;」へ変換
-  sed -e 's/&/\&amp;/g' ${tgtFile}\
+  sed -e 's/&/\&amp;/g' ${tgtFile} \
 | sed -e 's/</\&lt;/g' \
 | sed -e 's/>/\&gt;/g' \
 | sed -e "s/'/\&quot;/g" \
@@ -104,4 +103,9 @@ sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' tmp.txt >tmp2.txt
 | sed -z 's/\([^!！?？\&#;]\)\(!!\|！！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">!!<\/span>\3/g' \
 | sed -z 's/\([^!！?？\&#;]\)\(??\|？？\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">??<\/span>\3/g' \
 | sed -z 's/\([^!！?？\&#;]\)\(!?\|！？\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">!?<\/span>\3/g' \
-| sed -z 's/\([^!！?？\&#;]\)\(?!\|？！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">?!<\/span>\3/g' >${destFile}
+| sed -z 's/\([^!！?？\&#;]\)\(?!\|？！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">?!<\/span>\3/g' >tmp.txt
+
+
+## [-字-]を<span class="ltlbg_wdfix">へ
+## 前段で、特定の文字についてはltlbg_wSpを挿入されているのでそれも考慮した置換を行う
+  sed -e 's/\[\-\(.\)\(<span class="ltlbg_wSp"><\/span>\)\?\-\]/<span class="ltlbg_wdfix">\1<\/span><span class="ltlbg_wSp"><\/span>/g' tmp.txt >${destFile}
