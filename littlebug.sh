@@ -76,6 +76,15 @@ sed -e 's/\^\([^\^]\+\)\^/<span class="ltlbg_tcy">\1<\/span>/g' tmp2.txt >tmp.tx
 ## ／＼もしくは〱を、<span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>に
 sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/g' tmp.txt >tmp2.txt
 
+## 行頭全角スペースを<p>タグに
+  sed -e 's/^　/<\/p>\n<p class="ltlbg_p">\n/g' tmp2.txt \
+| sed -z '1,/\n<\/p>\n/s/<\/p>\n//' \
+| sed -z 's/$/<\/p>\n/' \
+| sed -z 's/<p class="ltlbh_p">\n<p class="ltlbh_p">/<p class="ltlbh_p">\n/g' \
+| sed -z 's/\n<\/p>\n<\/p>/<\/p>/g' >tmp.txt
+
+cat tmp.txt >tmp2.txt
+
 ## [capter]を<section class="ltlbg_section">に。:XXXXXはid="XXXX"に。
   sed -z 's/^/<section class="ltlbg_section">\n/g' tmp2.txt \
 | sed -z 's/\[capter:/[capter id=/g' \
@@ -83,9 +92,9 @@ sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odor
 | sed -e 's/id=\([^>]\+\)\+>/id="\1">/' \
 | sed -z 's/<section class="ltlbg_section"\( id="[^"]\+"\)\?>\n<br class="ltlbg_br">/<section class="ltlbg_section"\1>/g' \
 | sed -z '1,/<\/section>\n/s/<\/section>\n//' \
-| sed -z 's/$/\n<\/section>\n/' \
+| sed -z 's/$/<\/section>\n/' \
 | sed -z 's/<section class="ltlbg_section">\n<section class="ltlbg_section"/<section class="ltlbg_section"/g' \
-| sed -z 's/<\/section>\n<\/section>/\n<\/section>/g' >tmp.txt
+| sed -z 's/<\/section>\n<\/section>/<\/section>/g' >tmp.txt
 
 ## ---を<span class="ltlbg_hr">へ。
 sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' tmp.txt >tmp2.txt
