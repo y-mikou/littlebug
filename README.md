@@ -17,26 +17,20 @@
 
 ## 変換の要約
 
-それぞれの詳細は、[txtと.htmlの約物定義](#.txtと.htmlの約物定義)以降に記載しています。
+それぞれの詳細は、[.txtと.htmlの約物、特殊文字の定義](#.txtと.htmlの約物、特殊文字の定義)以降に記載しています。
 
-※マークアップに`or`を含むものは完全に可逆変換にならない(いずれか一つに収斂される)
+※対象文字やマークアップに`or`を含むものは完全に可逆変換にならない(いずれか一つに収斂される)
 
 ### 変換概要
-| 効果             | txtマークアップ      | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
+#### マークアップなしでの自動変換
+| 効果             | 対象文字、状況       | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
 | ---------------- | -------------------- | -------------------------------------------- | -----------------
 | 作品タイトル     | (ファイル名)         | `<title class="ltlbg_noveltitle">`           | 利用想定無し
 |                  |                      | `<h1 class="ltlbg_noveltitle">`              | 利用想定無し
 | 改行             | 改行コード           | `<br class="ltlbg_br">`                      | 特殊style無し
 | 空行             | 行頭改行コード       | `<br class="ltlbg_blankline">`               | 特殊style無し
-| ルビ             | `{母字｜ルビ}`       | `<ruby class="ltlbg_ruby">`,`<tr>`           | 特殊style無し
-| 傍点             | `《《傍点》》`       | `<span class="ltlbg_emphasis">`              | 黒ゴマ
-| 太字             | `**太字**`           | `<span class="ltlbg_bold">`                  | font-weight:bold
-| 縦中横           | `^XX^`               | `<span class="ltlbg_tcy">`                   | 半角2字のみ
 | ダーシ           | `―`or`――`         | `<span class="ltlbg_wSize">`                 | 1字を長さ倍
 | 章タイトル       | 行頭`§`or`◆`or`■` | `<h2 class="ltlbg_sectionname">`             | 2字幅行に大Font
-| 章区切り         | `[chapter:章idx]`    | `<section class="ltlbg_section" id="章idx">` | 章idxは必須でない
-| 改ページ         | `[newpage]`          | `<div class="ltlbg_newpage">`                | breakAfter:Allの空div
-| 線               | `---`                | `<hr class="ltlbg_hr">`                      | 特殊style無し
 | 段落             | 行頭全角空白         | `<p class="ltlbg_p">`                        | 先頭空白除去、空行挿入
 | 踊字             | `／＼`or`〱`         | `<span class="ltlbg_odori1">`                | 1字目。横書時回転
 |                  |                      | `<span class="ltlbg_odori2">`                | 2字目。横書時回転
@@ -44,24 +38,36 @@
 | （思考）         | 行頭`（`から`）`     | `<span class="ltlbg_think">`                 | ぶら下がりIndent
 | 〝強調〟         | 行頭`〝`から`〟`     | `<span class="ltlbg_wqote">`                 | ぶら下がりIndent
 | 半角ズレ修正     | 奇数長の半角文字列   | `<span class="ltlbg_lenfil">`                | 右marginに0.5em
-| 回転対応         | `[^字^]`             | `<span class="ltlbg_rotate">`                | 全半角1字。1em幅確保、回転
-| 字幅対応         | `[-字-]`             | `<span class="ltlbg_wdfix">`                 | 全半角1字。1em幅確保
-| 右大不等号       | `<`                  | `&lt;`                                       | クラスなし
-| 左大不等号       | `>`                  | `&gt;`                                       | クラスなし
-| アンパサンド     | `&`                  | `&amp;`                                      | クラスなし
-| ダブルクォート   | `"`                  | `&quot;`                                     | クラスなし
-| シングルクォート | `'`                  | `&#39;`                                      | クラスなし
+| 右大不等号       | `<`                  | `&lt;`                                       | クラス化なし
+| 左大不等号       | `>`                  | `&gt;`                                       | クラス化なし
+| アンパサンド     | `&`                  | `&amp;`                                      | クラス化なし
+| ダブルクォート   | `"`                  | `&quot;`                                     | クラス化なし
+| シングルクォート | `'`                  | `&#39;`                                      | クラス化なし
+| 線               | `---`                | `<hr class="ltlbg_hr">`                      | 特殊style無し
 | 全角空白         | 行頭以外の全角空白   | `<span class="ltlbg_wSP">`                   | 全角空白。1em幅確保
 | 半角空白         | 半角空白             | `<span class="ltlbg_sSP">`                   | 半角空白。0.5em幅確保
 | 後ろ空白         | ！や？               | `<span class="ltlbg_wSP">`                   | 記号の直後に強制全角空白
 | 多重記号         | ！や？の重なり       | `<span class="ltlbg_tcy">`                   | 2字のみ。強制半角縦中横化
 
-`クラスなし`を指定しているものは、htmlからtxtに直すとき、当アプリで返還されたものか否かに関わらず変換前の文字に戻す。
+`クラス化なし`を指定しているものは、htmlからtxtに直すとき、当アプリで返還されたものか否かに関わらず変換前の文字に戻す。
 
 慣例的に、半角SPには`&nbsp;`、全角SPには`&emsp;`を用いるが、本来の意味ではないため使用しない。
+
+#### マークアップ部分の変換
+| 効果             | txtマークアップ      | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
+| ---------------- | -------------------- | -------------------------------------------- | -----------------
+| ルビ             | `{母字｜ルビ}`       | `<ruby class="ltlbg_ruby">`,`<tr>`           | 特殊style無し
+| 傍点             | `《《傍点》》`       | `<span class="ltlbg_emphasis">`              | 黒ゴマ
+| 太字             | `**太字**`           | `<span class="ltlbg_bold">`                  | font-weight:bold
+| 縦中横           | `^XX^`               | `<span class="ltlbg_tcy">`                   | 半角2字のみ
+| 章区切り         | `[chapter:章idx]`    | `<section class="ltlbg_section" id="章idx">` | 章idxは必須でない
+| 改ページ         | `[newpage]`          | `<div class="ltlbg_newpage">`                | breakAfter:Allの空div
+| 回転対応         | `[^字^]`             | `<span class="ltlbg_rotate">`                | 全半角1字。1em幅確保、回転
+| 字幅対応         | `[-字-]`             | `<span class="ltlbg_wdfix">`                 | 全半角1字。1em幅確保
+
     
 ### 検討中の変換
-他では絶対実装されないのでやりたいけど後回し
+他のアプリとかでは絶対実装されないのでやりたいけど後回し
 | 効果             | txtマークアップ      | htmlタグとClass(閉じ省略)                    | 概要/デフォ設定
 | ---------------- | -------------------- | -------------------------------------------- | -----------------
 | アへ声           | `(h`から`h)`         | `<span class="ltlbg_ahe">`                   | 字間サイズ傾き位置を乱す？
