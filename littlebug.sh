@@ -98,7 +98,7 @@ cat tmp.txt >tmp2.txt #順序入れ替え時の不整合修正の糊
 sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' tmp.txt >tmp2.txt
 
 ## 英数字2文字と、！？!?の重なりを<span class="ltlbg_tcy">にする
-  sed -z 's/\([^a-zA-Z0-9<_\&#;]\)\([a-zA-Z0-9]\{2\}\)\([^a-zA-Z0-9>_\&#;]\)/\1<span class="ltlbg_tcy">\2<\/span>\3/g' tmp2.txt \
+  sed -z 's/\([^a-zA-Z0-9<_\&#;\^]\)\([a-zA-Z0-9]\{2\}\)\([^a-zA-Z0-9>_\&#;\^]\)/\1<span class="ltlbg_tcy">\2<\/span>\3/g' tmp2.txt \
 | sed -z 's/\([^!！?？\&#;]\)\(!!\|！！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">!!<\/span>\3/g' \
 | sed -z 's/\([^!！?？\&#;]\)\(??\|？？\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">??<\/span>\3/g' \
 | sed -z 's/\([^!！?？\&#;]\)\(!?\|！？\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">!?<\/span>\3/g' \
@@ -120,4 +120,11 @@ sed -e 's/\([^[]\)\^\([^\^]\{1,2\}\)\^\([^]]\)/\1<span class="ltlbg_tcy">\2<\/sp
 sed -e 's/\(；\|\;\)/<span class="ltlbg_semicolon">；<\/span>/g' tmp2.txt >tmp.txt
 
 ## 縦書きの際、「:」「：」に<span ltlbg_colon>を適用する
-sed -e 's/\(：\|\:\)/<span class="ltlbg_colon">：<\/span>/g' tmp.txt >${destFile}
+sed -e 's/\(：\|\:\)/<span class="ltlbg_colon">：<\/span>/g' tmp.txt >tmp2.txt
+
+## 行頭「ではじまる、」までを<div class="ltlbg_talk">にする
+sed -e 's/^「\(.\+\)」/<span class="ltlbg_talk">\1<\/span>/g' tmp2.txt >tmp.txt
+## 行頭（ではじまる、）までを<div class="ltlbg_talk">にする
+sed -e 's/^（\(.\+\)）/<span class="ltlbg_think">\1<\/span>/g' tmp.txt >tmp2.txt
+## 行頭〝ではじまる、〟までを<div class="ltlbg_wquote">にする
+sed -e 's/^〝\(.\+\)〟/<span class="ltlbg_wquote">\1<\/span>/g' tmp2.txt >${destFile}
