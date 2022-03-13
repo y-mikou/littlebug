@@ -69,8 +69,7 @@ sed -e 's/\*\*\([^\*]\+\)\*\*/<span class="ltlbg_bold">\1<\/span>/g' tmp2.txt >t
 ## 行頭を§◆■の次に空白(なくても良い)に続く行を、<br class="ltlbg_sectionName">章タイトル</span>に
 sed -e 's/^[§◆■][ 　]*\(.\+\)<br class="ltlbg_br">/<span class="ltlbg_sectionName">\1<\/span><br class="ltlbg_br">/g' tmp.txt >tmp2.txt
 
-## ^と^に囲まれた範囲を、<br class="ltlbg_tcy">縦中横</span>に
-sed -e 's/\^\([^\^]\+\)\^/<span class="ltlbg_tcy">\1<\/span>/g' tmp2.txt >tmp.txt
+cat tmp2.txt >tmp1.txt #順序入れ替え時の不整合修正の糊
 
 ## ／＼もしくは〱を、<span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>に
 sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/g' tmp.txt >tmp2.txt
@@ -82,7 +81,7 @@ sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odor
 | sed -z 's/<p class="ltlbh_p">\n<p class="ltlbh_p">/<p class="ltlbh_p">\n/g' \
 | sed -z 's/\n<\/p>\n<\/p>/<\/p>/g' >tmp.txt
 
-cat tmp.txt >tmp2.txt
+cat tmp.txt >tmp2.txt #順序入れ替え時の不整合修正の糊
 
 ## [capter]を<section class="ltlbg_section">に。:XXXXXはid="XXXX"に。
   sed -z 's/^/<section class="ltlbg_section">\n/g' tmp2.txt \
@@ -105,7 +104,14 @@ sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' tmp.txt >tmp2.txt
 | sed -z 's/\([^!！?？\&#;]\)\(!?\|！？\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">!?<\/span>\3/g' \
 | sed -z 's/\([^!！?？\&#;]\)\(?!\|？！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">?!<\/span>\3/g' >tmp.txt
 
-
 ## [-字-]を<span class="ltlbg_wdfix">へ
-## 前段で、特定の文字についてはltlbg_wSpを挿入されているのでそれも考慮した置換を行う
-  sed -e 's/\[\-\(.\)\(<span class="ltlbg_wSp"><\/span>\)\?\-\]/<span class="ltlbg_wdfix">\1<\/span><span class="ltlbg_wSp"><\/span>/g' tmp.txt >${destFile}
+## 特定の文字についてはltlbg_wSpを挿入されている可能性がるのでそれも考慮した置換を行う
+sed -e 's/\[\-\(.\)\(<span class="ltlbg_wSp"><\/span>\)\?\-\]/<span class="ltlbg_wdfix">\1<\/span>\2/g' tmp.txt >tmp2.txt
+
+## [^字^]を<span class="ltlbg_rotate">へ
+## ^字^でtcyになっている可能性があるので考慮する。
+## 前段で、特定の文字についてはltlbg_wSpを挿入されているが、その空白は消す。
+sed -e 's/\[\(\^\|<span class="ltlbg_tcy">\)\(.\)\(\^\|<\/span>\)\]/<span class="ltlbg_rotate">\2<\/span>/g' tmp2.txt >tmp.txt
+
+## ^と^に囲まれた1〜2文字の範囲を、<br class="ltlbg_tcy">縦中横</span>に。[^字^]は食わないように
+sed -e 's/\([^[]\)\^\([^\^]\{1,2\}\)\^\([^]]\)/\1<span class="ltlbg_tcy">\2<\/span>\3/g' tmp.txt >${destFile}
