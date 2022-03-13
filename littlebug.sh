@@ -114,4 +114,10 @@ sed -e 's/\[\-\(.\)\(<span class="ltlbg_wSp"><\/span>\)\?\-\]/<span class="ltlbg
 sed -e 's/\[\(\^\|<span class="ltlbg_tcy">\)\(.\)\(\^\|<\/span>\)\]/<span class="ltlbg_rotate">\2<\/span>/g' tmp2.txt >tmp.txt
 
 ## ^と^に囲まれた1〜2文字の範囲を、<br class="ltlbg_tcy">縦中横</span>に。[^字^]は食わないように
-sed -e 's/\([^[]\)\^\([^\^]\{1,2\}\)\^\([^]]\)/\1<span class="ltlbg_tcy">\2<\/span>\3/g' tmp.txt >${destFile}
+sed -e 's/\([^[]\)\^\([^\^]\{1,2\}\)\^\([^]]\)/\1<span class="ltlbg_tcy">\2<\/span>\3/g' tmp.txt >tmp2.txt
+
+## 縦書きの際、「;」「；」に<span ltlbg_semicolon>を適用する
+sed -e 's/\(；\|\;\)/<span class="ltlbg_semicolon">；<\/span>/g' tmp2.txt >tmp.txt
+
+## 縦書きの際、「:」「：」に<span ltlbg_colon>を適用する
+sed -e 's/\(：\|\:\)/<span class="ltlbg_colon">：<\/span>/g' tmp.txt >${destFile}

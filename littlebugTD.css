@@ -40,3 +40,19 @@ span.ltlbg_rotate{
     text-align: center;
     height: 1em;
 }
+
+/*セミコロン用。時計回りに90度*/
+span.ltlbg_semicolon{
+    display: inline-block;
+    transform: rotate(90deg);
+    text-align: center;
+    height: 1em;
+}
+
+/*コロン用*/
+/*コロンは文章方向に従って回転するので回転は不要*/
+span.ltlbg_colon{
+    display: inline-block;
+    text-align: center;
+    height: 1em;
+}
