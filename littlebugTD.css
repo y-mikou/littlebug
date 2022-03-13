@@ -32,3 +32,11 @@ span.ltlbg_sSp{
 span.ltlbg_wSp{
     margin-bottom: 1.0em;
 }
+
+/*回転。デフォルトは半時計回りに90度*/
+span.ltlbg_rotate{
+    display: inline-block;
+    transform: rotate(-90deg);
+    text-align: center;
+    height: 1em;
+}
