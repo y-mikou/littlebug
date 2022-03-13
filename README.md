@@ -59,7 +59,7 @@
 | ルビ             | `{母字｜ルビ}`       | `<ruby class="ltlbg_ruby">`,`<tr>`           | 特殊style無し
 | 傍点             | `《《傍点》》`       | `<span class="ltlbg_emphasis">`              | 黒ゴマ
 | 太字             | `**太字**`           | `<span class="ltlbg_bold">`                  | font-weight:bold
-| 縦中横           | `^XX^`               | `<span class="ltlbg_tcy">`                   | 半角2字のみ
+| 縦中横           | `^XX^`               | `<span class="ltlbg_tcy">`                   | 半角1〜2字のみ
 | 章区切り         | `[chapter:章idx]`    | `<section class="ltlbg_section" id="章idx">` | 章idxは必須でない
 | 改ページ         | `[newpage]`          | `<div class="ltlbg_newpage">`                | breakAfter:Allの空div
 | 回転対応         | `[^字^]`             | `<span class="ltlbg_rotate">`                | 全半角1字。1em幅確保、回転
