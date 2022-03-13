@@ -69,7 +69,7 @@ sed -e 's/\*\*\([^\*]\+\)\*\*/<span class="ltlbg_bold">\1<\/span>/g' tmp2.txt >t
 ## 行頭を§◆■の次に空白(なくても良い)に続く行を、<br class="ltlbg_sectionName">章タイトル</span>に
 sed -e 's/^[§◆■][ 　]*\(.\+\)<br class="ltlbg_br">/<span class="ltlbg_sectionName">\1<\/span><br class="ltlbg_br">/g' tmp.txt >tmp2.txt
 
-cat tmp2.txt >tmp1.txt #順序入れ替え時の不整合修正の糊
+cat tmp2.txt >tmp.txt #順序入れ替え時の不整合修正の糊
 
 ## ／＼もしくは〱を、<span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>に
 sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/g' tmp.txt >tmp2.txt
