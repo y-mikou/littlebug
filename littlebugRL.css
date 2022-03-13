@@ -7,6 +7,19 @@ html {
     widows: 1;
 }
 
+/*段落*/
+p.ltlbg_p{
+    margin-top: 2em;
+}
+
+/*二倍化。自動変換対象ではないが、～などを伸ばすのにも使える。*/
+span.ltlbg_wSize{
+    display: inline-block;
+    transform-origin: left;
+    transform: scale(1.8, 1) translateX(1px);
+    margin-right: 1em;
+}
+
 /*踊り字*/
 span.ltlbg_odori1::after{
     display: inline-block;
@@ -29,3 +42,39 @@ span.ltlbg_wSp{
     margin-right: 1.0em;
 }
 
+/*会話「」をぶら下げインデントにする。*/
+span.ltlbg_talk{
+    display: inline-block;
+}
+span.ltlbg_talk::before{
+    display: inline-block;
+    content: "「";
+    margin-left: -1em;    
+}
+span.ltlbg_talk::after{
+    content: "」";
+}
+/*思考（）をぶら下げインデントにする。*/
+span.ltlbg_think{
+    display: inline-block;
+}
+span.ltlbg_think::before{
+    display: inline-block;
+    content: "「";
+    margin-left: -1em;    
+}
+span.ltlbg_think::after{
+    content: "」";
+}
+/*強調〝〟をぶら下げインデントにする。*/
+span.ltlbg_think{
+    display: inline-block;
+}
+span.ltlbg_think::before{
+    display: inline-block;
+    content: "〝";
+    margin-left: -1em;    
+}
+span.ltlbg_think::after{
+    content: "〟";
+}
