@@ -7,6 +7,11 @@ html {
     widows: 1;
 }
 
+/*章*/
+section.ltlbg_section{
+    margin-left: 5em;
+}
+
 /*段落*/
 p.ltlbg_p{
     margin-right: 2em;
@@ -17,6 +22,17 @@ span.ltlbg_tcy {
     text-combine-upright: all;
     display: inline-block;
 }
+
+/*アへ濁点*/
+span.ltlbg_dakuten{
+    margin-bottom: -1em;
+}
+span.ltlbg_dakuten::after {
+    display: inline-block;
+    content: "゛";
+    transform: translate(0.3em,-1.6em);
+}
+
 
 /*二倍化。自動変換対象ではないが、～などを伸ばすのにも使える。*/
 span.ltlbg_wSize{
@@ -108,4 +124,41 @@ span.ltlbg_wquote::before{
 span.ltlbg_wquote::after{
     content: "〟";
 }
-  
+
+/*特殊ルビ*/
+[data-ruby] {
+    position: relative;
+}
+[data-ruby]::before {
+    content: attr(data-ruby);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: -1em;
+    margin: auto;
+    font-size: 0.5em;
+    white-space: nowrap;
+    line-height: 1;
+    text-indent: 0;
+    text-align:center;
+}
+
+/*特殊傍点*/
+[data-emphasis] {
+    position: relative;
+}
+[data-emphasis]::before {
+    content: attr(data-emphasis);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: -1em;
+    margin: auto;
+    font-size: 0.3em;
+    white-space: nowrap;
+    line-height: 1;
+    text-indent: 0;
+    text-align:center;
+    margin-top: 0.5em;
+    letter-spacing: 1.3em;
+}
