@@ -18,10 +18,6 @@ br.ltlbg_blankline{
 ruby.ltlbg_ruby{
 }
 
-章
-ruby.ltlbg_section{
-}
-
 水平線
 hr.ltlbg_hr{
 }
@@ -30,6 +26,7 @@ hr.ltlbg_hr{
 
 html{
     padding: 1.5em;
+    line-height: 2em;    
 }
 
 /*改ページ*/
@@ -50,7 +47,7 @@ span.ltlbg_emphasis{
 /*章タイトル*/
 span.ltlbg_sectionName{
     display: inline-block;
-    line-height: 2rem;
+    line-height: 2em;
     font-size: 1.6em;
 }
 
@@ -60,4 +57,10 @@ span.ltlbg_wdfix{
     text-align: center;
     width: 1em;
     height: 1em;
+}
+
+/*特殊ルビ用。
+  rubyのクラスは縦横別なのでそれぞれに記載*/
+rt {
+    display: none;
 }

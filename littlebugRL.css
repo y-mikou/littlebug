@@ -7,6 +7,11 @@ html {
     widows: 1;
 }
 
+/*章*/
+section.ltlbg_section{
+    margin-bottom: 5em;
+}
+
 /*段落*/
 p.ltlbg_p{
     margin-top: 2em;
@@ -77,4 +82,38 @@ span.ltlbg_think::before{
 }
 span.ltlbg_think::after{
     content: "〟";
+}
+
+/*特殊ルビ*/
+[data-ruby] {
+    position: relative;
+}
+[data-ruby]::before {
+    content: attr(data-ruby);
+    position: absolute;
+    top: -1em;
+    left: 0;
+    right: 0;
+    margin: auto;
+    font-size: 0.5em;
+    white-space: nowrap;
+    line-height: 1;
+    text-indent: 0;
+}
+
+/*特殊傍点*/
+[data-emphasis] {
+    position: relative;
+}
+[data-emphasis]::before {
+    content: attr(data-emphasis);
+    position: absolute;
+    top: -1em;
+    left: 0;
+    right: 0;
+    margin: auto;
+    font-size: 0.5em;
+    white-space: nowrap;
+    line-height: 1;
+    text-indent: 0;
 }
