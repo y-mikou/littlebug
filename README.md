@@ -41,7 +41,6 @@
 | 改行             | 改行コード           | `<br class="ltlbg_br">`                      | 特殊style無し
 | 空行             | 行頭改行コード       | `<br class="ltlbg_blankline">`               | 特殊style無し
 | ダーシ           | `―`or`――`         | `<span class="ltlbg_wSize">`                 | 1字を長さ倍
-| 章タイトル       | 行頭`§`or`◆`or`■` | `<h2 class="ltlbg_sectionname">`             | 2字幅行に大Font
 | 段落             | 行頭全角空白         | `<p class="ltlbg_p">`                        | 先頭空白除去、空行挿入
 | 踊字             | `／＼`or`〱`         | `<span class="ltlbg_odori1">`                | 1字目。横書時回転
 |                  |                      | `<span class="ltlbg_odori2">`                | 2字目。横書時回転
@@ -69,11 +68,12 @@
 #### マークアップ部分の変換
 | 効果             | txtマークアップ      | htmlタグとClass(閉じ省略)                                | 概要/デフォ設定
 | ---------------- | -------------------- | -------------------------------------------------------- | -----------------
-| ルビ             | `{母字｜ルビ}`       | `<ruby class="ltlbg_ruby" data-ruby="">`、`<rt>`         | 疑似要素でルビ表示
+| ルビ             | `{母字｜ルビ}`       | `<ruby class="ltlbg_ruby" data-ruby="">`、`<rt>`         | 
 | 傍点             | `《《傍点》》`       | `<ruby class="ltlbg_emphasis" data-emphasis="">`、`<rt>` | ルビ化する。黒ゴマ
 | 太字             | `**太字**`           | `<span class="ltlbg_bold">`                              | font-weight:bold
 | 縦中横           | `^XX^`               | `<span class="ltlbg_tcy">`                               | 半角1〜2字のみ
 | 章区切り         | `[chapter:章idx]`    | `<section class="ltlbg_section" id="章idx">`             | 章idxは必須でない
+| 章タイトル       | 行頭`§`or`◆`or`■` | `<h2 class="ltlbg_sectionname">`                         | 2字幅行に大Font
 | 改ページ         | `[newpage]`          | `<div class="ltlbg_newpage">`                            | breakAfter:Allの空div
 | 回転対応         | `[^字^]`             | `<span class="ltlbg_rotate">`                            | 全半角1字。1em幅確保、回転
 | 字幅対応         | `[-字-]`             | `<span class="ltlbg_wdfix">`                             | 全半角1字。1em幅確保
