@@ -9,20 +9,26 @@ html {
 
 /*章*/
 section.ltlbg_section{
-    margin-bottom: 5em;
+    margin-bottom: 5rem;
 }
 
 /*段落*/
 p.ltlbg_p{
-    margin-top: 2em;
+    margin-top: 2rem;
 }
+
+/*アへ濁点*/
+span.ltlbg_dakuten::after {
+    content: "゛";
+}
+
 
 /*二倍化。自動変換対象ではないが、～などを伸ばすのにも使える。*/
 span.ltlbg_wSize{
     display: inline-block;
     transform-origin: left;
     transform: scale(1.8, 1) translateX(1px);
-    margin-right: 1em;
+    margin-right: 1rem;
 }
 
 /*踊り字*/
@@ -39,12 +45,12 @@ span.ltlbg_odori2::before{
 
 /*半角SP*/
 span.ltlbg_sSp{
-    margin-right: 0.5em;
+    margin-right: 0.5rem;
 }
 
 /*全角SP*/
 span.ltlbg_wSp{
-    margin-right: 1.0em;
+    margin-right: 1.0rem;
 }
 
 /*会話「」をぶら下げインデントにする。*/
@@ -54,7 +60,7 @@ span.ltlbg_talk{
 span.ltlbg_talk::before{
     display: inline-block;
     content: "「";
-    margin-left: -1em;    
+    margin-left: -1rem;    
 }
 span.ltlbg_talk::after{
     content: "」";
@@ -66,7 +72,7 @@ span.ltlbg_think{
 span.ltlbg_think::before{
     display: inline-block;
     content: "「";
-    margin-left: -1em;    
+    margin-left: -1rem;    
 }
 span.ltlbg_think::after{
     content: "」";
@@ -78,42 +84,97 @@ span.ltlbg_think{
 span.ltlbg_think::before{
     display: inline-block;
     content: "〝";
-    margin-left: -1em;    
+    margin-left: -1rem;    
 }
 span.ltlbg_think::after{
     content: "〟";
 }
 
-/*特殊ルビ*/
-[data-ruby] {
+/*特殊ルビ_同じ文字数*/
+[data-ruby_even] {
     position: relative;
+
+    /*デバッグ目視用*/
+    background-color: rgba(255, 0, 0, 0.2);
 }
-[data-ruby]::before {
-    content: attr(data-ruby);
+[data-ruby_even]::before {
+    content: attr(data-ruby_even);
     position: absolute;
-    top: -1em;
     left: 0;
     right: 0;
-    margin: auto;
-    font-size: 0.5em;
+    bottom: 70%;
     white-space: nowrap;
-    line-height: 1;
     text-indent: 0;
+
+    transform-origin: left bottom;
+    transform: scale(0.5, 0.5);
+
+    margin-left: 0.25rem;
+    letter-spacing: 1rem;
+}
+
+/*特殊ルビ_ルビが長い*/
+[data-ruby_long] {
+    position: relative;
+
+    /*デバッグ目視用*/
+    background-color: rgba(255, 0, 0, 0.2);
+}
+[data-ruby_long]::before {
+    content: attr(data-ruby_long);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 70%;
+    white-space: nowrap;
+    text-indent: 0;
+
+    transform-origin: left bottom;
+    transform: scale(0.5, 0.5);
+}
+
+/*特殊ルビ_ルビが短い*/
+[data-ruby_short] {
+    position: relative;
+
+    /*デバッグ目視用*/
+    background-color: rgba(255, 0, 0, 0.2);
+}
+[data-ruby_short]::before {
+    content: attr(data-ruby_short);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 70%;
+    white-space: nowrap;
+    text-indent: 0;
+
+    text-align: center;
+    transform-origin: center bottom;
+    transform: scale(0.5, 0.5);
+
+    letter-spacing: 1rem;
 }
 
 /*特殊傍点*/
 [data-emphasis] {
     position: relative;
+
+    /*デバッグ目視用*/
+    background-color: rgba(0, 255, 0, 0.2);
 }
 [data-emphasis]::before {
     content: attr(data-emphasis);
     position: absolute;
-    top: -1em;
     left: 0;
     right: 0;
-    margin: auto;
-    font-size: 0.5em;
+    bottom: 70%;
     white-space: nowrap;
-    line-height: 1;
     text-indent: 0;
+
+    transform-origin: left bottom;
+    transform: scale(0.5, 0.5);
+
+    margin-left: 0.25rem;
+    letter-spacing: 1rem;
 }

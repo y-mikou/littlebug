@@ -113,21 +113,21 @@ sed -e 's/^<br class="ltlbg_br">/<br class="ltlbg_blankline">/' tmp2.txt >tmp.tx
 | sed -e 's/^（\(.\+\)）/<span class="ltlbg_think">\1<\/span>/g' \
 | sed -e 's/^〝\(.\+\)〟/<span class="ltlbg_wquote">\1<\/span>/g' >tmp2.txt
 
-##{母字|ルビ}となっているものを<ruby class="ltlbg_ruby">母字<rt>ルビ</rt></ruby>へ
+##{基底文字|ルビ}となっているものを<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
 ## [newpage\]を、<br class="ltlbg_blankline">に
 ## ―を<br class="ltlbg_wSize">―</span>に
 ## **太字**を<br class="ltlbg_wSize">―</span>に
 ## ／＼もしくは〱を、<span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>に
 ## ---を<span class="ltlbg_hr">へ。
-  sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt class="ltlbg_rt">\2<\/rt><\/ruby>/g' tmp2.txt \
+  sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' tmp2.txt \
 | sed -e '/\[newpage\]/c <div class="ltlbg_newpage"></div>' \
 | sed -e 's/―/<span class="ltlbg_wSize">―<\/span>/g' \
 | sed -e 's/\*\*\([^\*]\+\)\*\*/<span class="ltlbg_bold">\1<\/span>/g' \
 | sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/g' \
 | sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' >tmp.txt
 
-##《《母字》》となっているものを母字と同文字数の﹅をふるルビへ置換する
-## <ruby class="ltlbg_emphasis" data-ruby="﹅">母字<rt>﹅</rt></ruby>
+##《《基底文字》》となっているものを基底文字と同文字数の﹅をふるルビへ置換する
+## <ruby class="ltlbg_emphasis" data-ruby="﹅">基底文字<rt>﹅</rt></ruby>
 ### 圏点用変換元文字列|変換先文字列を作成する
 grep -E -o "《《[^》]*》》" tmp.txt >tgt
 grep -E -o "《《[^》]*》》" tmp.txt | sed -e 's/.*/<ruby class=\\\\\"ltlbg_emphasis\\\\\" data-emphasis=\\\\\"/g' >1
@@ -150,14 +150,39 @@ do
 done < ./replaceSeed
 cat rslt.html >tmp.txt
 
+## <ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>になっているルビのdata-rubyを
+## ルビ文字数と基底文字数の関係に従いeven/long/shortに分岐させる
+### 置換元文字列を抽出し、ユニークにする(ルビは同じものが多数出現する)
+cat tmp.txt | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq >tgt
+cat tmp.txt | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/.\+|//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >1
+cat tmp.txt | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
+
+### 基底文字数,ルビ文字数 の一時ファイルを作成し、比較結果を出力する一時shを作成する
+### その実行結果に従ってパラメータ要素名に付与する文字列を格納し、各中間ファイルと結合して置換元|置換先のファイルを作成する
+paste -d , 1 2 | sed 's/\([0-9]\+\)\,\([0-9]\+\)/if [ \1 -eq \2 ]; then echo '"'_even'"'; elif [ \1 -gt \2 ]; then echo '"'_long'"'; else echo '"'_short'"'; fi/g' >cmp.sh
+bash cmp.sh >ins
+cat tgt | sed 's/.\+/<ruby class="ltlbg_ruby" data-ruby/' >3
+cat tgt | sed 's/<ruby class="ltlbg_ruby" data-ruby//' >4
+paste 3 ins 4 | sed 's/\t//g' >rep
+paste -d \| tgt rep | sed 's/\([\"\/]\)/\\\\\1/g' >replaceSeed
+### 変換元文字列|変換先文字列に従って順次パラメータ名置換を行う
+while read line
+do
+    from="${line%%\|*}"
+    to="${line##*\|}"
+    str="sed -e 's/${from}/${to}/g' rslt.html"
+    eval ${str} >rslt2.html
+    cat rslt2.html >rslt.html
+done < ./replaceSeed
+cat rslt.html >tmp.txt
 
 
 ## [-字-]を<span class="ltlbg_wdfix">へ
 ## 特定の文字についてはltlbg_wSpを挿入されている可能性がるのでそれも考慮した置換を行う
 sed -e 's/\[\-\(.\)\(<span class="ltlbg_wSp"><\/span>\)\?\-\]/<span class="ltlbg_wdfix">\1<\/span>\2/g' tmp.txt >tmp2.txt
 
-## ^と^に囲まれた1〜2文字の範囲を、<br class="ltlbg_tcy">縦中横</span>に。[^字^]は食わないように
-sed -e 's/\([^[]\)\^\([^\^]\{1,2\}\)\^\([^]]\)/\1<span class="ltlbg_tcy">\2<\/span>\3/g' tmp2.txt >tmp.txt
+## ^と^に囲まれた1〜3文字の範囲を、<br class="ltlbg_tcy">縦中横</span>に。[^字^]は食わないように
+sed -e 's/\([^[]\)\^\([^\^]\{1,3\}\)\^\([^]]\)/\1<span class="ltlbg_tcy">\2<\/span>\3/g' tmp2.txt >tmp.txt
 
 ## [^字^]を<span class="ltlbg_rotate">へ
 ## ^字^でtcyになっている可能性があるので考慮する。
@@ -184,8 +209,8 @@ sed -e 's/\[\(\^\|<span class="ltlbg_tcy">\)\(.\)\(\^\|<\/span>\)\]/<span class=
 ##########################################################################################
 # デバッグ用。先頭にlittlebugU.css、littlebugTD.cssを読み込むよう追記する
 ##########################################################################################
-  sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/\.\.\/littlebugU\.css"\>\n/' tmp.txt\
-| sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/\.\.\/littlebugTD\.css"\>\n/' >${destFile}
+  sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/\.\.\/littlebugTD\.css"\>\n/' tmp.txt\
+| sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/\.\.\/littlebugU\.css"\>\n/' >${destFile}
 
 ##########################################################################################
 # ファイルが上書きできないため使用している中間ファイルのゴミ掃除。なんとかならんか…
@@ -200,8 +225,13 @@ eval $rmstrBase'5'
 eval $rmstrBase'6'
 eval $rmstrBase'rep'
 eval $rmstrBase'tgt'
+eval $rmstrBase'ins'
 eval $rmstrBase'replaceSeed'
 eval $rmstrBase'rslt.html'
 eval $rmstrBase'rslt2.html'
 eval $rmstrBase'tmp.txt'
 eval $rmstrBase'tmp2.txt'
+eval $rmstrBase'cmp.sh'
+
+
+

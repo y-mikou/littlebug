@@ -2,19 +2,19 @@ html {
     /* 組み方向 */
     /* 縦 */ writing-mode: vertical-rl;
     /* 横    writing-mode: horizontal-tb; */ 
-
+    
     orphans: 1;
     widows: 1;
 }
 
 /*章*/
 section.ltlbg_section{
-    margin-left: 5em;
+    margin-left: 5rem;
 }
 
 /*段落*/
 p.ltlbg_p{
-    margin-right: 2em;
+    margin-right: 2rem;
 }
 
 /* 縦中横 */
@@ -25,12 +25,12 @@ span.ltlbg_tcy {
 
 /*アへ濁点*/
 span.ltlbg_dakuten{
-    margin-bottom: -1em;
+    margin-bottom: -1rem;
 }
 span.ltlbg_dakuten::after {
     display: inline-block;
     content: "゛";
-    transform: translate(0.3em,-1.6em);
+    transform: translate(0.3rem,-1.6rem);
 }
 
 
@@ -39,7 +39,7 @@ span.ltlbg_wSize{
     display: inline-block;
     transform-origin: top;
     transform: scale(1, 1.8) translateY(1px);
-    margin-bottom: 1em;
+    margin-bottom: 1rem;
 }
 
 /*踊り字*/
@@ -54,12 +54,12 @@ span.ltlbg_odori2::before{
 
 /*半角SP*/
 span.ltlbg_sSp{
-    margin-bottom: 0.5em;
+    margin-bottom: 0.5rem;
 }
 
 /*全角SP*/
 span.ltlbg_wSp{
-    margin-bottom: 1.0em;
+    margin-bottom: 1.0rem;
 }
 
 /*回転。デフォルトは半時計回りに90度*/
@@ -67,7 +67,7 @@ span.ltlbg_rotate{
     display: inline-block;
     transform: rotate(-90deg);
     text-align: center;
-    height: 1em;
+    height: 1rem;
 }
 
 /*セミコロン用。時計回りに90度*/
@@ -75,7 +75,7 @@ span.ltlbg_semicolon{
     display: inline-block;
     transform: rotate(90deg);
     text-align: center;
-    height: 1em;
+    height: 1rem;
 }
 
 /*コロン用*/
@@ -83,7 +83,7 @@ span.ltlbg_semicolon{
 span.ltlbg_colon{
     display: inline-block;
     text-align: center;
-    height: 1em;
+    height: 1rem;
 }
 
 /*会話「」をぶら下げインデントにする。*/
@@ -93,7 +93,7 @@ span.ltlbg_talk{
 span.ltlbg_talk::before{
     display: inline-block;
     content: "「";
-    margin-top: -1em;
+    margin-top: -1rem;
 }
 span.ltlbg_talk::after{
     content: "」";
@@ -106,7 +106,7 @@ span.ltlbg_think{
 span.ltlbg_think::before{
     display: inline-block;
     content: "（";
-    margin-top: -1em;
+    margin-top: -1rem;
 }
 span.ltlbg_think::after{
     content: "）";
@@ -119,46 +119,104 @@ span.ltlbg_wquote{
 span.ltlbg_wquote::before{
     display: inline-block;
     content: "〝";
-    margin-top: -1em;
+    margin-top: -1rem;
 }
 span.ltlbg_wquote::after{
     content: "〟";
 }
 
-/*特殊ルビ*/
-[data-ruby] {
+/*特殊ルビ_同じ文字数*/
+[data-ruby_even] {
     position: relative;
+
+    /*デバッグ目視用*/
+    background-color: rgba(255, 0, 0, 0.2);
+
 }
-[data-ruby]::before {
-    content: attr(data-ruby);
+[data-ruby_even]::before {
+    content: attr(data-ruby_even);
     position: absolute;
     top: 0;
-    left: 0;
-    right: -1em;
-    margin: auto;
-    font-size: 0.5em;
+    bottom: 0;
+    left: 70%;
     white-space: nowrap;
-    line-height: 1;
     text-indent: 0;
-    text-align:center;
+
+    transform-origin: left top;
+    transform: scale(0.5, 0.5);
+
+    margin-top: 0.25rem;
+    letter-spacing: 1rem;
+}
+
+/*特殊ルビ_ルビが長い*/
+[data-ruby_long] {
+    position: relative;
+
+    /*デバッグ目視用*/
+    background-color: rgba(255, 0, 0, 0.2);
+
+}
+[data-ruby_long]::before {
+    content: attr(data-ruby_long);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 70%;
+    white-space: nowrap;
+    text-indent: 0;
+
+    transform-origin: left top;
+    transform: scale(0.5, 0.5);
+
+}
+
+/*特殊ルビ_ルビが短い*/
+[data-ruby_short] {
+    position: relative;
+
+    /*デバッグ目視用*/
+    background-color: rgba(255, 0, 0, 0.2);
+
+}
+[data-ruby_short]::before {
+    content: attr(data-ruby_short);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 70%;
+    white-space: nowrap;
+    text-indent: 0;
+
+    display: flex;
+    justify-content: center;
+    transform-origin: left center;
+    transform: scale(0.5, 0.5);
+
+    margin-top: 0.5rem;
+    letter-spacing: 1rem;
+
 }
 
 /*特殊傍点*/
 [data-emphasis] {
     position: relative;
+
+    /*デバッグ目視用*/
+    background-color: rgba(0, 255, 0, 0.2);
 }
 [data-emphasis]::before {
     content: attr(data-emphasis);
     position: absolute;
     top: 0;
-    left: 0;
-    right: -1em;
-    margin: auto;
-    font-size: 0.3em;
+    bottom: 0;
+    left: 70%;
     white-space: nowrap;
-    line-height: 1;
     text-indent: 0;
-    text-align:center;
-    margin-top: 0.5em;
-    letter-spacing: 1.3em;
+
+    transform-origin: left top;
+    transform: scale(0.5, 0.5);
+
+    margin-top: 0.25rem;
+    letter-spacing: 1rem;
 }
