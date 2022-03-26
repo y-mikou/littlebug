@@ -116,9 +116,6 @@ span.ltlbg_think::after{
 /*特殊ルビ_ルビが長い*/
 [data-ruby_long] {
     position: relative;
-
-    /*デバッグ目視用*/
-    background-color: rgba(255, 0, 0, 0.2);
 }
 [data-ruby_long]::before {
     content: attr(data-ruby_long);
@@ -136,9 +133,6 @@ span.ltlbg_think::after{
 /*特殊ルビ_ルビが短い*/
 [data-ruby_short] {
     position: relative;
-
-    /*デバッグ目視用*/
-    background-color: rgba(255, 0, 0, 0.2);
 }
 [data-ruby_short]::before {
     content: attr(data-ruby_short);
@@ -159,9 +153,6 @@ span.ltlbg_think::after{
 /*特殊傍点*/
 [data-emphasis] {
     position: relative;
-
-    /*デバッグ目視用*/
-    background-color: rgba(0, 255, 0, 0.2);
 }
 [data-emphasis]::before {
     content: attr(data-emphasis);
