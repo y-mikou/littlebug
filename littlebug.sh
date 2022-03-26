@@ -53,10 +53,10 @@ touch ${destFile}                                  #出力先ファイルを生�
 
 ## 英数字2文字と、！？!?の重なりを<span class="ltlbg_tcy">の変換対象にする
   sed -e 's/\([^a-zA-Z0-9\<\>]\)\([a-zA-Z0-9]\{2\}\)\([^a-zA-Z0-9/</>]\)/\1^\2^\3/g' tmp.txt \
-| sed -e 's/\([^!！?？\&#;]\)\(!!\|！！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">!!<\/span>\3/g' \
-| sed -e 's/\([^!！?？\&#;]\)\(??\|？？\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">??<\/span>\3/g' \
-| sed -e 's/\([^!！?？\&#;]\)\(!?\|！？\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">!?<\/span>\3/g' \
-| sed -e 's/\([^!！?？\&#;]\)\(?!\|？！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcy">?!<\/span>\3/g' >tmp2.txt
+| sed -e 's/\([^!！?？\&#;]\)\(!!\|！！\)\([^!！?？\&#;]\)/\1^!!^\3/g' \
+| sed -e 's/\([^!！?？\&#;]\)\(??\|？？\)\([^!！?？\&#;]\)/\1^??^\3/g' \
+| sed -e 's/\([^!！?？\&#;]\)\(!?\|！？\)\([^!！?？\&#;]\)/\1^!?^\3/g' \
+| sed -e 's/\([^!！?？\&#;]\)\(?!\|？！\)\([^!！?？\&#;]\)/\1^?!^\3/g' >tmp2.txt
 
 ## [capter]を<section class="ltlbg_section">に。:XXXXXはid="XXXX"に。
 ## 章区切りのない文章対応で、先頭に必ず章を付与し、重なった章開始を除去
@@ -131,7 +131,7 @@ sed -e 's/^<br class="ltlbg_br">/<br class="ltlbg_blankline">/' tmp2.txt >tmp.tx
 ### 圏点用変換元文字列|変換先文字列を作成する
 grep -E -o "《《[^》]*》》" tmp.txt >tgt
 grep -E -o "《《[^》]*》》" tmp.txt | sed -e 's/.*/<ruby class=\\\\\"ltlbg_emphasis\\\\\" data-emphasis=\\\\\"/g' >1
-grep -E -o "《《[^》]*》》" tmp.txt | sed -e 's/[《》]//g' | sed -e 's/./﹅/g' | sed -e 's/$/\\\\\">/g' >2
+grep -E -o "《《[^》]*》》" tmp.txt | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' | sed -e 's/$/\\\\\">/g' >2
 grep -E -o "《《[^》]*》》" tmp.txt | sed -e 's/[《》]//g' >3
 grep -E -o "《《[^》]*》》" tmp.txt | sed -e 's/.*/<rt>/g' >4
 grep -E -o "《《[^》]*》》" tmp.txt | sed -e 's/[《》]//g' | sed -e 's/./﹅/g' >5
