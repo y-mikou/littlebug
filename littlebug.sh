@@ -47,7 +47,6 @@ touch ${destFile}                                  #出力先ファイルを生�
 ## 事前に、作品冒頭に空行がある場合は削除する
   sed -z 's/\n*\(\[chapter[^]]\+\]\)\n\+/\n\1\n/g' tmp2.txt \
 | sed -z '1,/^\n*/s/^\n*//' >tmp.txt
-
 ## 文章中スペース類置換ここまで###########################################################
 
 
@@ -113,13 +112,15 @@ sed -e 's/^<br class="ltlbg_br">/<br class="ltlbg_blankline">/' tmp2.txt >tmp.tx
 | sed -e 's/^（\(.\+\)）/<span class="ltlbg_think">\1<\/span>/g' \
 | sed -e 's/^〝\(.\+\)〟/<span class="ltlbg_wquote">\1<\/span>/g' >tmp2.txt
 
-##{基底文字|ルビ}となっているものを<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
+## {基底文字|ルビ}となっているものを<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
+## ついでだから|基底文字《ルビ》も<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
 ## [newpage\]を、<br class="ltlbg_blankline">に
 ## ―を<br class="ltlbg_wSize">―</span>に
 ## **太字**を<br class="ltlbg_wSize">―</span>に
 ## ／＼もしくは〱を、<span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>に
 ## ---を<span class="ltlbg_hr">へ。
   sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' tmp2.txt \
+| sed -e 's/｜\([^《]\+\)《\([^》]\+\)》/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' \
 | sed -e '/\[newpage\]/c <div class="ltlbg_newpage"></div>' \
 | sed -e 's/―/<span class="ltlbg_wSize">―<\/span>/g' \
 | sed -e 's/\*\*\([^\*]\+\)\*\*/<span class="ltlbg_bold">\1<\/span>/g' \
