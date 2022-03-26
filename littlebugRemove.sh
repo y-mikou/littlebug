@@ -3,7 +3,7 @@ export lang=ja_jp.utf-8
 
 tgtFile=${1}                                       #引数で指定されたファイルを対象とする
 #convMode=${2:=1}                                   #引数2は未対応
-destFile=${tgtFile/".html"/"_littlebugResult.txt"} #出力ファイルの指定する
+destFile=${tgtFile/".html"/".txt"}                 #出力ファイルの指定する
 touch ${destFile}                                  #出力先ファイルを生成
 
 # 最終的にlittlebug.shと統合する
@@ -13,9 +13,7 @@ touch ${destFile}                                  #出力先ファイルを生�
 ##########################################################################################
 # デバッグ用。先頭にlittlebugU.css、littlebugTD.cssを読み込むよう追記する
 ##########################################################################################
-  sed -z 's/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css"\>\n//' ${tgtFile} \
-| sed -z 's/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css"\>\n//' \
-| sed -z 's/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugU\.css"\>\n//' >${destFile}
+sed -e 's/\<link rel=\"stylesheet\" href=\".+littlebug.+\.css"\>$//' ${tgtFile} >${destFile}
 
 
 ## 「<」(半角)を「&lt;」へ変換
