@@ -210,8 +210,8 @@ sed -e 's/\[\(\^\|<span class="ltlbg_tcy">\)\(.\)\(\^\|<\/span>\)\]/<span class=
 ##########################################################################################
 # デバッグ用。先頭にlittlebugU.css、littlebugTD.cssを読み込むよう追記する
 ##########################################################################################
-  sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/\.\.\/littlebugTD\.css"\>\n/' tmp.txt\
-| sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/\.\.\/littlebugU\.css"\>\n/' >${destFile}
+  sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css"\>\n/' tmp.txt\
+| sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugU\.css"\>\n/' >${destFile}
 
 ##########################################################################################
 # ファイルが上書きできないため使用している中間ファイルのゴミ掃除。なんとかならんか…
