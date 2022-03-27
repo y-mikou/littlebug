@@ -2,7 +2,7 @@
 | branch           | ver       | status                                       
 | ---------------- | --------- | -------------------------------------------- 
 | main             | 0.5       | txt→htmlだけ一通り実装
-| develop-root     | 0.51      | html→txt作成中
+| develop-root     | 0.53      | html→txt一通り実装、未テスト
 
 # テキスト⇔HTML相互変換「リトルバグ」
 
