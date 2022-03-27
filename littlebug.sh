@@ -68,9 +68,10 @@ touch ${destFile}                                  #出力先ファイルを生�
 ## 章を閉じる
 ## 置換の都合上必ず生じる先頭の章閉じは削除
 ## 作品の末尾には必ず章閉じを付与
-  sed -e 's/<section/<\/section>\n<section/g' tmp.txt \
-| sed -z '1,/<\/section>\n/s/<\/section>\n//' \
-| sed -z 's/$/\n<\/section>\n/' >tmp2.txt
+## 章区切りは複数行に渡る可能性があるので閉じタグに<\!--ltlbg_section-->を付与する
+  sed -e 's/<section/<\/section><\!--ltlbg_section-->\n<section/g' tmp.txt \
+| sed -z '1,/<\/section><\!--ltlbg_section-->\n/s/<\/section><\!--ltlbg_section-->\n//' \
+| sed -z 's/$/\n<\/section><\!--ltlbg_section-->\n/' >tmp2.txt
 
 ## 行頭§◆■の次に空白(なくても良い)に続く行を、<h2 class="ltlbg_sectionName">章タイトルに
 ## 順序の都合上直後に</p>が現れる場合、</p>は除去
@@ -85,11 +86,12 @@ sed -e 's/^[§◆■][ 　]*\(.\+\)/<h2 class="ltlbg_sectionName">\1<\/h2>/g' tm
 ## <p>の手前に</p>
 ## 章区切り(終了)の手前でも段落を終了させる
 ## 但し章区切り(開始)、hタグ行がある行の場合は回避する
-  sed -z 's/\n<p class="ltlbg_p">/<\/p>\n<p class="ltlbg_p">/g' tmp2.txt \
-| sed -z 's/」<\/p>/」\n<\/p>/g' \
-| sed -z 's/\n<\/section>/<\/p>\n<\/section>/g' \
-| sed -z 's/<\/h2>\n<\/p>/<\/h2>/g' \
-| sed -e 's/\(<section.*>\)<\/p>/\1/g' >tmp.txt
+## 段落は複数行に渡る可能性があるため、閉じタグに<\!--ltlbg_p-->を付与する
+  sed -z 's/\n<p class="ltlbg_p">/<\/p><\!--ltlbg_p-->\n<p class="ltlbg_p">/g' tmp2.txt \
+| sed -z 's/」<\/p><\!--ltlbg_p-->/」\n<\/p><\!--ltlbg_p-->/g' \
+| sed -z 's/\n<\/section><\!--ltlbg_section-->/<\/p><\!--ltlbg_p-->\n<\/section><\!--ltlbg_section-->/g' \
+| sed -z 's/<\/h2>\n<\/p><\!--ltlbg_p-->/<\/h2>/g' \
+| sed -e 's/\(<section.*>\)<\/p><\!--ltlbg_p-->/\1/g' >tmp.txt
 
 ## 改行→改行タグ
 ## crlf→lf してから lf→<br class="ltlbg_br">+lfに
@@ -97,10 +99,10 @@ sed -e 's/^[§◆■][ 　]*\(.\+\)/<h2 class="ltlbg_sectionName">\1<\/h2>/g' tm
   sed -z 's/\r\n/\n/g' tmp.txt \
 | sed -z 's/\n/<br class="ltlbg_br">\n/g' \
 | sed -e 's/\(<section.*>\)<br class="ltlbg_br">/\1/g' \
-| sed -e 's/<\/section><br class="ltlbg_br">/<\/section>/g' \
+| sed -e 's/<\/section><\!--ltlbg_section--><br class="ltlbg_br">/<\/section><\!--ltlbg_section-->/g' \
 | sed -e 's/<\/h2><br class="ltlbg_br">/<\/h2>/g' \
 | sed -e 's/<p class="ltlbg_p"><br class="ltlbg_br">/<p class="ltlbg_p">/g' \
-| sed -e 's/<\/p><br class="ltlbg_br">/<\/p>/g' >tmp2.txt
+| sed -e 's/<\/p><\!--ltlbg_p--><br class="ltlbg_br">/<\/p><\!--ltlbg_p-->/g' >tmp2.txt
 
 ## 行頭<br>を、<br class="ltlbg_blankline">に
 sed -e 's/^<br class="ltlbg_br">/<br class="ltlbg_blankline">/' tmp2.txt >tmp.txt
@@ -108,13 +110,14 @@ sed -e 's/^<br class="ltlbg_br">/<br class="ltlbg_blankline">/' tmp2.txt >tmp.tx
 ## 行頭「ではじまる、」までを<div class="ltlbg_talk">にする
 ## 行頭（ではじまる、）までを<div class="ltlbg_talk">にする
 ## 行頭〝ではじまる、〟までを<div class="ltlbg_wquote">にする
-  sed -e 's/^「\(.\+\)」/<span class="ltlbg_talk">\1<\/span>/g' tmp.txt \
-| sed -e 's/^（\(.\+\)）/<span class="ltlbg_think">\1<\/span>/g' \
-| sed -e 's/^〝\(.\+\)〟/<span class="ltlbg_wquote">\1<\/span>/g' >tmp2.txt
+## これらのspanタグは複数行に渡る可能性があるため、閉じタグに<\!--ltlbg_XXX-->を付与する
+  sed -e 's/^「\(.\+\)」/<span class="ltlbg_talk">\1<\/span><\!--ltlbg_talk-->/g' tmp.txt \
+| sed -e 's/^（\(.\+\)）/<span class="ltlbg_think">\1<\/span><\!--ltlbg_think-->/g' \
+| sed -e 's/^〝\(.\+\)〟/<span class="ltlbg_wquote">\1<\/span><\!--ltlbg_wquote-->/g' >tmp2.txt
 
 ## {基底文字|ルビ}となっているものを<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
 ## ついでだから|基底文字《ルビ》も<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
-## [newpage\]を、<br class="ltlbg_blankline">に
+## [newpage]を、<br class="ltlbg_newpage">に
 ## ―を<br class="ltlbg_wSize">―</span>に
 ## **太字**を<br class="ltlbg_wSize">―</span>に
 ## ／＼もしくは〱を、<span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>に
