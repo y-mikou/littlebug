@@ -64,8 +64,8 @@
 #### マークアップ部分の変換
 | 効果             | txtマークアップ      | htmlタグとClass(閉じ省略)                                | 概要/デフォ設定
 | ---------------- | -------------------- | -------------------------------------------------------- | -----------------
-| ルビ             | `{母字｜ルビ}`       | `<ruby class="ltlbg_ruby" data-ruby_even="ルビ">`        | 母字数=ルビ字数はモノルビ
-|                  |                      | `<ruby class="ltlbg_ruby" data-ruby_long="ルビ">`        | 長いルビは始点合わせ
+| ルビ             | `{母字｜ルビ}`or     | `<ruby class="ltlbg_ruby" data-ruby_even="ルビ">`        | 母字数=ルビ字数はモノルビ風
+|                  | `｜母字《ルビ》`     | `<ruby class="ltlbg_ruby" data-ruby_long="ルビ">`        | 長いルビは始点合わせ
 |                  |                      | `<ruby class="ltlbg_ruby" data-ruby_short="ルビ">`       | 短いルビは中央寄せ
 | 傍点             | `《《傍点》》`       | `<ruby class="ltlbg_emphasis" data-emphasis="﹅">`       | ルビ化する。黒ゴマ
 | 太字             | `**太字**`           | `<span class="ltlbg_bold">`                              | font-weight:bold
