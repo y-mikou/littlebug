@@ -50,12 +50,12 @@ touch ${destFile}                                  #出力先ファイルを生�
 ## 文章中スペース類置換ここまで###########################################################
 
 
-## 英数字2文字と、！？!?の重なりを<span class="ltlbg_tcy">の変換対象にする
-  sed -e 's/\([^a-zA-Z0-9\<\>]\)\([a-zA-Z0-9]\{2\}\)\([^a-zA-Z0-9/</>]\)/\1^\2^\3/g' tmp.txt \
-| sed -e 's/\([^!！?？\&#;]\)\(!!\|！！\)\([^!！?？\&#;]\)/\1^!!^\3/g' \
-| sed -e 's/\([^!！?？\&#;]\)\(??\|？？\)\([^!！?？\&#;]\)/\1^??^\3/g' \
-| sed -e 's/\([^!！?？\&#;]\)\(!?\|！？\)\([^!！?？\&#;]\)/\1^!?^\3/g' \
-| sed -e 's/\([^!！?？\&#;]\)\(?!\|？！\)\([^!！?？\&#;]\)/\1^?!^\3/g' >tmp2.txt
+## 英数字2文字と、！？!?の重なりを<span class="ltlbg_tcyA">の変換対象にする
+  sed -e 's/\([^a-zA-Z0-9\<\>]\)\([a-zA-Z0-9]\{2\}\)\([^a-zA-Z0-9/</>]\)/\1<span class="ltlbg_tcyA">\2<\/span>\3/g' tmp.txt \
+| sed -e 's/\([^!！?？\&#;]\)\(!!\|！！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcyA">!!<\/span>\3/g' \
+| sed -e 's/\([^!！?？\&#;]\)\(??\|？？\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcyA">??<\/span>\3/g' \
+| sed -e 's/\([^!！?？\&#;]\)\(!?\|！？\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcyA">!?<\/span>\3/g' \
+| sed -e 's/\([^!！?？\&#;]\)\(?!\|？！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcyA">?!<\/span>\3/g' >tmp2.txt
 
 ## [capter]を<section class="ltlbg_section">に。:XXXXXはid="XXXX"に。
 ## 章区切りのない文章対応で、先頭に必ず章を付与し、重なった章開始を除去
@@ -78,18 +78,19 @@ touch ${destFile}                                  #出力先ファイルを生�
 sed -e 's/^[§◆■][ 　]*\(.\+\)/<h2 class="ltlbg_sectionName">\1<\/h2>/g' tmp2.txt >tmp.txt
 
 ## 行頭全角スペースを<p>タグに
-## 行頭括弧類の前に<p>タグへ
+## 行頭括弧類の前に<p class="ltlbg_brctGrp">タグ
   sed -e 's/^　/<p class="ltlbg_p">/g' tmp.txt \
-| sed -e 's/^「/<p class="ltlbg_p">\n「/g' \
-| sed -z 's/」\n<p class="ltlbg_p">\n「/」\n「/g' >tmp2.txt
+| sed -e 's/^「/<p class="ltlbg_p_brctGrp">\n「/g' \
+| sed -z 's/」\n<p class="ltlbg_p_brctGrp">\n「/」\n「/g' >tmp2.txt
 
 ## <p>の手前に</p>
 ## 章区切り(終了)の手前でも段落を終了させる
 ## 但し章区切り(開始)、hタグ行がある行の場合は回避する
-## 段落は複数行に渡る可能性があるため、閉じタグに<\!--ltlbg_p-->を付与する
+## 段落は複数行に渡る可能性があるため、閉じタグに<\!--ltlbg_p/_brctGrp-->を付与する
   sed -z 's/\n<p class="ltlbg_p">/<\/p><\!--ltlbg_p-->\n<p class="ltlbg_p">/g' tmp2.txt \
-| sed -z 's/」<\/p><\!--ltlbg_p-->/」\n<\/p><\!--ltlbg_p-->/g' \
+| sed -z 's/」<\/p><\!--ltlbg_p-->/」\n<\/p><\!--ltlbg_p_brctGrp-->/g' \
 | sed -z 's/\n<\/section><\!--ltlbg_section-->/<\/p><\!--ltlbg_p-->\n<\/section><\!--ltlbg_section-->/g' \
+| sed -z 's/\n<\/section><\!--ltlbg_section-->/<\/p><\!--ltlbg_p_brctGrp-->\n<\/section><\!--ltlbg_section-->/g' \
 | sed -z 's/<\/h2>\n<\/p><\!--ltlbg_p-->/<\/h2>/g' \
 | sed -e 's/\(<section.*>\)<\/p><\!--ltlbg_p-->/\1/g' >tmp.txt
 
@@ -102,10 +103,18 @@ sed -e 's/^[§◆■][ 　]*\(.\+\)/<h2 class="ltlbg_sectionName">\1<\/h2>/g' tm
 | sed -e 's/<\/section><\!--ltlbg_section--><br class="ltlbg_br">/<\/section><\!--ltlbg_section-->/g' \
 | sed -e 's/<\/h2><br class="ltlbg_br">/<\/h2>/g' \
 | sed -e 's/<p class="ltlbg_p"><br class="ltlbg_br">/<p class="ltlbg_p">/g' \
-| sed -e 's/<\/p><\!--ltlbg_p--><br class="ltlbg_br">/<\/p><\!--ltlbg_p-->/g' >tmp2.txt
+| sed -e 's/<p class="ltlbg_p_brctGrp"><br class="ltlbg_br">/<p class="ltlbg_p_brctGrp">/g' \
+| sed -e 's/<\/p><\!--ltlbg_p--><br class="ltlbg_br">/<\/p><\!--ltlbg_p-->/g' \
+| sed -e 's/<\/p><\!--ltlbg_p_brctGrp--><br class="ltlbg_br">/<\/p><\!--ltlbg_p_brctGrp-->/g' >tmp2.txt
 
 ## 行頭<br>を、<br class="ltlbg_blankline">に
 sed -e 's/^<br class="ltlbg_br">/<br class="ltlbg_blankline">/' tmp2.txt >tmp.txt
+
+cat tmp.txt >tmp2.txt
+
+## 改行付きブロック要素の直前にある空行は一つ余計になるので除去
+  sed -z 's/<br class="ltlbg_blankline">\n<p class="ltlbg_p">/<p class="ltlbg_p">/g' tmp2.txt \
+| sed -z 's/<br class="ltlbg_blankline">\n<p class="ltlbg_p_brctGrp">/<p class="ltlbg_p_brctGrp">/g' >tmp.txt
 
 ## 行頭「ではじまる、」までを<div class="ltlbg_talk">にする
 ## 行頭（ではじまる、）までを<div class="ltlbg_talk">にする
@@ -185,12 +194,12 @@ cat rslt.html >tmp.txt
 ## 特定の文字についてはltlbg_wSpを挿入されている可能性がるのでそれも考慮した置換を行う
 sed -e 's/\[\-\(.\)\(<span class="ltlbg_wSp"><\/span>\)\?\-\]/<span class="ltlbg_wdfix">\1<\/span>\2/g' tmp.txt >tmp2.txt
 
-## ^と^に囲まれた1〜3文字の範囲を、<br class="ltlbg_tcy">縦中横</span>に。[^字^]は食わないように
-sed -e 's/\([^[]\)\^\([^\^]\{1,3\}\)\^\([^]]\)/\1<span class="ltlbg_tcy">\2<\/span>\3/g' tmp2.txt >tmp.txt
+## ^と^に囲まれた1〜3文字の範囲を、<br class="ltlbg_tcyM">縦中横</span>に。[^字^]は食わないように
+sed -e 's/\([^[]\)\^\([^\^]\{1,3\}\)\^\([^]]\)/\1<span class="ltlbg_tcyM">\2<\/span>\3/g' tmp2.txt >tmp.txt
 
 ## [^字^]を<span class="ltlbg_rotate">へ
 ## ^字^でtcyになっている可能性があるので考慮する。
-sed -e 's/\[\(\^\|<span class="ltlbg_tcy">\)\(.\)\(\^\|<\/span>\)\]/<span class="ltlbg_rotate">\2<\/span>/g' tmp.txt >tmp2.txt
+sed -e 's/\[\(\^\|<span class="ltlbg_tcy.">\)\(.\)\(\^\|<\/span>\)\]/<span class="ltlbg_rotate">\2<\/span>/g' tmp.txt >tmp2.txt
 
 ## 「;」「；」に<span ltlbg_semicolon>を適用する
 ## 「:」「：」に<span ltlbg_colon>を適用する
@@ -207,8 +216,8 @@ sed -e 's/\[\(\^\|<span class="ltlbg_tcy">\)\(.\)\(\^\|<\/span>\)\]/<span class=
 # 退避的復旧。置換対象文字に抵触するが、特例的に置換したくない箇所のみ復旧する
 ##########################################################################################
 ## chapter:XXXX には英数字が使えるのでtcyタグの当て込みがある可能性がある。それを削除する
-  sed -e 's/id="\(.*\)<span class="ltlbg_tcy">\(.*\)">/id="\1\2">/g' tmp2.txt \
-| sed -e 's/id="\(.*\)<\/span>\(.*\)">/id="\1\2">/g' >tmp.txt
+## ここでの復旧は想定外に壊れて当て込まれているものが対象なので、除去置換はほぼ個別対応
+  sed -e 's/id="\(.*\)<span class="ltlbg_tcy[^>]\+">\(.*\)<\/span>\(.*\)>/id="\1\2\3">/g' tmp2.txt >tmp.txt 
 
 ##########################################################################################
 # デバッグ用。先頭にlittlebugU.css、littlebugTD.cssを読み込むよう追記する
