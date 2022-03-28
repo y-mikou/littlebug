@@ -37,23 +37,29 @@ sed -z 's/<link rel=\"stylesheet\" href=\".\+littlebug.\+css\">//' ${tgtFile} >t
 | sed -e 's/<span class="ltlbg_think">/（/g' \
 | sed -e 's/<span class="ltlbg_wquote">/〝/g' >tmp2
 
-## <span class="ltlbg_tcy">XX</span>を除去
+## <span class="ltlbg_tcyA">XX</span>を除去
 ## <span class="ltlbg_wdfix">XX</span>を除去
 ## <span ltlbg_semicolon>；</span>を除去
 ## <span ltlbg_colon>：</span>を除去
-  sed -e 's/<span class="ltlbg_tcy">\([^<]\{1,2\}\)<\/span>/\1/g' tmp2 \
+  sed -e 's/<span class="ltlbg_tcyA">\([^<]\{2\}\)<\/span>/\1/g' tmp2 \
 | sed -e 's/<span class="ltlbg_wdfix">\([^<]\)<\/span>/\1/g' \
 | sed -e 's/<span class="ltlbg_semicolon">；<\/span>/；/g' \
 | sed -e 's/<span class="ltlbg_colon">：<\/span>/：/g' >tmp
 
-## <span class="ltlbg_dakuten">を「゛」に変換する
-sed -e 's/<span class="ltlbg_dakuten">\(.\)<\/span>/\1゛/g' tmp >tmp2
+## 括弧類段落記号を除去
+  sed -e 's/<p class="ltlbg_p_brctGrp">//g' tmp \
+| sed -e 's/<\/p><\!--ltlbg_p_brctGrp-->//g' >tmp2
 
+cat tmp2 >tmp
+
+## <span class="ltlbg_dakuten">を「゛」に復旧
+## <span class="ltlbg_tcyM">XX</span>を復旧
 ## <span class="ltlbg_wSize">字</span>を復旧
-sed -e 's/<span class="ltlbg_wSize">\(.\)<\/span>/\1\1/g' tmp2 >tmp
-
 ## <span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>を復旧
-sed -e 's/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/／＼/g' tmp >tmp2
+  sed -e 's/<span class="ltlbg_dakuten">\(.\)<\/span>/\1゛/g' tmp \
+| sed -e 's/<span class="ltlbg_tcyM">\([^<]\{1,3\}\)<\/span>/^\1^/g' \
+| sed -e 's/<span class="ltlbg_wSize">\(.\)<\/span>/\1\1/g' \
+| sed -e 's/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/／＼/g' >tmp2
 
 ## <span class="ltlbg_ruby" data-ruby_XXX="XXX"></span>を復旧
   sed -e 's/<ruby class="ltlbg_ruby" data-ruby_[^=]\+="\([^"]\+\)">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/{\2｜\1}/g' tmp2 \
@@ -74,9 +80,10 @@ sed -e 's/<h2 class="ltlbg_sectionName">\([^<]\+\)<\/h2>/◆\1/g' tmp >tmp2
 | sed -e 's/\&#39;/\"/g' >tmp
 
 ## ここまで生じているハード空行は副産物なので削除
-## その上で、<br class="ltlbg_br">を削除
+## その上で、<br class="ltlbg_br">、<br class="ltlbg_blankline">を削除
   sed -z 's/^\n//g' tmp \
-| sed -e 's/<br class="ltlbg_br">//g' >tmp2
+| sed -e 's/<br class="ltlbg_br">//g' \
+| sed -e 's/^<br class="ltlbg_blankline">//g' >tmp2
 
 ## <span class="ltlbg_wSp"></span>を「　」へ
   sed -e 's/<span class="ltlbg_wSp"><\/span>/　/g' tmp2 \
