@@ -17,8 +17,12 @@ p.ltlbg_p{
     margin-right: 2rem;
 }
 
-/* 縦中横 */
-span.ltlbg_tcy {
+/* 縦中横。AもMもスタイル自体は同じ*/
+span.ltlbg_tcyA {
+    text-combine-upright: all;
+    display: inline-block;
+}
+span.ltlbg_tcyM {
     text-combine-upright: all;
     display: inline-block;
 }
