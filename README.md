@@ -1,8 +1,8 @@
 ## 状況
 | branch           | ver       | status                                       
 | ---------------- | --------- | -------------------------------------------- 
-| main             | 0.5       | txt→html
-| develop-root     | 0.8       | 一通り動作確認、統合済み。
+| main             | 0.81      | 一通り動作確認、統合済み。
+| develop-root     | 0.8       | デバッグ機能残置。
 
 # テキスト⇔HTML相互変換「リトルバグ」
 
@@ -75,7 +75,7 @@
 | 改ページ         | `[newpage]`          | `<div class="ltlbg_newpage">`                            | breakAfter:Allの空div
 | 回転対応         | `[^字^]`             | `<span class="ltlbg_rotate">`                            | 全半角1字。1em幅確保、回転
 | 字幅対応         | `[-字-]`             | `<span class="ltlbg_wdfix">`                             | 全半角1字。1em幅確保
-| 強制合字         | `[[字]]`             | `<span class="ltlbg_forceGouji">`                        | 左右のやつ限定「忄実」みたいの
+| 強制合字         | `[l[字]r]`           | `<span class="ltlbg_forceGouji">`                        | 左右のやつ限定「忄実」みたいの
 
 
 ### 検討中の変換
@@ -453,7 +453,7 @@ htmlにおいては`見出し`と混同されがちだが、明確に区別す�
 
 ## 強制合字について
 - txt
-  - 入力されたままの`[l[偏旁]r]`で指示した範囲
+  - `[l[偏旁]r]`で指示した範囲
 - html
   - `強制合字クラス`を指定した`span`タグ
 
