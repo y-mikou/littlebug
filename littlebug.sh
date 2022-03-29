@@ -149,12 +149,12 @@ if [ "${1}" = "1" ] ; then
   ##《《基底文字》》となっているものを基底文字と同文字数の﹅をふるルビへ置換する
   ## <ruby class="ltlbg_emphasis" data-ruby="﹅">基底文字<rt>﹅</rt></ruby>
   ### 圏点用変換元文字列|変換先文字列を作成する
-  grep -E -o "《《[^》]*》》" tmp >tgt
+  grep -E -o "《《[^》]*》》" tmp | sed 's/\[/\\\\\[/g' | sed 's/\]/\\\\\]/g' >tgt
   grep -E -o "《《[^》]*》》" tmp | sed -e 's/.*/<ruby class=\\\\\"ltlbg_emphasis\\\\\" data-emphasis=\\\\\"/g' >1
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' | sed -e 's/$/\\\\\">/g' >2
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' >3
+  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' | sed -e 's/$/\\\\\">/g' >2
+  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed 's/\[/\\\\\[/g' | sed 's/\]/\\\\\]/g' >3
   grep -E -o "《《[^》]*》》" tmp | sed -e 's/.*/<rt>/g' >4
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed -e 's/./﹅/g' >5
+  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' >5
   grep -E -o "《《[^》]*》》" tmp | sed -e 's/.*/<\\\\\/rt><\\\\\/ruby>/g' >6
   paste 1 2 3 4 5 6 | sed 's/\t//g' >rep
   paste -d \| tgt rep >replaceSeed
@@ -173,9 +173,9 @@ if [ "${1}" = "1" ] ; then
   ## <ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>になっているルビのdata-rubyを
   ## ルビ文字数と基底文字数の関係に従いeven/long/shortに分岐させる
   ### 置換元文字列を抽出し、ユニークにする(ルビは同じものが多数出現する)
-  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq >tgt
+  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed 's/\[/\\\[/g' | sed 's/\]/\\\]/g' >tgt
   cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/.\+|//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >1
-  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
+  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | sed 's/\[l\[..\]r\]/■/g'  | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
 
   ### 基底文字数,ルビ文字数 の一時ファイルを作成し、比較結果を出力する一時shを作成する
   ### その実行結果に従ってパラメータ要素名に付与する文字列を格納し、各中間ファイルと結合して置換元|置換先のファイルを作成する
