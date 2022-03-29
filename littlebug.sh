@@ -196,17 +196,14 @@ if [ "${1}" = "1" ] ; then
   done < ./replaceSeed
   cat rslt.html >tmp
 
-
-  ## [-字-]を<span class="ltlbg_wdfix">へ
-  ## 特定の文字についてはltlbg_wSpを挿入されている可能性がるのでそれも考慮した置換を行う
-  sed -e 's/\[\-\(.\)\(<span class="ltlbg_wSp"><\/span>\)\?\-\]/<span class="ltlbg_wdfix">\1<\/span>\2/g' tmp >tmp2
-
+  ## [-字-]を<span class="ltlbg_wdfix">へ。特定の文字についてはltlbg_wSpを挿入されている可能性がるのでそれも考慮した置換を行う
   ## ^と^に囲まれた1〜3文字の範囲を、<br class="ltlbg_tcyM">縦中横</span>に。[^字^]は食わないように
-  sed -e 's/\([^[]\)\^\([^\^]\{1,3\}\)\^\([^]]\)/\1<span class="ltlbg_tcyM">\2<\/span>\3/g' tmp2 >tmp
-
-  ## [^字^]を<span class="ltlbg_rotate">へ
-  ## ^字^でtcyになっている可能性があるので考慮する。
-  sed -e 's/\[\(\^\|<span class="ltlbg_tcy.">\)\(.\)\(\^\|<\/span>\)\]/<span class="ltlbg_rotate">\2<\/span>/g' tmp >tmp2
+  ## [^字^]を<span class="ltlbg_rotate">へ。^字^でtcyになっている可能性があるので考慮する。
+  ## [l[偏旁]r]を<span class="ltlbg_forcedGouji1/2">へ
+  sed -e 's/\[\-\(.\)\(<span class="ltlbg_wSp"><\/span>\)\?\-\]/<span class="ltlbg_wdfix">\1<\/span>\2/g' tmp \
+| sed -e 's/\([^[]\)\^\([^\^]\{1,3\}\)\^\([^]]\)/\1<span class="ltlbg_tcyM">\2<\/span>\3/g' \
+| sed -e 's/\[\(\^\|<span class="ltlbg_tcy.">\)\(.\)\(\^\|<\/span>\)\]/<span class="ltlbg_rotate">\2<\/span>/g' \
+| sed -e 's/\[l\[\(.\)\(.\)\]r\]/<span class="ltlbg_forceGouji1">\1<\/span><span class="ltlbg_forceGouji2">\2<\/span>/g' >tmp2
 
   ## 「;」「；」に<span ltlbg_semicolon>を適用する
   ## 「:」「：」に<span ltlbg_colon>を適用する
@@ -230,7 +227,7 @@ if [ "${1}" = "1" ] ; then
   # デバッグ用。先頭にlittlebugU.css、littlebugTD.cssを読み込むよう追記する
   ##########################################################################################
     sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css"\>\n/' tmp \
-  | sed -z 's/^/\<\!--\<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css"\>-->\n/' \
+  | sed -z 's/^/\<\!--\<link rel=\"stylesheet\" href=\"\.\.\/littlebugRL\.css"\>-->\n/' \
   | sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugU\.css"\>\n/' >${destFile}
 
   echo "✨ "${destFile}"を出力しました[html化]"
