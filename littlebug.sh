@@ -73,13 +73,12 @@ if [ "${1}" = "1" ] ; then
   | sed -e 's/\*\*\([^\*]\+\)\*\*/<span class="ltlbg_bold">\1<\/span>/g' \
   | sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/g' \
   | sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' >tmp
-
-  grep -E -o "《《[^》]*》》" tmp >tgt
+  grep -E -o "《《[^》]*》》" tmp | sed 's/\[/\\\\\[/g' | sed 's/\]/\\\\\]/g' >tgt
   grep -E -o "《《[^》]*》》" tmp | sed -e 's/.*/<ruby class=\\\\\"ltlbg_emphasis\\\\\" data-emphasis=\\\\\"/g' >1
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' | sed -e 's/$/\\\\\">/g' >2
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' >3
+  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' | sed -e 's/$/\\\\\">/g' >2
+  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed 's/\[/\\\\\[/g' | sed 's/\]/\\\\\]/g' >3
   grep -E -o "《《[^》]*》》" tmp | sed -e 's/.*/<rt>/g' >4
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed -e 's/./﹅/g' >5
+  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' >5
   grep -E -o "《《[^》]*》》" tmp | sed -e 's/.*/<\\\\\/rt><\\\\\/ruby>/g' >6
   paste 1 2 3 4 5 6 | sed 's/\t//g' >rep
   paste -d \| tgt rep >replaceSeed
@@ -93,11 +92,9 @@ if [ "${1}" = "1" ] ; then
       cat rslt2.html >rslt.html
   done < ./replaceSeed
   cat rslt.html >tmp
-
-  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq >tgt
+  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed 's/\[/\\\[/g' | sed 's/\]/\\\]/g' >tgt
   cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/.\+|//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >1
-  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
-
+  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | sed 's/\[l\[..\]r\]/■/g'  | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
   paste -d , 1 2 | sed 's/\([0-9]\+\)\,\([0-9]\+\)/if [ \1 -eq \2 ]; then echo '"'_even'"'; elif [ \1 -gt \2 ]; then echo '"'_long'"'; else echo '"'_short'"'; fi/g' >cmp.sh
   bash cmp.sh >ins
   cat tgt | sed 's/.\+/<ruby class="ltlbg_ruby" data-ruby/' >3
@@ -113,20 +110,19 @@ if [ "${1}" = "1" ] ; then
       cat rslt2.html >rslt.html
   done < ./replaceSeed
   cat rslt.html >tmp
-
     sed -e 's/\[\-\(.\)\(<span class="ltlbg_wSp"><\/span>\)\?\-\]/<span class="ltlbg_wdfix">\1<\/span>\2/g' tmp \
   | sed -e 's/\([^[]\)\^\([^\^]\{1,3\}\)\^\([^]]\)/\1<span class="ltlbg_tcyM">\2<\/span>\3/g' \
-  | sed -e 's/\[l\[\(.\)\(.\)\]r\]/<span class="ltlbg_forceGouji1">\1<\/span><span class="ltlbg_forceGouji2">\2<\/span>/g' \
   | sed -e 's/\[\(\^\|<span class="ltlbg_tcy.">\)\(.\)\(\^\|<\/span>\)\]/<span class="ltlbg_rotate">\2<\/span>/g' \
+  | sed -e 's/\[l\[\(.\)\(.\)\]r\]/<span class="ltlbg_forceGouji1">\1<\/span><span class="ltlbg_forceGouji2">\2<\/span>/g' \
   | sed -e 's/\(；\|\;\)/<span class="ltlbg_semicolon">；<\/span>/g' \
   | sed -e 's/\(：\|\:\)/<span class="ltlbg_colon">：<\/span>/g' \
   | sed -e 's/\([！？♥♪☆]\)<span class="ltlbg_wSp"><\/span>゛/<span class="ltlbg_dakuten">\1<\/span><span class="ltlbg_wSp"><\/span>/g' \
   | sed -e 's/\(.\)゛/<span class="ltlbg_dakuten">\1<\/span>/g' \
   | sed -e 's/id="\(.*\)<span class="ltlbg_tcy[^>]\+">\(.*\)<\/span>\(.*\)>/id="\1\2\3">/g' \
   | sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css"\>\n/' \
-  | sed -z 's/^/\<\!--\<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css"\>-->\n/' \
+  | sed -z 's/^/\<\!--\<link rel=\"stylesheet\" href=\"\.\.\/littlebugRL\.css"\>-->\n/' \
   | sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugU\.css"\>\n/' >${destFile}
-
+  
   echo "✨ "${destFile}"を出力しました[html化]"
 
 elif [ "${1}" = "2" ] ; then
@@ -136,11 +132,10 @@ elif [ "${1}" = "2" ] ; then
   destFile=${tgtFile/".html"/"_removed.txt"} #出力ファイルの指定する
   touch ${destFile}                          #出力先ファイルを生成
 
-  sed -z 's/<link rel=\"stylesheet\" href=\".\+littlebug.\+css\">//' ${tgtFile} >tmp
-
-    sed -e 's/<\/section><!--ltlbg_section-->//g' tmp \
+    sed -z 's/<link rel=\"stylesheet\" href=\".\+littlebug.\+css\">//' ${tgtFile} \
+  | sed -e 's/<\/section><!--ltlbg_section-->//g' \
   | sed -e 's/<section class="ltlbg_section" id="\([^"]\+\)">/[chapter:\1]/g' \
-  | sed -e 's/\[chapter:\]/\[chapter\]/g' \
+  | sed -e 's/\[chapter:\]/\[chapter\]/g'  \
   | sed -e 's/<\/p><!--ltlbg_p-->//g' \
   | sed -e 's/<p class="ltlbg_p">/<span class="ltlbg_wSp"><\/span>/g' \
   | sed -z 's/<span class="ltlbg_wSp"><\/span>\n<span class="ltlbg_talk">/\n<span class="ltlbg_talk">/g' \
@@ -177,7 +172,6 @@ elif [ "${1}" = "2" ] ; then
   echo "✨ "${destFile}"を出力しました[txtもどし]"
 
 else
-
   echo "💩 引数1は1(txt→html)か2(html→txt)で指定してください"
   exit 1
 fi
