@@ -166,3 +166,15 @@ span.ltlbg_think::after{
     margin-left: 0.25rem;
     letter-spacing: 1rem;
 }
+
+span.ltlbg_forceGouji1{
+    transform-origin: center right;
+    transform: scale(0.6,1 )  translate(-0.7rem,0);
+    display: inline-block;    
+}
+span.ltlbg_forceGouji2{
+    transform-origin: center left;
+    transform: scale(0.8,1 ) translate(-1rem,0);
+    display: inline-block;
+    margin-right: -1rem;
+}
