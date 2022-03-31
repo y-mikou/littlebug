@@ -53,6 +53,11 @@
 # 仕様
 [仕様書的なもの](https://github.com/y-mikou/littlebug/wiki/20_%E4%BB%95%E6%A7%98%E6%9B%B8%E7%9A%84%E3%81%AA%E3%82%82%E3%81%AE)参照
 
+# 使い方
+```
+bash littlebug.sh [引数1:変換方法] [引数2:(パスと)対象ファイル]
+```
+
 
 ---
 
