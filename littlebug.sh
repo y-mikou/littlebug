@@ -33,7 +33,8 @@ if [ "${1}" = "1" ] ; then
   | sed -e 's/>/\&gt;/g' \
   | sed -e "s/'/\&quot;/g" \
   | sed -e 's/\"/\&#39;/g' \
-  | sed -e 's/――/―/g' >tmp
+  | sed -e 's/――/―/g' \
+  | sed -z 's/\r\n/\n/g' | sed -z 's/\r/\n/g' >tmp
 
   #特殊文字変換類置換ここまで##############################################################
   #########################################################################################
@@ -104,8 +105,7 @@ if [ "${1}" = "1" ] ; then
   ## 改行→改行タグ
   ## crlf→lf してから lf→<br class="ltlbg_br">+lfに
   ## 但し直前にブロック要素(章区切り、段落区切り、章タイトル、改ページ)がある場合は回避
-    sed -z 's/\r\n/\n/g' tmp \
-  | sed -z 's/\n/<br class="ltlbg_br">\n/g' \
+    sed -z 's/\n/<br class="ltlbg_br">\n/g' tmp \
   | sed -e 's/\(<section.*>\)<br class="ltlbg_br">/\1/g' \
   | sed -e 's/<\/section><\!--ltlbg_section--><br class="ltlbg_br">/<\/section><\!--ltlbg_section-->/g' \
   | sed -e 's/<\/h2><br class="ltlbg_br">/<\/h2>/g' \
