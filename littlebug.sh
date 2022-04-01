@@ -22,6 +22,7 @@ if [ "${1}" = "1" ] ; then
   | sed -e "s/'/\&quot;/g" \
   | sed -e 's/\"/\&#39;/g' \
   | sed -e 's/――/―/g' \
+  | sed -z 's/\r\n/\n/g' | sed -z 's/\r/\n/g' \
   | sed -e 's/\ /<span class="ltlbg_sSp"><\/span>/g' \
   | sed -e 's/\([！？♥♪☆\!\?]\+\)　\?/\1　/g' \
   | sed -e 's/　\([」）〟゛/n]\)/\1/g' \
@@ -50,8 +51,7 @@ if [ "${1}" = "1" ] ; then
   | sed -z 's/\n<\/section><\!--ltlbg_section-->/<\/p><\!--ltlbg_p-->\n<\/section><\!--ltlbg_section-->/g' \
   | sed -z 's/\n<\/section><\!--ltlbg_section-->/<\/p><\!--ltlbg_p_brctGrp-->\n<\/section><\!--ltlbg_section-->/g' \
   | sed -z 's/<\/h2>\n<\/p><\!--ltlbg_p-->/<\/h2>/g' \
-  | sed -e 's/\(<section.*>\)<\/p><\!--ltlbg_p-->/\1/g' \
-  | sed -z 's/\r\n/\n/g' \
+  | sed -e 's/\(<section.*>\)<\/ap><\!--ltlbg_p-->/\1/g' \
   | sed -z 's/\n/<br class="ltlbg_br">\n/g' \
   | sed -e 's/\(<section.*>\)<br class="ltlbg_br">/\1/g' \
   | sed -e 's/<\/section><\!--ltlbg_section--><br class="ltlbg_br">/<\/section><\!--ltlbg_section-->/g' \
