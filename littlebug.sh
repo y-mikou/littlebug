@@ -3,10 +3,16 @@ export lang=ja_jp.utf-8
 
 convMode=${1}  #1でtxt→html、2でhtml→txt、それ以外は今の所はエラー
 tgtFile=${2}   #引数で指定されたファイルを対象とする
+chrset=$(file -i ${tgtFile})
 
 if [ ! -e ${2} ]; then
   echo "💩 そんなファイルいないです"
   exit 1
+fi
+
+if [ "${chrset##*charset=}" = "unknown-8bit" ]; then
+  iconv -f SHIFT_JIS -t UTF-8 ${tgtFile} > tmp
+  cat tmp >${tgtFile}
 fi
 
 if [ "${1}" = "1" ] ; then
@@ -34,7 +40,7 @@ if [ "${1}" = "1" ] ; then
   | sed -e "s/'/\&quot;/g" \
   | sed -e 's/\"/\&#39;/g' \
   | sed -e 's/――/―/g' \
-  | sed -z 's/\r\n/\n/g' | sed -z 's/\r/\n/g' >tmp
+  | sed -z 's/\r\n/\n/g' |  sed -z 's/\r/\n/g' >tmp 
 
   #特殊文字変換類置換ここまで##############################################################
   #########################################################################################
