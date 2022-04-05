@@ -155,26 +155,22 @@ if [ "${1}" = "1" ] ; then
   ## <ruby class="ltlbg_emphasis" data-ruby="﹅">基底文字<rt>﹅</rt></ruby>
   ### 圏点用変換元文字列|変換先文字列を作成する
   cat tmp >emphasisInput
-  grep -E -o "《《[^》]*》》" emphasisInput | sed 's/\[/\\\\\[/g' | sed 's/\]/\\\\\]/g' >tgt
-  grep -E -o "《《[^》]*》》" emphasisInput | sed -e 's/.*/<ruby class=\\\\\"ltlbg_emphasis\\\\\" data-emphasis=\\\\\"/g' >1
-  grep -E -o "《《[^》]*》》" emphasisInput | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' | sed -e 's/$/\\\\\">/g' >2
-  grep -E -o "《《[^》]*》》" emphasisInput | sed -e 's/[《》]//g' | sed 's/\[/\\\\\[/g' | sed 's/\]/\\\\\]/g' >3
-  grep -E -o "《《[^》]*》》" emphasisInput | sed -e 's/.*/<rt>/g' >4
-  grep -E -o "《《[^》]*》》" emphasisInput | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' >5
-  grep -E -o "《《[^》]*》》" emphasisInput | sed -e 's/.*/<\\\\\/rt><\\\\\/ruby>/g' >6
-  paste 1 2 3 4 5 6 | sed 's/\t//g' >rep
-  paste -d \| tgt rep >replaceSeed
-  cat  emphasisInput >rslt
-  ### 変換元文字列|変換先文字列に従って順次圏点置換を行う
-  while read line
-  do
-      from="${line%%\|*}"
-      to="${line##*\|}"
-      str="sed -e 's/${from}/${to}/g' rslt"
-      eval ${str} >rslt2
-      cat rslt2 >rslt
-  done < ./replaceSeed
-  cat rslt >tmp
+  grep -E -o "《《[^》]*》》" emphasisInput >org
+  sed -e 's/[《》]//g' org >raw
+  sed -e 's/\[\-.\-\]/﹅/g' raw | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' >emphtmp
+  sed -e 's/^/\| sed -e '\''s\//g' org >tgt
+  paste -d , raw emphtmp \
+  | while read line || [ -n "${line}" ]; do \
+    echo -n '/'
+    echo ${line##*,} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_emphasis\\\" data-emphasis=\\\"/' | sed -e 's/$/\\\">/' >1
+    echo ${line%%,*} | grep -o . >2
+    echo ${line##*,} | grep -o . | sed -e 's/^/<rt>/' | sed -e 's/$/<\\\/rt><\\\/ruby>/' >3
+    paste 1 2 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
+    echo ''
+    done \
+  >rep
+  paste tgt rep | sed -e 's/\t//g' | sed -z 's/^/cat emphasisInput \\\n/' >tmp.sh
+  bash  tmp.sh >tmp
 
   ## {基底文字|ルビ}となっているものを<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
   ## ついでだから|基底文字《ルビ》も<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
@@ -183,18 +179,29 @@ if [ "${1}" = "1" ] ; then
   | sed -e 's/｜\([^《]\+\)《\([^》]\+\)》/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' >rubytmp
 
   ## <ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>になっているルビのdata-rubyを
-  ## ルビ文字数と基底文字数の関係に従いeven/long/shortに分岐させる
+  ## ルビ文字数と基底文字数の関係に従いmono/long/shortに分岐させる
   ### 置換元文字列を抽出し、ユニークにする(ルビは同じものが多数出現する)
-  cat rubytmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed 's/\[/\\\[/g' | sed 's/\]/\\\]/g' >tgt
-  cat rubytmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/.\+|//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >1
-  cat rubytmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | sed 's/\[l\[..\]r\]/■/g'  | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
-
-  ### 基底文字数,ルビ文字数 の一時ファイルを作成し、比較結果を出力する一時shを作成する
-  ### その実行結果に従ってパラメータ要素名に付与する文字列を格納し、各中間ファイルと結合して置換元|置換先のファイルを作成する
-  paste -d , 1 2 | sed 's/\([0-9]\+\)\,\([0-9]\+\)/if [ \1 -eq \2 ]; then echo '"'_even'"'; elif [ \1 -gt \2 ]; then echo '"'_long'"'; else echo '"'_short'"'; fi/g' >tmp.sh
+  ### 基底文字の文字数と、ルビの文字数を抽出
+  sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed 's/\[/\\\[/g' | sed 's/\]/\\\]/g' >tgt
+  sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/.\+|//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >1
+  sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | sed 's/\[l\[..\]r\]/■/g'  | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
+  ### 文字数の関係に従って付与する文字を出力する(該当箇所を置換する)。文字はシェルスクリプトになっている
+  paste -d , 1 2 \
+  | sed 's/\([0-9]\+\)\,\([0-9]\+\)/ \
+    i=$((\2 * 2)); \
+    if [ $(( ${i} - \1 )) -gt 0 ] \&\& [ $(( \2 - \1 )) -lt 0 ]; then \
+      echo '"'_center'"'; \
+    elif [ \1 -eq \2 ]; then \
+      echo '"'_mono'"'; \
+    elif [ $(( ${i} - \1 )) -lt 0 ] \|\| [ $(( \2 - \1 )) -lg 0 ]; then \
+      echo '"'_long'"'; \
+    else echo '"'_short'"'; \
+    fi/g' \
+    >tmp.sh
   bash tmp.sh >ins
-  cat tgt | sed 's/.\+/<ruby class="ltlbg_ruby" data-ruby/' >3
-  cat tgt | sed 's/<ruby class="ltlbg_ruby" data-ruby//' >4
+  
+  sed 's/.\+/<ruby class="ltlbg_ruby" data-ruby/' tgt >3
+  sed 's/<ruby class="ltlbg_ruby" data-ruby//' tgt >4
   paste 3 ins 4 | sed 's/\t//g' >rep
   paste -d \| tgt rep | sed 's/\([\"\/]\)/\\\\\1/g' >replaceSeed
   cat  rubytmp >rslt
@@ -210,14 +217,15 @@ if [ "${1}" = "1" ] ; then
   cat rslt >tmp
 
   cat tmp>monorubyInput
-  ## data-ruby_evenのルビタグを、モノルビに変換する
-  cat monorubyInput | grep -o '<ruby class="ltlbg_ruby" data-ruby_even="[^>]\+">[^<]\+<rt>[^<]\+<\/rt><\/ruby>' | uniq >org
-  cat org | sed -e 's/\//\\\//g' | sed -e 's/\"/\\\"/g' | sed -e 's/^/\| sed -e '\''s\//g' >tgt
-  cat org | sed 's/<ruby class="ltlbg_ruby" data-ruby_even="//g' | sed 's/<rt>.\+$//g' | sed 's/\">/,/g' | uniq >raw
-  cat raw \
+  ## data-ruby_monoのルビタグを、モノルビに変換する
+  ## 前段でdata-ruby_monoを付与したものを対象に、モノルビ置換する一時shを作成して実行する。
+  ## 後続には当該shの出力をつなげる。モノルビにはshortが指定される
+  grep -o '<ruby class="ltlbg_ruby" data-ruby_mono="[^>]\+">[^<]\+<rt>[^<]\+<\/rt><\/ruby>' monorubyInput | uniq >org
+  sed -e 's/\//\\\//g' org | sed -e 's/\"/\\\"/g' | sed -e 's/^/\| sed -e '\''s\//g' >tgt
+  sed 's/<ruby class="ltlbg_ruby" data-ruby_mono="//g' org | sed 's/<rt>.\+$//g' | sed 's/\">/,/g' | uniq \
   | while read line || [ -n "${line}" ]; do \
     echo -n '/'
-    echo ${line##*,} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_ruby\\\" data-ruby_even=\\\"/' | sed -e 's/$/\\\">/' >1
+    echo ${line##*,} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_ruby\\\" data-ruby_short=\\\"/' | sed -e 's/$/\\\">/' >1
     echo ${line%%,*} | grep -o . >2
     echo ${line##*,} | grep -o . | sed -e 's/^/<rt>/' | sed -e 's/$/<\\\/rt><\\\/ruby>/' >3
     paste 1 2 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
@@ -386,6 +394,7 @@ eval $rmstrBase'emphasisInput'
 eval $rmstrBase'rubyInput'
 eval $rmstrBase'rubytmp'
 eval $rmstrBase'monorubyInput'
+eval $rmstrBase'emphtmp'
 eval $rmstrBase'replaceSeed'
 eval $rmstrBase'rslt'
 eval $rmstrBase'rslt2'
