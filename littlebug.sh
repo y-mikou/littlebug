@@ -179,7 +179,7 @@ if [ "${1}" = "1" ] ; then
   | sed -e 's/｜\([^《]\+\)《\([^》]\+\)》/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' >rubytmp
 
   ## <ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>になっているルビのdata-rubyを
-  ## ルビ文字数と基底文字数の関係に従いmono/long/shortに分岐させる
+  ## ルビ文字数と基底文字数の関係に従いmono/center/long/shortに分岐させる
   ### 置換元文字列を抽出し、ユニークにする(ルビは同じものが多数出現する)
   ### 基底文字の文字数と、ルビの文字数を抽出
   sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed 's/\[/\\\[/g' | sed 's/\]/\\\]/g' >tgt
@@ -225,7 +225,7 @@ if [ "${1}" = "1" ] ; then
   sed 's/<ruby class="ltlbg_ruby" data-ruby_mono="//g' org | sed 's/<rt>.\+$//g' | sed 's/\">/,/g' | uniq \
   | while read line || [ -n "${line}" ]; do \
     echo -n '/'
-    echo ${line##*,} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_ruby\\\" data-ruby_short=\\\"/' | sed -e 's/$/\\\">/' >1
+    echo ${line##*,} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_ruby\\\" data-ruby_center=\\\"/' | sed -e 's/$/\\\">/' >1
     echo ${line%%,*} | grep -o . >2
     echo ${line##*,} | grep -o . | sed -e 's/^/<rt>/' | sed -e 's/$/<\\\/rt><\\\/ruby>/' >3
     paste 1 2 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
