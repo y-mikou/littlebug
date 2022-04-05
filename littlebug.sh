@@ -140,16 +140,12 @@ if [ "${1}" = "1" ] ; then
   | sed -e 's/^（\(.\+\)）/<span class="ltlbg_think">\1<\/span><\!--ltlbg_think-->/g' \
   | sed -e 's/^〝\(.\+\)〟/<span class="ltlbg_wquote">\1<\/span><\!--ltlbg_wquote-->/g' >tmp2
 
-  ## {基底文字|ルビ}となっているものを<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
-  ## ついでだから|基底文字《ルビ》も<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
   ## [newpage]を、<br class="ltlbg_newpage">に
   ## ―を<br class="ltlbg_wSize">―</span>に
   ## **太字**を<br class="ltlbg_wSize">―</span>に
   ## ／＼もしくは〱を、<span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>に
   ## ---を<span class="ltlbg_hr">へ。
-    sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' tmp2 \
-  | sed -e 's/｜\([^《]\+\)《\([^》]\+\)》/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' \
-  | sed -e '/\[newpage\]/c <div class="ltlbg_newpage"></div>' \
+    sed -e '/\[newpage\]/c <div class="ltlbg_newpage"></div>' tmp2\
   | sed -e 's/―/<span class="ltlbg_wSize">―<\/span>/g' \
   | sed -e 's/\*\*\([^\*]\+\)\*\*/<span class="ltlbg_bold">\1<\/span>/g' \
   | sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/g' \
@@ -158,52 +154,78 @@ if [ "${1}" = "1" ] ; then
   ##《《基底文字》》となっているものを基底文字と同文字数の﹅をふるルビへ置換する
   ## <ruby class="ltlbg_emphasis" data-ruby="﹅">基底文字<rt>﹅</rt></ruby>
   ### 圏点用変換元文字列|変換先文字列を作成する
-  grep -E -o "《《[^》]*》》" tmp | sed 's/\[/\\\\\[/g' | sed 's/\]/\\\\\]/g' >tgt
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/.*/<ruby class=\\\\\"ltlbg_emphasis\\\\\" data-emphasis=\\\\\"/g' >1
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' | sed -e 's/$/\\\\\">/g' >2
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed 's/\[/\\\\\[/g' | sed 's/\]/\\\\\]/g' >3
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/.*/<rt>/g' >4
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' >5
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/.*/<\\\\\/rt><\\\\\/ruby>/g' >6
+  cat tmp >emphasisInput
+  grep -E -o "《《[^》]*》》" emphasisInput | sed 's/\[/\\\\\[/g' | sed 's/\]/\\\\\]/g' >tgt
+  grep -E -o "《《[^》]*》》" emphasisInput | sed -e 's/.*/<ruby class=\\\\\"ltlbg_emphasis\\\\\" data-emphasis=\\\\\"/g' >1
+  grep -E -o "《《[^》]*》》" emphasisInput | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' | sed -e 's/$/\\\\\">/g' >2
+  grep -E -o "《《[^》]*》》" emphasisInput | sed -e 's/[《》]//g' | sed 's/\[/\\\\\[/g' | sed 's/\]/\\\\\]/g' >3
+  grep -E -o "《《[^》]*》》" emphasisInput | sed -e 's/.*/<rt>/g' >4
+  grep -E -o "《《[^》]*》》" emphasisInput | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' >5
+  grep -E -o "《《[^》]*》》" emphasisInput | sed -e 's/.*/<\\\\\/rt><\\\\\/ruby>/g' >6
   paste 1 2 3 4 5 6 | sed 's/\t//g' >rep
   paste -d \| tgt rep >replaceSeed
-  cat  tmp >rslt.html
+  cat  emphasisInput >rslt
   ### 変換元文字列|変換先文字列に従って順次圏点置換を行う
   while read line
   do
       from="${line%%\|*}"
       to="${line##*\|}"
-      str="sed -e 's/${from}/${to}/g' rslt.html"
-      eval ${str} >rslt2.html
-      cat rslt2.html >rslt.html
+      str="sed -e 's/${from}/${to}/g' rslt"
+      eval ${str} >rslt2
+      cat rslt2 >rslt
   done < ./replaceSeed
-  cat rslt.html >tmp
+  cat rslt >tmp
+
+  ## {基底文字|ルビ}となっているものを<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
+  ## ついでだから|基底文字《ルビ》も<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
+  cat tmp >rubyInput
+    sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' rubyInput \
+  | sed -e 's/｜\([^《]\+\)《\([^》]\+\)》/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' >rubytmp
 
   ## <ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>になっているルビのdata-rubyを
   ## ルビ文字数と基底文字数の関係に従いeven/long/shortに分岐させる
   ### 置換元文字列を抽出し、ユニークにする(ルビは同じものが多数出現する)
-  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed 's/\[/\\\[/g' | sed 's/\]/\\\]/g' >tgt
-  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/.\+|//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >1
-  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | sed 's/\[l\[..\]r\]/■/g'  | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
+  cat rubytmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed 's/\[/\\\[/g' | sed 's/\]/\\\]/g' >tgt
+  cat rubytmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/.\+|//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >1
+  cat rubytmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | sed 's/\[l\[..\]r\]/■/g'  | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
 
   ### 基底文字数,ルビ文字数 の一時ファイルを作成し、比較結果を出力する一時shを作成する
   ### その実行結果に従ってパラメータ要素名に付与する文字列を格納し、各中間ファイルと結合して置換元|置換先のファイルを作成する
-  paste -d , 1 2 | sed 's/\([0-9]\+\)\,\([0-9]\+\)/if [ \1 -eq \2 ]; then echo '"'_even'"'; elif [ \1 -gt \2 ]; then echo '"'_long'"'; else echo '"'_short'"'; fi/g' >cmp.sh
-  bash cmp.sh >ins
+  paste -d , 1 2 | sed 's/\([0-9]\+\)\,\([0-9]\+\)/if [ \1 -eq \2 ]; then echo '"'_even'"'; elif [ \1 -gt \2 ]; then echo '"'_long'"'; else echo '"'_short'"'; fi/g' >tmp.sh
+  bash tmp.sh >ins
   cat tgt | sed 's/.\+/<ruby class="ltlbg_ruby" data-ruby/' >3
   cat tgt | sed 's/<ruby class="ltlbg_ruby" data-ruby//' >4
   paste 3 ins 4 | sed 's/\t//g' >rep
   paste -d \| tgt rep | sed 's/\([\"\/]\)/\\\\\1/g' >replaceSeed
+  cat  rubytmp >rslt
   ### 変換元文字列|変換先文字列に従って順次パラメータ名置換を行う
   while read line
   do
       from="${line%%\|*}"
       to="${line##*\|}"
-      str="sed -e 's/${from}/${to}/g' rslt.html"
-      eval ${str} >rslt2.html
-      cat rslt2.html >rslt.html
+      str="sed -e 's/${from}/${to}/g' rslt"
+      eval ${str} >rslt2
+      cat rslt2 >rslt
   done < ./replaceSeed
-  cat rslt.html >tmp
+  cat rslt >tmp
+
+  cat tmp>monorubyInput
+  ## data-ruby_evenのルビタグを、モノルビに変換する
+  cat monorubyInput | grep -o '<ruby class="ltlbg_ruby" data-ruby_even="[^>]\+">[^<]\+<rt>[^<]\+<\/rt><\/ruby>' | uniq >org
+  cat org | sed -e 's/\//\\\//g' | sed -e 's/\"/\\\"/g' | sed -e 's/^/\| sed -e '\''s\//g' >tgt
+  cat org | sed 's/<ruby class="ltlbg_ruby" data-ruby_even="//g' | sed 's/<rt>.\+$//g' | sed 's/\">/,/g' | uniq >raw
+  cat raw \
+  | while read line || [ -n "${line}" ]; do \
+    echo -n '/'
+    echo ${line##*,} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_ruby\\\" data-ruby_even=\\\"/' | sed -e 's/$/\\\">/' >1
+    echo ${line%%,*} | grep -o . >2
+    echo ${line##*,} | grep -o . | sed -e 's/^/<rt>/' | sed -e 's/$/<\\\/rt><\\\/ruby>/' >3
+    paste 1 2 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
+    echo ''
+    done \
+  >rep
+  paste tgt rep | sed -e 's/\t//g' | sed -z 's/^/cat monorubyInput \\\n/' >tmp.sh
+  bash  tmp.sh >tmp
 
   ## [-字-]を<span class="ltlbg_wdfix">へ。特定の文字についてはltlbg_wSpを挿入されている可能性がるのでそれも考慮した置換を行う
   ## ^と^に囲まれた1〜3文字の範囲を、<br class="ltlbg_tcyM">縦中横</span>に。[^字^]は食わないように
@@ -357,11 +379,18 @@ eval $rmstrBase'6'
 eval $rmstrBase'rep'
 eval $rmstrBase'tgt'
 eval $rmstrBase'ins'
+eval $rmstrBase'raw'
+eval $rmstrBase'org'
+eval $rmstrBase'r'
+eval $rmstrBase'emphasisInput'
+eval $rmstrBase'rubyInput'
+eval $rmstrBase'rubytmp'
+eval $rmstrBase'monorubyInput'
 eval $rmstrBase'replaceSeed'
-eval $rmstrBase'rslt.html'
-eval $rmstrBase'rslt2.html'
+eval $rmstrBase'rslt'
+eval $rmstrBase'rslt2'
 eval $rmstrBase'tmp'
 eval $rmstrBase'tmp2'
-eval $rmstrBase'cmp.sh'
+eval $rmstrBase'tmp.sh'
 
 exit 0

@@ -222,8 +222,7 @@ span.ltlbg_wquote::after{
     transform: scale(0.5, 0.5);
 
     margin-top: 0.25rem;
-    letter-spacing: 1rem;
-}
+    letter-spacing: 1rem;}
 
 span.ltlbg_forceGouji1{
     transform-origin: center right;
