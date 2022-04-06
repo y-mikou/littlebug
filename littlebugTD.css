@@ -129,26 +129,6 @@ span.ltlbg_wquote::after{
     content: "〟";
 }
 
-/*特殊ルビ_同じ文字数*/
-[data-ruby_even] {
-    position: relative;
-}
-[data-ruby_even]::before {
-    content: attr(data-ruby_even);
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 70%;
-    white-space: nowrap;
-    text-indent: 0;
-
-    transform-origin: left top;
-    transform: scale(0.5, 0.5);
-
-    margin-top: 0.25rem;
-    letter-spacing: 1rem;
-}
-
 /*特殊ルビ_ルビが長い*/
 [data-ruby_long] {
     position: relative;
@@ -163,6 +143,26 @@ span.ltlbg_wquote::after{
     text-indent: 0;
 
     transform-origin: left top;
+    transform: scale(0.5, 0.5);
+
+}
+
+/*特殊ルビ_ルビが少し短い*/
+[data-ruby_center] {
+    position: relative;
+}
+[data-ruby_center]::before {
+    content: attr(data-ruby_center);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 70%;
+    white-space: nowrap;
+    text-indent: 0;
+
+    display: flex;
+    justify-content: center;
+    transform-origin: left center;
     transform: scale(0.5, 0.5);
 }
 
@@ -186,7 +186,6 @@ span.ltlbg_wquote::after{
 
     margin-top: 0.5rem;
     letter-spacing: 1rem;
-
 }
 
 /*特殊傍点*/
@@ -202,23 +201,10 @@ span.ltlbg_wquote::after{
     white-space: nowrap;
     text-indent: 0;
 
-    transform-origin: left top;
+    display: flex;
+    justify-content: center;
+    transform-origin: left center;
     transform: scale(0.5, 0.5);
-
-    margin-top: 0.25rem;
-    letter-spacing: 1rem;
-}
-
-span.ltlbg_forceGouji1{
-    transform-origin: center right;
-    transform: scale(0.6,1 )  translate(-0.7rem,0);
-    display: inline-block;    
-}
-span.ltlbg_forceGouji2{
-    transform-origin: center left;
-    transform: scale(0.8,1 ) translate(-1rem,0);
-    display: inline-block;
-    margin-right: -1rem;
 }
 
 span.ltlbg_forceGouji1{

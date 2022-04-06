@@ -3,10 +3,16 @@ export lang=ja_jp.utf-8
 
 convMode=${1}  #1でtxt→html、2でhtml→txt、それ以外は今の所はエラー
 tgtFile=${2}   #引数で指定されたファイルを対象とする
+chrset=$(file -i ${tgtFile})
 
 if [ ! -e ${2} ]; then
   echo "💩 そんなファイルいないです"
   exit 1
+fi
+
+if [ "${chrset##*charset=}" = "unknown-8bit" ]; then
+  iconv -f SHIFT_JIS -t UTF-8 ${tgtFile} > tmp
+  cat tmp >${tgtFile}
 fi
 
 if [ "${1}" = "1" ] ; then
@@ -16,20 +22,53 @@ if [ "${1}" = "1" ] ; then
   destFile=${tgtFile/".txt"/"_tagged.html"} #出力ファイルの指定する
   touch ${destFile}                        #出力先ファイルを生成
 
-    sed -e 's/&/\&amp;/g' ${tgtFile} \
-  | sed -e 's/</\&lt;/g' \
-  | sed -e 's/>/\&gt;/g' \
-  | sed -e "s/'/\&quot;/g" \
-  | sed -e 's/\"/\&#39;/g' \
+  ##########################################################################################
+  # 先行変換。特殊文字など、htmlタグに含まれることが多いものを先に置換する
+  ##########################################################################################
+  ##########################################################################################
+  # 特殊文字など、htmlタグに含まれることが多いものを先に置換する
+  ##########################################################################################
+  ## 「&」(半角)を「＆ａｍｐ」へ変換
+  ## 「<」(半角)を「&ｌｔ」へ変換(最初から&lt;と書かれているものを考慮)
+  ## 「>」(半角)を「&ｇｔ」へ変換(最初から&gt;と書かれているものを考慮)
+  ## 「'」(半角)を「&ｑｕｏｔ」へ変換(最初から&quot;と書かれているものを考慮)
+  ## 「"」(半角)を「＆＃３９」へ変換(最初から&#39;と書かれているものを考慮)
+  ## ※全角であること、；をつけないは以降の変換に引っかからないように。
+  ## 最後に復旧する。
+  ## ――を―へ変換
+  ## 改行コードをlfに統一
+    sed -e 's/&amp;/＆ａｍｐ/g' ${tgtFile} \
+  | sed -e 's/[\&\|＆ａｍｐ]lt;/＆ｌｔ/g' \
+  | sed -e 's/[\&\|＆ａｍｐ]gt;/＆ｇｔ/g' \
+  | sed -e 's/[\&\|＆ａｍｐ]#39;/＆＃３９/g' \
+  | sed -e 's/[\&\|＆ａｍｐ]#quot;/＆ｑｕｏｔ/g' \
   | sed -e 's/――/―/g' \
-  | sed -z 's/\r\n/\n/g' | sed -z 's/\r/\n/g' \
-  | sed -e 's/\ /<span class="ltlbg_sSp"><\/span>/g' \
+  | sed -z 's/\r\n/\n/g' | sed -z 's/\r/\n/g' >tmp 
+
+  #特殊文字変換類置換ここまで##############################################################
+  #########################################################################################
+  # 文章中に登場するスペース類はすべてタグへ置換する。
+  # 以降登場するスペース類はhtml上の区切り文字としてのスペースのみで、置換対象ではない
+  # 以降でスペースを置換したい場合は、空白クラスのタグを置換すること
+  #########################################################################################
+
+  ## 半角SPを<span class="ltlbg_sSp">へ。
+  ## 特定の記号(の連続)のあとに全角SPを挿入する。直後に閉じ括弧類、改行、「゛」がある場合は回避する
+  ## 行頭以外の全角SPを<span class="ltlbg_wSp">へ。
+    sed -e 's/\ /<span class="ltlbg_sSp"><\/span>/g' tmp \
   | sed -e 's/\([！？♥♪☆\!\?]\+\)　\?/\1　/g' \
   | sed -e 's/　\([」）〟゛/n]\)/\1/g' \
-  | sed -e 's/\(.\)　/\1<span class="ltlbg_wSp"><\/span>/g' \
-  | sed -z 's/\n*\(\[chapter[^]]\+\]\)\n\+/\n\1\n/g' \
-  | sed -z '1,/^\n*/s/^\n*//' \
-  | sed -e 's/\([^a-zA-Z0-9\<\>]\)\([a-zA-Z0-9]\{2\}\)\([^a-zA-Z0-9/</>]\)/\1<span class="ltlbg_tcyA">\2<\/span>\3/g' \
+  | sed -e 's/\(.\)　/\1<span class="ltlbg_wSp"><\/span>/g' >tmp2
+
+  # 章区切り前後の空行を削除する
+  ## 事前に、作品冒頭に空行がある場合は削除する
+    sed -z 's/\n*\(\[chapter[^]]\+\]\)\n\+/\n\1\n/g' tmp2 \
+  | sed -z '1,/^\n*/s/^\n*//' >tmp
+  ## 文章中スペース類置換ここまで###########################################################
+
+
+  ## 英数字2文字と、！？!?の重なりを<span class="ltlbg_tcyA">の変換対象にする
+    LANG=C sed -e 's/\([^a-zA-Z0-9\<\>]\)\([a-zA-Z0-9]\{2\}\)\([^a-zA-Z0-9/</>]\)/\1<span class="ltlbg_tcyA">\2<\/span>\3/g' tmp \
   | sed -e 's/\([^!！?？\&#;]\)\(!!\|！！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcyA">!!<\/span>\3/g' \
   | sed -e 's/\([^!！?？\&#;]\)\(??\|？？\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcyA">??<\/span>\3/g' \
   | sed -e 's/\([^!！?？\&#;]\)\(!?\|！？\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcyA">!?<\/span>\3/g' \
@@ -51,8 +90,12 @@ if [ "${1}" = "1" ] ; then
   | sed -z 's/\n<\/section><\!--ltlbg_section-->/<\/p><\!--ltlbg_p-->\n<\/section><\!--ltlbg_section-->/g' \
   | sed -z 's/\n<\/section><\!--ltlbg_section-->/<\/p><\!--ltlbg_p_brctGrp-->\n<\/section><\!--ltlbg_section-->/g' \
   | sed -z 's/<\/h2>\n<\/p><\!--ltlbg_p-->/<\/h2>/g' \
-  | sed -e 's/\(<section.*>\)<\/ap><\!--ltlbg_p-->/\1/g' \
-  | sed -z 's/\n/<br class="ltlbg_br">\n/g' \
+  | sed -e 's/\(<section.*>\)<\/p><\!--ltlbg_p-->/\1/g' >tmp
+
+  ## 改行→改行タグ
+  ## crlf→lf してから lf→<br class="ltlbg_br">+lfに
+  ## 但し直前にブロック要素(章区切り、段落区切り、章タイトル、改ページ)がある場合は回避
+    sed -z 's/\n/<br class="ltlbg_br">\n/g' tmp \
   | sed -e 's/\(<section.*>\)<br class="ltlbg_br">/\1/g' \
   | sed -e 's/<\/section><\!--ltlbg_section--><br class="ltlbg_br">/<\/section><\!--ltlbg_section-->/g' \
   | sed -e 's/<\/h2><br class="ltlbg_br">/<\/h2>/g' \
@@ -65,61 +108,142 @@ if [ "${1}" = "1" ] ; then
   | sed -z 's/<br class="ltlbg_blankline">\n<p class="ltlbg_p_brctGrp">/<p class="ltlbg_p_brctGrp">/g' \
   | sed -e 's/^「\(.\+\)」/<span class="ltlbg_talk">\1<\/span><\!--ltlbg_talk-->/g' \
   | sed -e 's/^（\(.\+\)）/<span class="ltlbg_think">\1<\/span><\!--ltlbg_think-->/g' \
-  | sed -e 's/^〝\(.\+\)〟/<span class="ltlbg_wquote">\1<\/span><\!--ltlbg_wquote-->/g' \
-  | sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' \
-  | sed -e 's/｜\([^《]\+\)《\([^》]\+\)》/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' \
-  | sed -e '/\[newpage\]/c <div class="ltlbg_newpage"></div>' \
+  | sed -e 's/^〝\(.\+\)〟/<span class="ltlbg_wquote">\1<\/span><\!--ltlbg_wquote-->/g' >tmp2
+
+  ## [newpage]を、<br class="ltlbg_newpage">に
+  ## ―を<br class="ltlbg_wSize">―</span>に
+  ## **太字**を<br class="ltlbg_wSize">―</span>に
+  ## ／＼もしくは〱を、<span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>に
+  ## ---を<span class="ltlbg_hr">へ。
+    sed -e '/\[newpage\]/c <div class="ltlbg_newpage"></div>' tmp2\
   | sed -e 's/―/<span class="ltlbg_wSize">―<\/span>/g' \
   | sed -e 's/\*\*\([^\*]\+\)\*\*/<span class="ltlbg_bold">\1<\/span>/g' \
   | sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/g' \
   | sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' >tmp
-  grep -E -o "《《[^》]*》》" tmp | sed 's/\[/\\\\\[/g' | sed 's/\]/\\\\\]/g' >tgt
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/.*/<ruby class=\\\\\"ltlbg_emphasis\\\\\" data-emphasis=\\\\\"/g' >1
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' | sed -e 's/$/\\\\\">/g' >2
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed 's/\[/\\\\\[/g' | sed 's/\]/\\\\\]/g' >3
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/.*/<rt>/g' >4
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/[《》]//g' | sed -e 's/\[\-.\-\]/﹅/g' | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' >5
-  grep -E -o "《《[^》]*》》" tmp | sed -e 's/.*/<\\\\\/rt><\\\\\/ruby>/g' >6
-  paste 1 2 3 4 5 6 | sed 's/\t//g' >rep
-  paste -d \| tgt rep >replaceSeed
-  cat  tmp >rslt.html
-  while read line
-  do
-      from="${line%%\|*}"
-      to="${line##*\|}"
-      str="sed -e 's/${from}/${to}/g' rslt.html"
-      eval ${str} >rslt2.html
-      cat rslt2.html >rslt.html
-  done < ./replaceSeed
-  cat rslt.html >tmp
-  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed 's/\[/\\\[/g' | sed 's/\]/\\\]/g' >tgt
-  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/.\+|//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >1
-  cat tmp | sed -e 's/<\/ruby>/<\/ruby>\n/g' | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | sed 's/\[l\[..\]r\]/■/g'  | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
-  paste -d , 1 2 | sed 's/\([0-9]\+\)\,\([0-9]\+\)/if [ \1 -eq \2 ]; then echo '"'_even'"'; elif [ \1 -gt \2 ]; then echo '"'_long'"'; else echo '"'_short'"'; fi/g' >cmp.sh
-  bash cmp.sh >ins
-  cat tgt | sed 's/.\+/<ruby class="ltlbg_ruby" data-ruby/' >3
-  cat tgt | sed 's/<ruby class="ltlbg_ruby" data-ruby//' >4
+
+  ##《《基底文字》》となっているものを基底文字と同文字数の﹅をふるルビへ置換する
+  ## <ruby class="ltlbg_emphasis" data-ruby="﹅">基底文字<rt>﹅</rt></ruby>
+  ### 圏点用変換元文字列|変換先文字列を作成する
+  cat tmp >emphasisInput
+  grep -E -o "《《[^》]*》》" emphasisInput >org
+  sed -e 's/[《》]//g' org >raw
+  sed -e 's/\[\-.\-\]/﹅/g' raw | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' >emphtmp
+  sed -e 's/^/\| sed -e '\''s\//g' org >tgt
+  paste -d , raw emphtmp \
+  | while read line || [ -n "${line}" ]; do \
+    echo -n '/'
+    echo ${line##*,} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_emphasis\\\" data-emphasis=\\\"/' | sed -e 's/$/\\\">/' >1
+    echo ${line%%,*} | grep -o . >2
+    echo ${line##*,} | grep -o . | sed -e 's/^/<rt>/' | sed -e 's/$/<\\\/rt><\\\/ruby>/' >3
+    paste 1 2 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
+    echo ''
+    done \
+  >rep
+  paste tgt rep | sed -e 's/\t//g' | sed -z 's/^/cat emphasisInput \\\n/' >tmp.sh
+  bash  tmp.sh >tmp
+
+  ## {基底文字|ルビ}となっているものを<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
+  ## ついでだから|基底文字《ルビ》も<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
+  cat tmp >rubyInput
+    sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' rubyInput \
+  | sed -e 's/｜\([^《]\+\)《\([^》]\+\)》/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' >rubytmp
+
+  ## <ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>になっているルビのdata-rubyを
+  ## ルビ文字数と基底文字数の関係に従いmono/center/long/shortに分岐させる
+  ### 置換元文字列を抽出し、ユニークにする(ルビは同じものが多数出現する)
+  ### 基底文字の文字数と、ルビの文字数を抽出
+  sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed 's/\[/\\\[/g' | sed 's/\]/\\\]/g' >tgt
+  sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/.\+|//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >1
+  sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | sed 's/\[l\[..\]r\]/■/g'  | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
+  ### 文字数の関係に従って付与する文字を出力する(該当箇所を置換する)。文字はシェルスクリプトになっている
+  paste -d , 1 2 \
+  | sed 's/\([0-9]\+\)\,\([0-9]\+\)/ \
+    i=$((\2 * 2)); \
+    if [ $(( ${i} - \1 )) -gt 0 ] \&\& [ $(( \2 - \1 )) -lt 0 ]; then \
+      echo '"'_center'"'; \
+    elif [ \1 -eq \2 ]; then \
+      echo '"'_mono'"'; \
+    elif [ $(( ${i} - \1 )) -lt 0 ] \|\| [ $(( \2 - \1 )) -lg 0 ]; then \
+      echo '"'_long'"'; \
+    else echo '"'_short'"'; \
+    fi/g' \
+    >tmp.sh
+  bash tmp.sh >ins
+  
+  sed 's/.\+/<ruby class="ltlbg_ruby" data-ruby/' tgt >3
+  sed 's/<ruby class="ltlbg_ruby" data-ruby//' tgt >4
   paste 3 ins 4 | sed 's/\t//g' >rep
   paste -d \| tgt rep | sed 's/\([\"\/]\)/\\\\\1/g' >replaceSeed
+  cat  rubytmp >rslt
+  ### 変換元文字列|変換先文字列に従って順次パラメータ名置換を行う
   while read line
   do
       from="${line%%\|*}"
       to="${line##*\|}"
-      str="sed -e 's/${from}/${to}/g' rslt.html"
-      eval ${str} >rslt2.html
-      cat rslt2.html >rslt.html
+      str="sed -e 's/${from}/${to}/g' rslt"
+      eval ${str} >rslt2
+      cat rslt2 >rslt
   done < ./replaceSeed
-  cat rslt.html >tmp
-    sed -e 's/\[\-\(.\)\(<span class="ltlbg_wSp"><\/span>\)\?\-\]/<span class="ltlbg_wdfix">\1<\/span>\2/g' tmp \
-  | sed -e 's/\([^[]\)\^\([^\^]\{1,3\}\)\^\([^]]\)/\1<span class="ltlbg_tcyM">\2<\/span>\3/g' \
-  | sed -e 's/\[\(\^\|<span class="ltlbg_tcy.">\)\(.\)\(\^\|<\/span>\)\]/<span class="ltlbg_rotate">\2<\/span>/g' \
-  | sed -e 's/\[l\[\(.\)\(.\)\]r\]/<span class="ltlbg_forceGouji1">\1<\/span><span class="ltlbg_forceGouji2">\2<\/span>/g' \
-  | sed -e 's/\(；\|\;\)/<span class="ltlbg_semicolon">；<\/span>/g' \
-  | sed -e 's/\(：\|\:\)/<span class="ltlbg_colon">：<\/span>/g' \
-  | sed -e 's/\([！？♥♪☆]\)<span class="ltlbg_wSp"><\/span>゛/<span class="ltlbg_dakuten">\1<\/span><span class="ltlbg_wSp"><\/span>/g' \
-  | sed -e 's/\(.\)゛/<span class="ltlbg_dakuten">\1<\/span>/g' \
-  | sed -e 's/id="\(.*\)<span class="ltlbg_tcy[^>]\+">\(.*\)<\/span>\(.*\)>/id="\1\2\3">/g' \
-  | sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css"\>\n/' \
+  cat rslt >tmp
+
+  cat tmp>monorubyInput
+  ## data-ruby_monoのルビタグを、モノルビに変換する
+  ## 前段でdata-ruby_monoを付与したものを対象に、モノルビ置換する一時shを作成して実行する。
+  ## 後続には当該shの出力をつなげる。モノルビにはshortが指定される
+  grep -o '<ruby class="ltlbg_ruby" data-ruby_mono="[^>]\+">[^<]\+<rt>[^<]\+<\/rt><\/ruby>' monorubyInput | uniq >org
+  sed -e 's/\//\\\//g' org | sed -e 's/\"/\\\"/g' | sed -e 's/^/\| sed -e '\''s\//g' >tgt
+  sed 's/<ruby class="ltlbg_ruby" data-ruby_mono="//g' org | sed 's/<rt>.\+$//g' | sed 's/\">/,/g' | uniq \
+  | while read line || [ -n "${line}" ]; do \
+    echo -n '/'
+    echo ${line##*,} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_ruby\\\" data-ruby_center=\\\"/' | sed -e 's/$/\\\">/' >1
+    echo ${line%%,*} | grep -o . >2
+    echo ${line##*,} | grep -o . | sed -e 's/^/<rt>/' | sed -e 's/$/<\\\/rt><\\\/ruby>/' >3
+    paste 1 2 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
+    echo ''
+    done \
+  >rep
+  paste tgt rep | sed -e 's/\t//g' | sed -z 's/^/cat monorubyInput \\\n/' >tmp.sh
+  bash  tmp.sh >tmp
+
+  ## [-字-]を<span class="ltlbg_wdfix">へ。特定の文字についてはltlbg_wSpを挿入されている可能性がるのでそれも考慮した置換を行う
+  ## ^と^に囲まれた1〜3文字の範囲を、<br class="ltlbg_tcyM">縦中横</span>に。[^字^]は食わないように
+  ## [^字^]を<span class="ltlbg_rotate">へ。^字^でtcyになっている可能性があるので考慮する。
+  ## [l[偏旁]r]を<span class="ltlbg_forcedGouji1/2">へ
+  sed -e 's/\[\-\(.\)\(<span class="ltlbg_wSp"><\/span>\)\?\-\]/<span class="ltlbg_wdfix">\1<\/span>\2/g' tmp \
+| sed -e 's/\([^[]\)\^\([^\^]\{1,3\}\)\^\([^]]\)/\1<span class="ltlbg_tcyM">\2<\/span>\3/g' \
+| sed -e 's/\[\(\^\|<span class="ltlbg_tcy.">\)\(.\)\(\^\|<\/span>\)\]/<span class="ltlbg_rotate">\2<\/span>/g' \
+| sed -e 's/\[l\[\(.\)\(.\)\]r\]/<span class="ltlbg_forceGouji1">\1<\/span><span class="ltlbg_forceGouji2">\2<\/span>/g' >tmp2
+
+  ## 「;」「；」に<span ltlbg_semicolon>を適用する
+  ## 「:」「：」に<span ltlbg_colon>を適用する
+    sed -e 's/\(；\|\;\)/<span class="ltlbg_semicolon">；<\/span>/g' tmp2 \
+  | sed -e 's/\(：\|\:\)/<span class="ltlbg_colon">：<\/span>/g' >tmp
+
+  ## 特殊文字の復旧。但し、末尾の；にセミコロンspanになっている
+    sed -e 's/＆ａｍｐ/\&amp;/g' tmp \
+  | sed -e 's/＆ｌｔ/\&lt;/g' \
+  | sed -e 's/＆ｇｔ/\&gt;/g' \
+  | sed -e 's/＆＃３９/\&#39;/g' \
+  | sed -e 's/＆ｑｕｏｔ/\&quot;/g' >tmp2
+
+
+  ## 「゛」を、<span class="ltlbg_dakuten">に変換する
+  ## 後ろスペース挿入されているケースを考慮する
+    sed -e 's/\([！？♥♪☆]\)<span class="ltlbg_wSp"><\/span>゛/<span class="ltlbg_dakuten">\1<\/span><span class="ltlbg_wSp"><\/span>/g'  tmp2 \
+  | sed -e 's/\(.\)゛/<span class="ltlbg_dakuten">\1<\/span>/g' >tmp
+
+
+  ##########################################################################################
+  # 退避的復旧。置換対象文字に抵触するが、特例的に置換したくない箇所のみ復旧する
+  ##########################################################################################
+  ## chapter:XXXX には英数字が使えるのでtcyタグの当て込みがある可能性がある。それを削除する
+  ## ここでの復旧は想定外に壊れて当て込まれているものが対象なので、除去置換はほぼ個別対応
+    sed -e 's/id="\(.*\)<span class="ltlbg_tcy[^>]\+">\(.*\)<\/span>\(.*\)>/id="\1\2\3">/g' tmp >tmp2 
+
+  ##########################################################################################
+  # デバッグ用。先頭にlittlebugU.css、littlebugTD.cssを読み込むよう追記する
+  ##########################################################################################
+    sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css"\>\n/' tmp2 \
   | sed -z 's/^/\<\!--\<link rel=\"stylesheet\" href=\"\.\.\/littlebugRL\.css"\>-->\n/' \
   | sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugU\.css"\>\n/' >${destFile}
   
@@ -154,16 +278,29 @@ elif [ "${1}" = "2" ] ; then
   | sed -e 's/<span class="ltlbg_dakuten">\(.\)<\/span>/\1゛/g' \
   | sed -e 's/<span class="ltlbg_tcyM">\([^<]\{1,3\}\)<\/span>/^\1^/g' \
   | sed -e 's/<span class="ltlbg_wSize">\(.\)<\/span>/\1\1/g' \
-  | sed -e 's/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/／＼/g' \
-  | sed -e 's/<ruby class="ltlbg_ruby" data-ruby_[^=]\+="\([^"]\+\)">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/{\2｜\1}/g' \
-  | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis="[^"]\+">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/《《\1》》/g' \
-  | sed -e 's/<h2 class="ltlbg_sectionName">\([^<]\+\)<\/h2>/◆\1/g' \
-  | sed -e 's/\&amp;/&/g' \
-  | sed -e 's/\&lt;/</g' \
-  | sed -e 's/\&gt;/>/g' \
-  | sed -e "s/\&quot;/'/g" \
-  | sed -e 's/\&#39;/\"/g' \
-  | sed -z 's/^\n//g' \
+  | sed -e 's/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/／＼/g' >tmp2
+
+  ## <span class="ltlbg_ruby" data-ruby_XXX="XXX"></span>を復旧
+    sed -e 's/<ruby class="ltlbg_ruby" data-ruby_[^=]\+="\([^"]\+\)">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/{\2｜\1}/g' tmp2 \
+  | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis="[^"]\+">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/《《\1》》/g' >tmp
+
+  ## <h2 class="ltlbg_sectionName">\1<\/h2>を行頭◆へ
+  sed -e 's/<h2 class="ltlbg_sectionName">\([^<]\+\)<\/h2>/◆\1/g' tmp >tmp2
+
+  ## 「&lt;」  を「<」(半角)へ変換
+  ## 「&gt;」  を「>」(半角)へ変換
+  ## 「&amp;」 を「&」(半角)へ変換
+  ## 「&quot;」を「'」(半角)へ変換
+  ## 「&#39;」 を「"」(半角)へ変換
+    sed -e 's/&amp;\/&/g' tmp2 \
+  | sed -e 's/&lt;\/</g' \
+  | sed -e 's/&gt;\/>/g' \
+  | sed -e "s/&quot;\/'/g" \
+  | sed -e 's/&#39;\/\"/g' >tmp
+
+  ## ここまで生じているハード空行は副産物なので削除
+  ## その上で、<br class="ltlbg_br">、<br class="ltlbg_blankline">を削除
+    sed -z 's/^\n//g' tmp \
   | sed -e 's/<br class="ltlbg_br">//g' \
   | sed -e 's/^<br class="ltlbg_blankline">//g' \
   | sed -e 's/<span class="ltlbg_wSp"><\/span>/　/g' \
@@ -190,11 +327,19 @@ eval $rmstrBase'6'
 eval $rmstrBase'rep'
 eval $rmstrBase'tgt'
 eval $rmstrBase'ins'
+eval $rmstrBase'raw'
+eval $rmstrBase'org'
+eval $rmstrBase'r'
+eval $rmstrBase'emphasisInput'
+eval $rmstrBase'rubyInput'
+eval $rmstrBase'rubytmp'
+eval $rmstrBase'monorubyInput'
+eval $rmstrBase'emphtmp'
 eval $rmstrBase'replaceSeed'
-eval $rmstrBase'rslt.html'
-eval $rmstrBase'rslt2.html'
+eval $rmstrBase'rslt'
+eval $rmstrBase'rslt2'
 eval $rmstrBase'tmp'
 eval $rmstrBase'tmp2'
-eval $rmstrBase'cmp.sh'
+eval $rmstrBase'tmp.sh'
 
 exit 0
