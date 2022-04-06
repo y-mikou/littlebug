@@ -193,7 +193,7 @@ if [ "${1}" = "1" ] ; then
       echo '"'_center'"'; \
     elif [ \1 -eq \2 ]; then \
       echo '"'_mono'"'; \
-    elif [ $(( ${i} - \1 )) -lt 0 ] \|\| [ $(( \2 - \1 )) -lg 0 ]; then \
+    elif [ $(( ${i} - \1 )) -lt 0 ] \|\| [ $(( \2 - \1 )) -lt 0 ]; then \
       echo '"'_long'"'; \
     else echo '"'_short'"'; \
     fi/g' \
@@ -225,9 +225,9 @@ if [ "${1}" = "1" ] ; then
   sed 's/<ruby class="ltlbg_ruby" data-ruby_mono="//g' org | sed 's/<rt>.\+$//g' | sed 's/\">/,/g' | uniq \
   | while read line || [ -n "${line}" ]; do \
     echo -n '/'
-    echo ${line##*,} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_ruby\\\" data-ruby_center=\\\"/' | sed -e 's/$/\\\">/' >1
-    echo ${line%%,*} | grep -o . >2
-    echo ${line##*,} | grep -o . | sed -e 's/^/<rt>/' | sed -e 's/$/<\\\/rt><\\\/ruby>/' >3
+    echo ${line%%,*} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_ruby\\\" data-ruby_center=\\\"/' | sed -e 's/$/\\\">/' >1
+    echo ${line##*,} | grep -o . >2
+    echo ${line%%,*} | grep -o . | sed -e 's/^/<rt>/' | sed -e 's/$/<\\\/rt><\\\/ruby>/' >3
     paste 1 2 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
     echo ''
     done \
