@@ -36,9 +36,10 @@
 | 後ろ空白         | ！や？               | `<span class="ltlbg_wSP">`                   | 記号の直後に強制全角空白
 | 半角英数記号     | ！や？、英数の重なり | `<span class="ltlbg_tcyA">`                  | 2字のみ。自動半角縦中横化
 | エロ濁点         | `゛`                 | `<span class="ltlbg_dakten">`                | 縦書時のみ前字の右上に移動
-| ルビ             | `{母字｜ルビ}`or     | `<ruby class="ltlbg_ruby" data-ruby_even="ルビ">`        | 母字数=ルビ字数はモノルビ風
+| ルビ             | `{母字｜ルビ}`or     | `<ruby class="ltlbg_ruby" data-ruby_center="ルビ">`        | 母字数=ルビ字数はモノルビ化
 |                  | `｜母字《ルビ》`     | `<ruby class="ltlbg_ruby" data-ruby_long="ルビ">`        | 長いルビは始点合わせ
-|                  |                      | `<ruby class="ltlbg_ruby" data-ruby_short="ルビ">`       | 短いルビは中央寄せ
+|                  |                      | `<ruby class="ltlbg_ruby" data-ruby_center="ルビ">`       | 少し短いルビは中央寄せ
+|                  |                      | `<ruby class="ltlbg_ruby" data-ruby_short="ルビ">`       | 短いルビは1マス空けして中央寄せ
 | 傍点             | `《《傍点》》`       | `<ruby class="ltlbg_emphasis" data-emphasis="﹅">`       | ルビ化する。黒ゴマ
 | 太字             | `**太字**`           | `<span class="ltlbg_bold">`                              | font-weight:bold
 | 縦中横           | `^XX^`               | `<span class="ltlbg_tcyM">`                              | 1〜3字のみ
@@ -48,6 +49,7 @@
 | 回転対応         | `[^字^]`             | `<span class="ltlbg_rotate">`                            | 全半角1字。1em幅確保、回転
 | 字幅対応         | `[-字-]`             | `<span class="ltlbg_wdfix">`                             | 全半角1字。1em幅確保
 | 強制合字         | `[l[字]r]`           | `<span class="ltlbg_forceGouji">`                        | 左右のやつ限定「忄実」みたいの
+
 
 
 # 仕様
