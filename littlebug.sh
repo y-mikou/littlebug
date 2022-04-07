@@ -158,7 +158,7 @@ if [ "${1}" = "1" ] ; then
   grep -E -o "《《[^》]*》》" emphasisInput >org
 
   ## 中間ファイルorg(《《[^》]*》》で抽出したもの)の長さが0の場合、処理しない
-  if [ ! -s ${org} ] ; then 
+  if [ -s org ] ; then 
 
     sed -e 's/[《》]//g' org >raw
     sed -e 's/\[\-.\-\]/﹅/g' raw | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' >emphtmp
@@ -190,7 +190,7 @@ if [ "${1}" = "1" ] ; then
   sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed 's/\[/\\\[/g' | sed 's/\]/\\\]/g' >tgt
 
   ## 中間ファイルtgt(ルビタグで抽出した結果)の長さが0の場合、処理しない
-  if [ ! -s ${tgt} ] ; then
+  if [ -s tgt ] ; then
 
     sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/.\+|//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >1
     sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | sed 's/\[l\[..\]r\]/■/g'  | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
@@ -232,7 +232,7 @@ if [ "${1}" = "1" ] ; then
     grep -o '<ruby class="ltlbg_ruby" data-ruby_mono="[^>]\+">[^<]\+<rt>[^<]\+<\/rt><\/ruby>' monorubyInput | uniq >org
 
     ## 中間ファイルorg(モノルビタグで抽出した結果)の長さが0のとき、処理しない
-    if [ ! -s ${org} ] ; then
+    if [ -s org ] ; then
 
       sed -e 's/\//\\\//g' org | sed -e 's/\"/\\\"/g' | sed -e 's/^/\| sed -e '\''s\//g' >tgt
       sed 's/<ruby class="ltlbg_ruby" data-ruby_mono="//g' org | sed 's/<rt>.\+$//g' | sed 's/\">/,/g' | uniq \
