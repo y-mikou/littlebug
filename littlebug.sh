@@ -358,25 +358,29 @@ elif [ "${1}" = "2" ] ; then
   ## 置換機能を持った中間シェルスクリプトを作成し、実行する。
   cat tmp2 >monorubyInput
   grep -o '\(<ruby class=\"ltlbg_ruby\" data-ruby_center=\"[^]]\">[^<]<rt>[^<]<\/rt><\/ruby>\)\+' monorubyInput | uniq >tgt
+  
+  ## モノルビタグで抽出した中間ファイル(tgt)の長さが0のとき、実施しない
+  if [ ! -s tgt ] ; then
+    cat tgt \
+    | while read line || [ -n "${line}" ]; do \
+        echo ${line} \
+        | sed -e 's/<ruby class="ltlbg_ruby" data-ruby_center=".">//g' \
+        | sed -e 's/<rt>/,/g' \
+        | sed -e 's/<\/rt><\/ruby>/\t/g' \
+        | sed -e 's/,[^\t]\+\t//g' ; \
+  done >1
   cat tgt \
   | while read line || [ -n "${line}" ]; do \
       echo ${line} \
       | sed -e 's/<ruby class="ltlbg_ruby" data-ruby_center=".">//g' \
       | sed -e 's/<rt>/,/g' \
       | sed -e 's/<\/rt><\/ruby>/\t/g' \
-      | sed -e 's/,[^\t]\+\t//g' ; \
- done >1
- cat tgt \
- | while read line || [ -n "${line}" ]; do \
-     echo ${line} \
-     | sed -e 's/<ruby class="ltlbg_ruby" data-ruby_center=".">//g' \
-     | sed -e 's/<rt>/,/g' \
-     | sed -e 's/<\/rt><\/ruby>/\t/g' \
-     | sed -e 's/\t\?.,//g' ; \
- done >2
-  paste 1 2 | sed -e 's/^/{/' | sed -e 's/\t/｜/' | sed -e 's/$/}/' | sed -e 's/\t//g' >rep
-  paste tgt rep | sed -e 's/\"/\\\"/g' | sed -e 's/\//\\\//g' | sed -e 's/^/\| sed -e '\''s\//g' | sed -e 's/\t/\//' | sed -e 's/$/\/g'\'' \\/g' | sed -z 's/^/cat monorubyInput \\\n/g' >tmp.sh
-  bash tmp.sh >tmp2
+      | sed -e 's/\t\?.,//g' ; \
+  done >2
+    paste 1 2 | sed -e 's/^/{/' | sed -e 's/\t/｜/' | sed -e 's/$/}/' | sed -e 's/\t//g' >rep
+    paste tgt rep | sed -e 's/\"/\\\"/g' | sed -e 's/\//\\\//g' | sed -e 's/^/\| sed -e '\''s\//g' | sed -e 's/\t/\//' | sed -e 's/$/\/g'\'' \\/g' | sed -z 's/^/cat monorubyInput \\\n/g' >tmp.sh
+    bash tmp.sh >tmp2
+fi
 
   ## モノルビ以外の<span class="ltlbg_ruby" data-ruby_XXX="XXX"></span>を復旧
     sed -e 's/<ruby class="ltlbg_ruby" data-ruby_[^=]\+="\([^"]\+\)">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/{\2｜\1}/g' tmp2 >tmp 
@@ -387,17 +391,21 @@ elif [ "${1}" = "2" ] ; then
   ## 置換機能を持った中間シェルスクリプトを作成し、実行する。
   cat tmp >emphasisInput
   grep -o '\(<ruby class=\"ltlbg_emphasis\" data-emphasis=\"[^]]\">[^<]<rt>[^<]<\/rt><\/ruby>\)\+' emphasisInput | uniq >tgt
-  cat tgt \
-  | while read line || [ -n "${line}" ]; do \
-      echo ${line} \
-      | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis=".">//g' \
-      | sed -e 's/<rt>/,/g' \
-      | sed -e 's/<\/rt><\/ruby>/\t/g' \
-      | sed -e 's/,[^\t]\+\t//g' \
-      | sed -e 's/\(.\+\)/《《\1》》/g' ; \
-  done >rep
-  paste tgt rep | sed -e 's/\"/\\\"/g' | sed -e 's/\//\\\//g' | sed -e 's/^/\| sed -e '\''s\//g' | sed -e 's/\t/\//' | sed -e 's/$/\/g'\'' \\/g' | sed -z 's/^/cat emphasisInput \\\n/g' >tmp.sh
-  bash tmp.sh >tmp
+
+  ## 圏点タグで抽出した中間ファイル(tgt)の長さが0のとき、実施しない
+  if [ ! -s tgt ] ; then
+    cat tgt \
+    | while read line || [ -n "${line}" ]; do \
+        echo ${line} \
+        | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis=".">//g' \
+        | sed -e 's/<rt>/,/g' \
+        | sed -e 's/<\/rt><\/ruby>/\t/g' \
+        | sed -e 's/,[^\t]\+\t//g' \
+        | sed -e 's/\(.\+\)/《《\1》》/g' ; \
+    done >rep
+    paste tgt rep | sed -e 's/\"/\\\"/g' | sed -e 's/\//\\\//g' | sed -e 's/^/\| sed -e '\''s\//g' | sed -e 's/\t/\//' | sed -e 's/$/\/g'\'' \\/g' | sed -z 's/^/cat emphasisInput \\\n/g' >tmp.sh
+    bash tmp.sh >tmp
+  fi
 
   ## <h2 class="ltlbg_sectionName">\1<\/h2>を行頭◆へ
   sed -e 's/<h2 class="ltlbg_sectionName">\([^<]\+\)<\/h2>/◆\1/g' tmp >tmp2
