@@ -207,25 +207,33 @@ elif [ "${1}" = "2" ] ; then
     sed -e 's/<\/section><!--ltlbg_section-->//g' tmp \
   | sed -e 's/<section class="ltlbg_section">/[chapter]/g' \
   | sed -e 's/<section class="ltlbg_section" id="\([^"]\+\)">/[chapter:\1]/g' \
-  | sed -e 's/\[chapter:\]/\[chapter\]/g'  \
-  | sed -e 's/<\/p><!--ltlbg_p-->//g' \
+  | sed -e 's/\[chapter:\]/\[chapter\]/g' >tmp2
+
+  ## 閉じpタグを消し、pタグを全角空白へ置換する
+  ## 全角空白直後の改行は削除する(元のpタグが直後に改行しているため)
+    sed -e 's/<\/p><!--ltlbg_p-->//g' tmp2 \
   | sed -e 's/<p class="ltlbg_p">/<span class="ltlbg_wSp"><\/span>/g' \
-  | sed -z 's/<span class="ltlbg_wSp"><\/span>\n<span class="ltlbg_talk">/\n<span class="ltlbg_talk">/g' \
-  | sed -e 's/<\/span><!--ltlbg_talk-->/」/g' \
+  | sed -z 's/<span class="ltlbg_wSp"><\/span>\n<span class="ltlbg_talk">/\n<span class="ltlbg_talk">/g' >tmp
+
+  ## 括弧類を復旧
+    sed -e 's/<\/span><!--ltlbg_talk-->/」/g' tmp \
   | sed -e 's/<\/span><!--ltlbg_think-->/）/g' \
   | sed -e 's/<\/span><!--ltlbg_wquote-->/〟/g' \
   | sed -e 's/<span class="ltlbg_talk">/「/g' \
   | sed -e 's/<span class="ltlbg_think">/（/g' \
-  | sed -e 's/<span class="ltlbg_wquote">/〝/g' \
-  | sed -e 's/<span class="ltlbg_tcyA">\([^<]\{2\}\)<\/span>/\1/g' \
-  | sed -e 's/<span class="ltlbg_wdfix">\([^<]\)<\/span>/\1/g' \
-  | sed -e 's/<span class="ltlbg_semicolon">；<\/span>/；/g' \
-  | sed -e 's/<span class="ltlbg_colon">：<\/span>/：/g' >tmp
-  ## 括弧類段落記号を除去
-    sed -e 's/<p class="ltlbg_p_brctGrp">//g' tmp \
-  | sed -e 's/<\/p><\!--ltlbg_p_brctGrp-->//g' >tmp2
+  | sed -e 's/<span class="ltlbg_wquote">/〝/g' >tmp2
 
-  cat tmp2 >tmp
+  ## 縦中横と横幅修正を除去
+    sed -e 's/<span class="ltlbg_tcyA">\([^<]\{2\}\)<\/span>/\1/g' tmp2 \
+  | sed -e 's/<span class="ltlbg_wdfix">\([^<]\)<\/span>/\1/g' >tmp
+
+  ## コロンとセミコロンを復旧
+    sed -e 's/<span class="ltlbg_semicolon">；<\/span>/；/g' tmp \
+  | sed -e 's/<span class="ltlbg_colon">：<\/span>/：/g' >tmp2
+
+  ## 括弧類の擬似段落記号を除去
+    sed -e 's/<p class="ltlbg_p_brctGrp">//g' tmp2 \
+  | sed -e 's/<\/p><\!--ltlbg_p_brctGrp-->//g' >tmp 
 
   ## <span class="ltlbg_dakuten">を「゛」に復旧
   ## <span class="ltlbg_tcyM">XX</span>を復旧
@@ -244,7 +252,7 @@ elif [ "${1}" = "2" ] ; then
   grep -o '\(<ruby class=\"ltlbg_ruby\" data-ruby_center=\"[^]]\">[^<]<rt>[^<]<\/rt><\/ruby>\)\+' monorubyInput | uniq >tgt
   
   ## モノルビタグで抽出した中間ファイル(tgt)の長さが0のとき、実施しない
-  if [ ! -s tgt ] ; then
+  if [ -s tgt ] ; then
     cat tgt \
     | while read line || [ -n "${line}" ]; do \
         echo ${line} \
@@ -252,22 +260,22 @@ elif [ "${1}" = "2" ] ; then
         | sed -e 's/<rt>/,/g' \
         | sed -e 's/<\/rt><\/ruby>/\t/g' \
         | sed -e 's/,[^\t]\+\t//g' ; \
-  done >1
-  cat tgt \
-  | while read line || [ -n "${line}" ]; do \
-      echo ${line} \
-      | sed -e 's/<ruby class="ltlbg_ruby" data-ruby_center=".">//g' \
-      | sed -e 's/<rt>/,/g' \
-      | sed -e 's/<\/rt><\/ruby>/\t/g' \
-      | sed -e 's/\t\?.,//g' ; \
-  done >2
+    done >1
+    cat tgt \
+    | while read line || [ -n "${line}" ]; do \
+        echo ${line} \
+        | sed -e 's/<ruby class="ltlbg_ruby" data-ruby_center=".">//g' \
+        | sed -e 's/<rt>/,/g' \
+        | sed -e 's/<\/rt><\/ruby>/\t/g' \
+        | sed -e 's/\t\?.,//g' ; \
+    done >2
     paste 1 2 | sed -e 's/^/{/' | sed -e 's/\t/｜/' | sed -e 's/$/}/' | sed -e 's/\t//g' >rep
     paste tgt rep | sed -e 's/\"/\\\"/g' | sed -e 's/\//\\\//g' | sed -e 's/^/\| sed -e '\''s\//g' | sed -e 's/\t/\//' | sed -e 's/$/\/g'\'' \\/g' | sed -z 's/^/cat monorubyInput \\\n/g' >tmp.sh
     bash tmp.sh >tmp2
-fi
+  fi
 
   ## モノルビ以外の<span class="ltlbg_ruby" data-ruby_XXX="XXX"></span>を復旧
-    sed -e 's/<ruby class="ltlbg_ruby" data-ruby_[^=]\+="\([^"]\+\)">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/{\2｜\1}/g' tmp2 >tmp 
+  sed -e 's/<ruby class="ltlbg_ruby" data-ruby_[^=]\+="\([^"]\+\)">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/{\2｜\1}/g' tmp2 >tmp
 
   ## 圏点タグを《《基底文字》》へ復旧する
   ## <ruby class=\"ltlbg_emphasis\" data-ruby_emphasis=\"[^]]\">〜で抽出したものを置換元とする。
@@ -277,7 +285,7 @@ fi
   grep -o '\(<ruby class=\"ltlbg_emphasis\" data-emphasis=\"[^]]\">[^<]<rt>[^<]<\/rt><\/ruby>\)\+' emphasisInput | uniq >tgt
 
   ## 圏点タグで抽出した中間ファイル(tgt)の長さが0のとき、実施しない
-  if [ ! -s tgt ] ; then
+  if [ -s tgt ] ; then
     cat tgt \
     | while read line || [ -n "${line}" ]; do \
         echo ${line} \
