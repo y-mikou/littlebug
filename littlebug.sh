@@ -21,7 +21,6 @@ if [ "${1}" = "1" ] ; then
 
   destFile=${tgtFile/".txt"/"_tagged.html"} #出力ファイルの指定する
   touch ${destFile}                        #出力先ファイルを生成
-
     sed -e 's/&amp;/＆ａｍｐ/g' ${tgtFile} \
   | sed -e 's/[\&\|＆ａｍｐ]lt;/＆ｌｔ/g' \
   | sed -e 's/[\&\|＆ａｍｐ]gt;/＆ｇｔ/g' \
@@ -36,7 +35,7 @@ if [ "${1}" = "1" ] ; then
   | sed -z 's/\n*\(\[chapter[^]]\+\]\)\n\+/\n\1\n/g' \
   | sed -z '1,/^\n*/s/^\n*//' \
   | LANG=C sed -e 's/\([^a-zA-Z0-9\<\>]\)\([a-zA-Z0-9]\{2\}\)\([^a-zA-Z0-9/</>]\)/\1<span class="ltlbg_tcyA">\2<\/span>\3/g' \
-  | LANG=ja_jp.utf-8 sed -e 's/\([^!！?？\&#;]\)\(!!\|！！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcyA">!!<\/span>\3/g' \
+  | sed -e 's/\([^!！?？\&#;]\)\(!!\|！！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcyA">!!<\/span>\3/g' \
   | sed -e 's/\([^!！?？\&#;]\)\(??\|？？\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcyA">??<\/span>\3/g' \
   | sed -e 's/\([^!！?？\&#;]\)\(!?\|！？\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcyA">!?<\/span>\3/g' \
   | sed -e 's/\([^!！?？\&#;]\)\(?!\|？！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcyA">?!<\/span>\3/g' \
@@ -79,74 +78,76 @@ if [ "${1}" = "1" ] ; then
   | sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' >tmp
   cat tmp >emphasisInput
   grep -E -o "《《[^》]*》》" emphasisInput >org
-  sed -e 's/[《》]//g' org >raw
-  sed -e 's/\[\-.\-\]/﹅/g' raw | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' >emphtmp
-  sed -e 's/^/\| sed -e '\''s\//g' org >tgt
-  paste -d , raw emphtmp \
-  | while read line || [ -n "${line}" ]; do \
-    echo -n '/'
-    echo ${line##*,} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_emphasis\\\" data-emphasis=\\\"/' | sed -e 's/$/\\\">/' >1
-    echo ${line%%,*} | grep -o . >2
-    echo ${line##*,} | grep -o . | sed -e 's/^/<rt>/' | sed -e 's/$/<\\\/rt><\\\/ruby>/' >3
-    paste 1 2 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
-    echo ''
-    done \
-  >rep
-  paste tgt rep | sed -e 's/\t//g' | sed -z 's/^/cat emphasisInput \\\n/' >tmp.sh
-  bash  tmp.sh >tmp
-
+  if [ -s org ] ; then 
+    sed -e 's/[《》]//g' org >raw
+    sed -e 's/\[\-.\-\]/﹅/g' raw | sed -e 's/\[\^.\^\]/﹅/g' | sed -e 's/\[l\[..\]r\]/﹅/g' | sed -e 's/\^.\{1,3\}\^/﹅/g' | sed -e 's/./﹅/g' >emphtmp
+    sed -e 's/^/\| sed -e '\''s\//g' org >tgt
+    paste -d , raw emphtmp \
+    | while read line || [ -n "${line}" ]; do \
+      echo -n '/'
+      echo ${line##*,} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_emphasis\\\" data-emphasis=\\\"/' | sed -e 's/$/\\\">/' >1
+      echo ${line%%,*} | grep -o . >2
+      echo ${line##*,} | grep -o . | sed -e 's/^/<rt>/' | sed -e 's/$/<\\\/rt><\\\/ruby>/' >3
+      paste 1 2 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
+      echo ''
+      done \
+    >rep
+    paste tgt rep | sed -e 's/\t//g' | sed -z 's/^/cat emphasisInput \\\n/' >tmp.sh
+    bash  tmp.sh >tmp
+  fi
   cat tmp >rubyInput
     sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' rubyInput \
   | sed -e 's/｜\([^《]\+\)《\([^》]\+\)》/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' >rubytmp
-
   sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed 's/\[/\\\[/g' | sed 's/\]/\\\]/g' >tgt
-  sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/.\+|//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >1
-  sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | sed 's/\[l\[..\]r\]/■/g'  | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
-
-  paste -d , 1 2 \
-  | sed 's/\([0-9]\+\)\,\([0-9]\+\)/ \
-    i=$((\2 * 2)); \
-    if [ $(( ${i} - \1 )) -gt 0 ] \&\& [ $(( \2 - \1 )) -lt 0 ]; then \
-      echo '"'_center'"'; \
-    elif [ \1 -eq \2 ]; then \
-      echo '"'_mono'"'; \
-    elif [ $(( ${i} - \1 )) -lt 0 ] \|\| [ $(( \2 - \1 )) -lg 0 ]; then \
-      echo '"'_long'"'; \
-    else echo '"'_short'"'; \
-    fi/g' \
-    >tmp.sh
-  bash tmp.sh >ins
-  
-  sed 's/.\+/<ruby class="ltlbg_ruby" data-ruby/' tgt >3
-  sed 's/<ruby class="ltlbg_ruby" data-ruby//' tgt >4
-  paste 3 ins 4 | sed 's/\t//g' >rep
-  paste -d \| tgt rep | sed 's/\([\"\/]\)/\\\\\1/g' >replaceSeed
-  cat  rubytmp >rslt
-  while read line
-  do
-      from="${line%%\|*}"
-      to="${line##*\|}"
-      str="sed -e 's/${from}/${to}/g' rslt"
-      eval ${str} >rslt2
-      cat rslt2 >rslt
-  done < ./replaceSeed
-  cat rslt >tmp
-
-  cat tmp>monorubyInput
-  grep -o '<ruby class="ltlbg_ruby" data-ruby_mono="[^>]\+">[^<]\+<rt>[^<]\+<\/rt><\/ruby>' monorubyInput | uniq >org
-  sed -e 's/\//\\\//g' org | sed -e 's/\"/\\\"/g' | sed -e 's/^/\| sed -e '\''s\//g' >tgt
-  sed 's/<ruby class="ltlbg_ruby" data-ruby_mono="//g' org | sed 's/<rt>.\+$//g' | sed 's/\">/,/g' | uniq \
-  | while read line || [ -n "${line}" ]; do \
-    echo -n '/'
-    echo ${line##*,} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_ruby\\\" data-ruby_center=\\\"/' | sed -e 's/$/\\\">/' >1
-    echo ${line%%,*} | grep -o . >2
-    echo ${line##*,} | grep -o . | sed -e 's/^/<rt>/' | sed -e 's/$/<\\\/rt><\\\/ruby>/' >3
-    paste 1 2 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
-    echo ''
-    done \
-  >rep
-  paste tgt rep | sed -e 's/\t//g' | sed -z 's/^/cat monorubyInput \\\n/' >tmp.sh
-  bash  tmp.sh >tmp
+  if [ -s tgt ] ; then
+    sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/.\+|//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >1
+    sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | sed 's/\[l\[..\]r\]/■/g'  | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
+    paste -d , 1 2 \
+    | sed 's/\([0-9]\+\)\,\([0-9]\+\)/ \
+      i=$((\2 * 2)); \
+      if [ $(( ${i} - \1 )) -gt 0 ] \&\& [ $(( \2 - \1 )) -lt 0 ]; then \
+        echo '"'_center'"'; \
+      elif [ \1 -eq \2 ]; then \
+        echo '"'_mono'"'; \
+      elif [ $(( ${i} - \1 )) -lt 0 ] \|\| [ $(( \2 - \1 )) -lt 0 ]; then \
+        echo '"'_long'"'; \
+      else echo '"'_short'"'; \
+      fi/g' \
+      >tmp.sh
+    bash tmp.sh >ins
+    
+    sed 's/.\+/<ruby class="ltlbg_ruby" data-ruby/' tgt >3
+    sed 's/<ruby class="ltlbg_ruby" data-ruby//' tgt >4
+    paste 3 ins 4 | sed 's/\t//g' >rep
+    paste -d \| tgt rep | sed 's/\([\"\/]\)/\\\\\1/g' >replaceSeed
+    cat  rubytmp >rslt
+    while read line
+    do
+        from="${line%%\|*}"
+        to="${line##*\|}"
+        str="sed -e 's/${from}/${to}/g' rslt"
+        eval ${str} >rslt2
+        cat rslt2 >rslt
+    done < ./replaceSeed
+    cat rslt >tmp
+    cat tmp>monorubyInput
+    grep -o '<ruby class="ltlbg_ruby" data-ruby_mono="[^>]\+">[^<]\+<rt>[^<]\+<\/rt><\/ruby>' monorubyInput | uniq >org
+   if [ -s org ] ; then
+      sed -e 's/\//\\\//g' org | sed -e 's/\"/\\\"/g' | sed -e 's/^/\| sed -e '\''s\//g' >tgt
+      sed 's/<ruby class="ltlbg_ruby" data-ruby_mono="//g' org | sed 's/<rt>.\+$//g' | sed 's/\">/,/g' | uniq \
+      | while read line || [ -n "${line}" ]; do \
+        echo -n '/'
+        echo ${line%%,*} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_ruby\\\" data-ruby_center=\\\"/' | sed -e 's/$/\\\">/' >1
+        echo ${line##*,} | grep -o . >2
+        echo ${line%%,*} | grep -o . | sed -e 's/^/<rt>/' | sed -e 's/$/<\\\/rt><\\\/ruby>/' >3
+        paste 1 2 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
+        echo ''
+        done \
+      >rep
+      paste tgt rep | sed -e 's/\t//g' | sed -z 's/^/cat monorubyInput \\\n/' >tmp.sh
+      bash  tmp.sh >tmp
+    fi
+  fi
 
     sed -e 's/\[\-\(.\)\(<span class="ltlbg_wSp"><\/span>\)\?\-\]/<span class="ltlbg_wdfix">\1<\/span>\2/g' tmp \
   | sed -e 's/\([^[]\)\^\([^\^]\{1,3\}\)\^\([^]]\)/\1<span class="ltlbg_tcyM">\2<\/span>\3/g' \
@@ -165,20 +166,18 @@ if [ "${1}" = "1" ] ; then
   | sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css"\>\n/' \
   | sed -z 's/^/\<\!--\<link rel=\"stylesheet\" href=\"\.\.\/littlebugRL\.css"\>-->\n/' \
   | sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugU\.css"\>\n/' >${destFile}
-  
   echo "✨ "${destFile}"を出力しました[html化]"
-
 elif [ "${1}" = "2" ] ; then
 
   ## html→txt ############################################################################################
 
   destFile=${tgtFile/".html"/"_removed.txt"} #出力ファイルの指定する
   touch ${destFile}                          #出力先ファイルを生成
-
     sed -z 's/<link rel=\"stylesheet\" href=\".\+littlebug.\+css\">//' ${tgtFile} \
   | sed -e 's/<\/section><!--ltlbg_section-->//g' \
+  | sed -e 's/<section class="ltlbg_section">/[chapter]/g' \
   | sed -e 's/<section class="ltlbg_section" id="\([^"]\+\)">/[chapter:\1]/g' \
-  | sed -e 's/\[chapter:\]/\[chapter\]/g'  \
+  | sed -e 's/\[chapter:\]/\[chapter\]/g' \
   | sed -e 's/<\/p><!--ltlbg_p-->//g' \
   | sed -e 's/<p class="ltlbg_p">/<span class="ltlbg_wSp"><\/span>/g' \
   | sed -z 's/<span class="ltlbg_wSp"><\/span>\n<span class="ltlbg_talk">/\n<span class="ltlbg_talk">/g' \
@@ -197,31 +196,63 @@ elif [ "${1}" = "2" ] ; then
   | sed -e 's/<span class="ltlbg_dakuten">\(.\)<\/span>/\1゛/g' \
   | sed -e 's/<span class="ltlbg_tcyM">\([^<]\{1,3\}\)<\/span>/^\1^/g' \
   | sed -e 's/<span class="ltlbg_wSize">\(.\)<\/span>/\1\1/g' \
-  | sed -e 's/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/／＼/g' \
-  | sed -e 's/<ruby class="ltlbg_ruby" data-ruby_[^=]\+="\([^"]\+\)">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/{\2｜\1}/g' \
-  | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis="[^"]\+">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/《《\1》》/g' \
-  | sed -e 's/<h2 class="ltlbg_sectionName">\([^<]\+\)<\/h2>/◆\1/g' \
-  | sed -e 's/&amp;\/&/g' \
-  | sed -e 's/&lt;\/</g' \
-  | sed -e 's/&gt;\/>/g' \
-  | sed -e "s/&quot;\/'/g" \
-  | sed -e 's/&#39;\/\"/g' \
-  | sed -z 's/^\n//g' tmp \
+  | sed -e 's/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/／＼/g' >tmp2
+
+  cat tmp2 >monorubyInput
+  grep -o '\(<ruby class=\"ltlbg_ruby\" data-ruby_center=\"[^]]\">[^<]<rt>[^<]<\/rt><\/ruby>\)\+' monorubyInput | uniq >tgt
+  if [ -s tgt ] ; then
+    cat tgt \
+    | while read line || [ -n "${line}" ]; do \
+        echo ${line} \
+        | sed -e 's/<ruby class="ltlbg_ruby" data-ruby_center=".">//g' \
+        | sed -e 's/<rt>/,/g' \
+        | sed -e 's/<\/rt><\/ruby>/\t/g' \
+        | sed -e 's/,[^\t]\+\t//g' ; \
+    done >1
+    cat tgt \
+    | while read line || [ -n "${line}" ]; do \
+        echo ${line} \
+        | sed -e 's/<ruby class="ltlbg_ruby" data-ruby_center=".">//g' \
+        | sed -e 's/<rt>/,/g' \
+        | sed -e 's/<\/rt><\/ruby>/\t/g' \
+        | sed -e 's/\t\?.,//g' ; \
+    done >2
+    paste 1 2 | sed -e 's/^/{/' | sed -e 's/\t/｜/' | sed -e 's/$/}/' | sed -e 's/\t//g' >rep
+    paste tgt rep | sed -e 's/\"/\\\"/g' | sed -e 's/\//\\\//g' | sed -e 's/^/\| sed -e '\''s\//g' | sed -e 's/\t/\//' | sed -e 's/$/\/g'\'' \\/g' | sed -z 's/^/cat monorubyInput \\\n/g' >tmp.sh
+    bash tmp.sh >tmp2
+  fi
+  sed -e 's/<ruby class="ltlbg_ruby" data-ruby_[^=]\+="\([^"]\+\)">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/{\2｜\1}/g' tmp2 >tmp
+  cat tmp >emphasisInput
+  grep -o '\(<ruby class=\"ltlbg_emphasis\" data-emphasis=\"[^]]\">[^<]<rt>[^<]<\/rt><\/ruby>\)\+' emphasisInput | uniq >tgt
+  if [ -s tgt ] ; then
+    cat tgt \
+    | while read line || [ -n "${line}" ]; do \
+        echo ${line} \
+        | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis=".">//g' \
+        | sed -e 's/<rt>/,/g' \
+        | sed -e 's/<\/rt><\/ruby>/\t/g' \
+        | sed -e 's/,[^\t]\+\t//g' \
+        | sed -e 's/\(.\+\)/《《\1》》/g' ; \
+    done >rep
+    paste tgt rep | sed -e 's/\"/\\\"/g' | sed -e 's/\//\\\//g' | sed -e 's/^/\| sed -e '\''s\//g' | sed -e 's/\t/\//' | sed -e 's/$/\/g'\'' \\/g' | sed -z 's/^/cat emphasisInput \\\n/g' >tmp.sh
+    bash tmp.sh >tmp
+  fi
+    sed -e 's/<h2 class="ltlbg_sectionName">\([^<]\+\)<\/h2>/◆\1/g' tmp \
+  | sed -e 's/&amp;/\&/g' \
+  | sed -e 's/&lt;/</g' \
+  | sed -e 's/&gt;/>/g' \
+  | sed -e 's/&quot;/'\''/g' \
+  | sed -e 's/&#39;/\"/g' \
+  | sed -z 's/^\n//g' \
   | sed -e 's/<br class="ltlbg_br">//g' \
   | sed -e 's/^<br class="ltlbg_blankline">//g' \
   | sed -e 's/<span class="ltlbg_wSp"><\/span>/　/g' \
   | sed -z 's/　\n/\n/g' >${destFile}
-
   echo "✨ "${destFile}"を出力しました[txtもどし]"
-
 else
   echo "💩 引数1は1(txt→html)か2(html→txt)で指定してください"
   exit 1
 fi
-
-##########################################################################################
-# ファイルが上書きできないため使用している中間ファイルのゴミ掃除。なんとかならんか…
-##########################################################################################
 pth=$(pwd)
 rmstrBase='rm -rf '${pth}'/'
 eval $rmstrBase'1'
