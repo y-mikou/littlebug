@@ -308,6 +308,7 @@ elif [ "${1}" = "2" ] ; then
   ### 閉じタグ</section><!--ltlbg_section-->を除去
   ### <section class="ltlbg_section" id="XXX">を[chapter:]へ
     sed -e 's/<\/section><!--ltlbg_section-->//g' tmp \
+  | sed -e 's/<section class="ltlbg_section">/[chapter]/g' \
   | sed -e 's/<section class="ltlbg_section" id="\([^"]\+\)">/[chapter:\1]/g' \
   | sed -e 's/\[chapter:\]/\[chapter\]/g'  >tmp2
 
@@ -336,7 +337,6 @@ elif [ "${1}" = "2" ] ; then
   | sed -e 's/<span class="ltlbg_wdfix">\([^<]\)<\/span>/\1/g' \
   | sed -e 's/<span class="ltlbg_semicolon">；<\/span>/；/g' \
   | sed -e 's/<span class="ltlbg_colon">：<\/span>/：/g' >tmp
-
   ## 括弧類段落記号を除去
     sed -e 's/<p class="ltlbg_p_brctGrp">//g' tmp \
   | sed -e 's/<\/p><\!--ltlbg_p_brctGrp-->//g' >tmp2
@@ -352,9 +352,52 @@ elif [ "${1}" = "2" ] ; then
   | sed -e 's/<span class="ltlbg_wSize">\(.\)<\/span>/\1\1/g' \
   | sed -e 's/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/／＼/g' >tmp2
 
-  ## <span class="ltlbg_ruby" data-ruby_XXX="XXX"></span>を復旧
-    sed -e 's/<ruby class="ltlbg_ruby" data-ruby_[^=]\+="\([^"]\+\)">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/{\2｜\1}/g' tmp2 \
-  | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis="[^"]\+">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/《《\1》》/g' >tmp
+  ## モノルビを復旧
+  ## <ruby class=\"ltlbg_ruby\" data-ruby_center=\"[^]]\">〜で抽出したものを置換元とする。
+  ## 基底文字だけを持つ中間ファイルと、ルビだけを持つ中間ファイルを作成し、置換先とする。
+  ## 置換機能を持った中間シェルスクリプトを作成し、実行する。
+  cat tmp2 >monorubyInput
+  grep -o '\(<ruby class=\"ltlbg_ruby\" data-ruby_center=\"[^]]\">[^<]<rt>[^<]<\/rt><\/ruby>\)\+' monorubyInput | uniq >tgt
+  cat tgt \
+  | while read line || [ -n "${line}" ]; do \
+      echo ${line} \
+      | sed -e 's/<ruby class="ltlbg_ruby" data-ruby_center=".">//g' \
+      | sed -e 's/<rt>/,/g' \
+      | sed -e 's/<\/rt><\/ruby>/\t/g' \
+      | sed -e 's/,[^\t]\+\t//g' ; \
+ done >1
+ cat tgt \
+ | while read line || [ -n "${line}" ]; do \
+     echo ${line} \
+     | sed -e 's/<ruby class="ltlbg_ruby" data-ruby_center=".">//g' \
+     | sed -e 's/<rt>/,/g' \
+     | sed -e 's/<\/rt><\/ruby>/\t/g' \
+     | sed -e 's/\t\?.,//g' ; \
+ done >2
+  paste 1 2 | sed -e 's/^/{/' | sed -e 's/\t/｜/' | sed -e 's/$/}/' | sed -e 's/\t//g' >rep
+  paste tgt rep | sed -e 's/\"/\\\"/g' | sed -e 's/\//\\\//g' | sed -e 's/^/\| sed -e '\''s\//g' | sed -e 's/\t/\//' | sed -e 's/$/\/g'\'' \\/g' | sed -z 's/^/cat monorubyInput \\\n/g' >tmp.sh
+  bash tmp.sh >tmp2
+
+  ## モノルビ以外の<span class="ltlbg_ruby" data-ruby_XXX="XXX"></span>を復旧
+    sed -e 's/<ruby class="ltlbg_ruby" data-ruby_[^=]\+="\([^"]\+\)">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/{\2｜\1}/g' tmp2 >tmp 
+
+  ## 圏点タグを《《基底文字》》へ復旧する
+  ## <ruby class=\"ltlbg_emphasis\" data-ruby_emphasis=\"[^]]\">〜で抽出したものを置換元とする。
+  ## 基底文字だけを持つ中間ファイルと、ルビだけを持つ中間ファイルを作成し、置換先とする。
+  ## 置換機能を持った中間シェルスクリプトを作成し、実行する。
+  cat tmp >emphasisInput
+  grep -o '\(<ruby class=\"ltlbg_emphasis\" data-emphasis=\"[^]]\">[^<]<rt>[^<]<\/rt><\/ruby>\)\+' emphasisInput | uniq >tgt
+  cat tgt \
+  | while read line || [ -n "${line}" ]; do \
+      echo ${line} \
+      | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis=".">//g' \
+      | sed -e 's/<rt>/,/g' \
+      | sed -e 's/<\/rt><\/ruby>/\t/g' \
+      | sed -e 's/,[^\t]\+\t//g' \
+      | sed -e 's/\(.\+\)/《《\1》》/g' ; \
+  done >rep
+  paste tgt rep | sed -e 's/\"/\\\"/g' | sed -e 's/\//\\\//g' | sed -e 's/^/\| sed -e '\''s\//g' | sed -e 's/\t/\//' | sed -e 's/$/\/g'\'' \\/g' | sed -z 's/^/cat emphasisInput \\\n/g' >tmp.sh
+  bash tmp.sh >tmp
 
   ## <h2 class="ltlbg_sectionName">\1<\/h2>を行頭◆へ
   sed -e 's/<h2 class="ltlbg_sectionName">\([^<]\+\)<\/h2>/◆\1/g' tmp >tmp2
@@ -364,11 +407,11 @@ elif [ "${1}" = "2" ] ; then
   ## 「&amp;」 を「&」(半角)へ変換
   ## 「&quot;」を「'」(半角)へ変換
   ## 「&#39;」 を「"」(半角)へ変換
-    sed -e 's/&amp;\/&/g' tmp2 \
-  | sed -e 's/&lt;\/</g' \
-  | sed -e 's/&gt;\/>/g' \
-  | sed -e "s/&quot;\/'/g" \
-  | sed -e 's/&#39;\/\"/g' >tmp
+    sed -e 's/&amp;/\&/g' tmp2 \
+  | sed -e 's/&lt;/</g' \
+  | sed -e 's/&gt;/>/g' \
+  | sed -e 's/&quot;/'\''/g' \
+  | sed -e 's/&#39;/\"/g' >tmp
 
   ## ここまで生じているハード空行は副産物なので削除
   ## その上で、<br class="ltlbg_br">、<br class="ltlbg_blankline">を削除
