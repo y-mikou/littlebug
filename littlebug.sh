@@ -181,7 +181,9 @@ if [ "${1}" = "1" ] ; then
   ## ついでだから|基底文字《ルビ》も<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
   cat tmp >rubyInput
     sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' rubyInput \
-  | sed -e 's/｜\([^《]\+\)《\([^》]\+\)》/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' >rubytmp
+  | sed -e 's/｜\([^《]\+\)《\([^》]\+\)》/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' \
+  | sed -e 's/<span class="ltlbg_wSp"><\/span>/　/g' \
+  | sed -e 's/<span class="ltlbg_sSp"><\/span>/□/g' >rubytmp
 
   ## <ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>になっているルビのdata-rubyを
   ## ルビ文字数と基底文字数の関係に従いmono/center/long/shortに分岐させる
@@ -244,7 +246,7 @@ if [ "${1}" = "1" ] ; then
         paste 1 2 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
         echo ''
         done \
-      >rep
+      | sed -e 's/□/＆ｎｂｓｐ/g' >rep
       paste tgt rep | sed -e 's/\t//g' | sed -z 's/^/cat monorubyInput \\\n/' >tmp.sh
       bash  tmp.sh >tmp
     fi
@@ -269,6 +271,7 @@ if [ "${1}" = "1" ] ; then
   | sed -e 's/＆ｌｔ/\&lt;/g' \
   | sed -e 's/＆ｇｔ/\&gt;/g' \
   | sed -e 's/＆＃３９/\&#39;/g' \
+  | sed -e 's/＆ｎｂｓｐ/\&nbsp;/g' \
   | sed -e 's/＆ｑｕｏｔ/\&quot;/g' >tmp2
 
 
