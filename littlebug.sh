@@ -179,6 +179,7 @@ if [ "${1}" = "1" ] ; then
   
   ## {基底文字|ルビ}となっているものを<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
   ## ついでだから|基底文字《ルビ》も<ruby class="ltlbg_ruby" data-ruby="ルビ">基底文字<rt>ルビ</rt></ruby>へ
+  ## 
   cat tmp >rubyInput
     sed -e 's/{\([^\{]\+\)｜\([^\}]\+\)}/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' rubyInput \
   | sed -e 's/｜\([^《]\+\)《\([^》]\+\)》/<ruby class="ltlbg_ruby" data-ruby="\2">\1<rt>\2<\/rt><\/ruby>/g' \
@@ -194,8 +195,28 @@ if [ "${1}" = "1" ] ; then
   ## 中間ファイルtgt(ルビタグで抽出した結果)の長さが0の場合、処理しない
   if [ -s tgt ] ; then
 
-    sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/.\+|//g' | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >1
-    sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" | uniq | sed -e 's/^[^>]\+>//g' | sed -e 's/<rt>/\|/g' | sed -e 's/<.\+//g' | sed 's/|.\+//g' | sed 's/\[l\[..\]r\]/■/g'  | while read line || [ -n "${line}" ]; do echo -n $line | wc -m; done >2
+    sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp \
+    | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" \
+    | uniq \
+    | sed -e 's/<rt>/\|/g' \
+    | sed -e 's/<[^>]\+>//g' \
+    | sed -e 's/^[^\|]\+|//g' \
+    | while read line || [ -n "${line}" ]; do 
+        echo -n $line \
+        | wc -m;
+      done >1
+
+    sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp \
+    | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" \
+    | uniq \
+    | sed -e 's/<rt>/\|/g' \
+    | sed -e 's/<[^>]\+>//g' \
+    | sed -e 's/|[^\|]\+$//g' \
+    | while read line || [ -n "${line}" ]; do 
+        echo -n $line \
+        | wc -m;
+      done >2
+
     ### 文字数の関係に従って付与する文字を出力する(該当箇所を置換する)。文字はシェルスクリプトになっている
     paste -d , 1 2 \
     | sed 's/\([0-9]\+\)\,\([0-9]\+\)/ \
@@ -208,8 +229,8 @@ if [ "${1}" = "1" ] ; then
         echo '"'_long'"'; \
       else echo '"'_short'"'; \
       fi/g' \
-      >tmp.sh
-    bash tmp.sh >ins
+      >tmp2.sh
+    bash tmp2.sh >ins
     
     sed 's/.\+/<ruby class="ltlbg_ruby" data-ruby/' tgt >3
     sed 's/<ruby class="ltlbg_ruby" data-ruby//' tgt >4
