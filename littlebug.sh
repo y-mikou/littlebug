@@ -23,6 +23,11 @@ if [ "${1}" = "1" ] ; then
   touch ${destFile}                        #出力先ファイルを生成
 
   ##########################################################################################
+  # エラーチェック
+  ##########################################################################################
+
+
+  ##########################################################################################
   # 先行変換。特殊文字など、htmlタグに含まれることが多いものを先に置換する
   ##########################################################################################
   ##########################################################################################
@@ -66,7 +71,7 @@ if [ "${1}" = "1" ] ; then
   | sed -z '1,/^\n*/s/^\n*//' >tmp
   ## 文章中スペース類置換ここまで###########################################################
 
-
+  
   ## 英数字2文字と、！？!?の重なりを<span class="ltlbg_tcyA">の変換対象にする
     LANG=C sed -e 's/\([^a-zA-Z0-9\<\>]\)\([a-zA-Z0-9]\{2\}\)\([^a-zA-Z0-9/</>]\)/\1<span class="ltlbg_tcyA">\2<\/span>\3/g' tmp \
   | sed -e 's/\([^!！?？\&#;]\)\(!!\|！！\)\([^!！?？\&#;]\)/\1<span class="ltlbg_tcyA">!!<\/span>\3/g' \
@@ -195,6 +200,7 @@ if [ "${1}" = "1" ] ; then
   ## 中間ファイルtgt(ルビタグで抽出した結果)の長さが0の場合、処理しない
   if [ -s tgt ] ; then
 
+    ## 基底文字の長さを抽出。
     sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp \
     | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" \
     | uniq \
@@ -206,6 +212,7 @@ if [ "${1}" = "1" ] ; then
         | wc -m;
       done >1
 
+    ## ルビ文字の長さを抽出。
     sed -e 's/<\/ruby>/<\/ruby>\n/g' rubytmp \
     | grep -o -E "<ruby class=\"ltlbg_ruby\" data-ruby=\".+<\/ruby>" \
     | uniq \
@@ -229,8 +236,8 @@ if [ "${1}" = "1" ] ; then
         echo '"'_long'"'; \
       else echo '"'_short'"'; \
       fi/g' \
-      >tmp2.sh
-    bash tmp2.sh >ins
+      >tmp.sh
+    bash tmp.sh >ins
     
     sed 's/.\+/<ruby class="ltlbg_ruby" data-ruby/' tgt >3
     sed 's/<ruby class="ltlbg_ruby" data-ruby//' tgt >4
@@ -269,10 +276,15 @@ if [ "${1}" = "1" ] ; then
         done \
       | sed -e 's/□/＆ｎｂｓｐ/g' >rep
       paste tgt rep | sed -e 's/\t//g' | sed -z 's/^/cat monorubyInput \\\n/' >tmp.sh
-      bash  tmp.sh >tmp
+      bash  tmp.sh \
+      >tmp
     fi
+    ## ここでdata-ruby_monoが置換されていない場合、内部にタグが含まれているなどの理由で変換がうまくできていない。
+    ## data-ruby_centerへ縮退変換する。
+    sed -e 's/<ruby class="ltlbg_ruby" data-ruby_mono="\([^"]\{2,\}\)">/<ruby class="ltlbg_ruby" data-ruby_center="\1">/g' tmp >tmp2
   fi
 
+  cat  tmp2 >tmp
   ## [-字-]を<span class="ltlbg_wdfix">へ。特定の文字についてはltlbg_wSpを挿入されている可能性がるのでそれも考慮した置換を行う
   ## ^と^に囲まれた1〜3文字の範囲を、<br class="ltlbg_tcyM">縦中横</span>に。[^字^]は食わないように
   ## [^字^]を<span class="ltlbg_rotate">へ。^字^でtcyになっている可能性があるので考慮する。
