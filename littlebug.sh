@@ -145,27 +145,17 @@ if [ "${1}" = "1" ] ; then
   | sed -e 's/^（\(.\+\)）/<span class="ltlbg_think">\1<\/span><\!--ltlbg_think-->/g' \
   | sed -e 's/^〝\(.\+\)〟/<span class="ltlbg_wquote">\1<\/span><\!--ltlbg_wquote-->/g' >tmp2
 
-  ## [newpage]を、<br class="ltlbg_newpage">に
-  ## ―を<br class="ltlbg_wSize">―</span>に
-  ## **太字**を<br class="ltlbg_wSize">―</span>に
-  ## ／＼もしくは〱を、<span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>に
-  ## ---を<span class="ltlbg_hr">へ。
-    sed -e '/\[newpage\]/c <div class="ltlbg_newpage"></div>' tmp2\
-  | sed -e 's/―/<span class="ltlbg_wSize">―<\/span>/g' \
-  | sed -e 's/\*\*\([^\*]\+\)\*\*/<span class="ltlbg_bold">\1<\/span>/g' \
-  | sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/g' \
-  | sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' >tmp
-
   ##《《基底文字》》となっているものを基底文字と同文字数の﹅をふるルビへ置換する
   ## <ruby class="ltlbg_emphasis" data-ruby="﹅">基底文字<rt>﹅</rt></ruby>
   ### 圏点用変換元文字列|変換先文字列を作成する
-  cat tmp >emphasisInput
+  cat tmp2 >emphasisInput
   grep -E -o "《《[^》]*》》" emphasisInput | uniq >replaceSeed
 
   ## 中間ファイルreplaceSeed(《《[^》]*》》で抽出したもの)の長さが0の場合、処理しない
   if [ -s replaceSeed ] ; then 
 
     sed -e 's/[《》]//g' replaceSeed \
+    | sed -e 's/\*/\\\*/g' \
     | sed -e 's/<span class="ltlbg_wSp"><\/span>/〼/g' \
     | sed -e 's/<span class="ltlbg_sSp"><\/span>/〿/g' \
     >raw
@@ -187,11 +177,12 @@ if [ "${1}" = "1" ] ; then
       echo ''
       done \
     >rep
-    sed -e 's/"/\\\"/g' replaceSeed | sed -e 's/\//\\\//g' | sed -e 's/^/\| sed -e '\''s\//' >tgt
+    sed -e 's/"/\\\"/g' replaceSeed | sed -e 's/\//\\\//g' | sed -e 's/^/\| sed -e '\''s\//' | sed 's/\*/\\\*/g' >tgt
     paste tgt rep | sed -e 's/\t//g' | sed -z 's/^/cat emphasisInput \\\n/' >tmp.sh
     bash  tmp.sh >tmp
-    sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis="﹅">〼<rt>﹅<\/rt><\/ruby>/<span class="ltlbg_wSp"><\/span>/g' tmp\
-    | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis="﹅">〿<rt>﹅<\/rt><\/ruby>/<span class="ltlbg_sSp"><\/span>/g' >tmp2
+    sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis="﹅">〼<rt>﹅<\/rt><\/ruby>/<span class="ltlbg_wSp"><\/span>/g' tmp \
+    | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis="﹅">〿<rt>﹅<\/rt><\/ruby>/<span class="ltlbg_sSp"><\/span>/g' \
+    | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis="﹅">\([\*\^]\?\)<rt>﹅<\/rt><\/ruby>/\1/g' >tmp2
     cat tmp2 >tmp
   fi
   
@@ -297,8 +288,18 @@ if [ "${1}" = "1" ] ; then
     ## ここでdata-ruby_monoが置換されていない場合、内部にタグが含まれているなどの理由で変換がうまくできていない。
     ## data-ruby_centerへ縮退変換する。
     sed -e 's/<ruby class="ltlbg_ruby" data-ruby_mono="\([^"]\{2,\}\)">/<ruby class="ltlbg_ruby" data-ruby_center="\1">/g' tmp >tmp2
-    cat tmp2 >tmp
   fi
+
+  ## [newpage]を、<br class="ltlbg_newpage">に
+  ## ―を<br class="ltlbg_wSize">―</span>に
+  ## **太字**を<br class="ltlbg_wSize">―</span>に
+  ## ／＼もしくは〱を、<span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>に
+  ## ---を<span class="ltlbg_hr">へ。
+    sed -e '/\[newpage\]/c <div class="ltlbg_newpage"></div>' tmp2\
+  | sed -e 's/―/<span class="ltlbg_wSize">―<\/span>/g' \
+  | sed -e 's/\*\*\([^\*]\+\)\*\*/<span class="ltlbg_bold">\1<\/span>/g' \
+  | sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/g' \
+  | sed -z 's/-\{3,\}/<br class="ltlbg_hr">/g' >tmp
 
   ## [-字-]を<span class="ltlbg_wdfix">へ。特定の文字についてはltlbg_wSpを挿入されている可能性がるのでそれも考慮した置換を行う
   ## ^と^に囲まれた1〜3文字の範囲を、<br class="ltlbg_tcyM">縦中横</span>に。[^字^]は食わないように
