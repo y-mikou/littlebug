@@ -172,12 +172,14 @@ if [ "${1}" = "1" ] ; then
   | sed -e 's/^〝\(.\+\)〟/<span class="ltlbg_wquote">\1<\/span><\!--ltlbg_wquote-->/g' \
   >tmp2
 
-  cat tmp2 >emphasisInput
+  cat tmp2 \
+  | sed -e 's/\*/\\\*/g' \
+  >emphasisInput
   ############################圏点対応
   ##《《基底文字》》となっているものを基底文字と同文字数の﹅をふるルビへ置換する
   ## <ruby class="ltlbg_emphasis" data-ruby="﹅">基底文字<rt>﹅</rt></ruby>
   ### 圏点用変換元文字列|変換先文字列を作成する
-  grep -E -o "《《[^》]*》》" emphasisInput | uniq >replaceSeed
+  grep -E -o "《《[^》]+》》" emphasisInput | uniq >replaceSeed
 
   ## 中間ファイルreplaceSeed(《《[^》]*》》で抽出したもの)の長さが0の場合、処理しない
   if [ -s replaceSeed ] ; then 
@@ -220,7 +222,8 @@ if [ "${1}" = "1" ] ; then
   else
     cat emphasisInput >emphasisOutput
   fi
-  cat emphasisOutput >tmp
+  cat emphasisOutput \
+  >tmp
   ############################圏点対応
 
   cat tmp >rubyInput
@@ -391,7 +394,7 @@ if [ "${1}" = "1" ] ; then
   ## ^と^に囲まれた1〜3文字の範囲を、<br class="ltlbg_tcyM">縦中横</span>に。[^字^]は食わないように
   ## ~と~に囲まれた2文字の範囲を<br class="ltlbg_tcyA">縦中横</span>に
   cat tmp \
-  | sed -e 's/~AA~/<span class="ltlbg_tcyA">AA<\/span>/g' \
+  | sed -e 's/\\\*/\*/g' | sed -e 's/~\([a-zA-Z0-9]\{2\}\)~/<span class="ltlbg_tcyA">\1<\/span>/g' \
   | sed -e 's/\*\*\([^\*]\+\)\*\*/<span class="ltlbg_bold">\1<\/span>/g' \
   | sed -e 's/\([^[]\)\^\([^\^]\{1,3\}\)\^\([^]]\)/\1<span class="ltlbg_tcyM">\2<\/span>\3/g' \
   > tmp2
