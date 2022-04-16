@@ -172,26 +172,28 @@ if [ "${1}" = "1" ] ; then
   | sed -e 's/^〝\(.\+\)〟/<span class="ltlbg_wquote">\1<\/span><\!--ltlbg_wquote-->/g' \
   >tmp2
 
-  cat tmp2 \
-  | sed -e 's/\*/\\\*/g' \
-  >emphasisInput
+  cat tmp2 >emphasisInput
   ############################圏点対応
   ##《《基底文字》》となっているものを基底文字と同文字数の﹅をふるルビへ置換する
   ## <ruby class="ltlbg_emphasis" data-ruby="﹅">基底文字<rt>﹅</rt></ruby>
   ### 圏点用変換元文字列|変換先文字列を作成する
-  grep -E -o "《《[^》]+》》" emphasisInput | uniq >replaceSeed
+  grep -E -o "《《[^》]+》》" emphasisInput | uniq >tgt
 
   ## 中間ファイルreplaceSeed(《《[^》]*》》で抽出したもの)の長さが0の場合、処理しない
-  if [ -s replaceSeed ] ; then 
+  if [ -s tgt ]; then 
 
-    cat replaceSeed \
+    # 圏点の基底文字列のみの中間ファイルを作成する
+    # ・マークアップの記号を外す
+    # ・スペース類を一時的に希少な退避文字へ置換する
+    cat tgt \
     | sed -e 's/[《》]//g' \
-    | sed -e 's/\*/\\\*/g' \
-    | sed -e 's/\^/\\\^/g' \
     | sed -e 's/<span class="ltlbg_wSp"><\/span>/〼/g' \
     | sed -e 's/<span class="ltlbg_sSp"><\/span>/〿/g' \
     >raw
 
+    # ルビとして振る「﹅」を、rawと同じ文字だけもった中間ファイルを作成する。
+    # [^字^](回転)、[l\[左右\]r\](強制合字)、^^(縦中横)、~~(自動縦中横)は
+    # 傍点観点では1文字として扱う。
     cat raw \
     | sed -e 's/\[\^.\^\]/﹅/g' \
     | sed -e 's/\[l\[..\]r\]/﹅/g' \
@@ -200,29 +202,60 @@ if [ "${1}" = "1" ] ; then
     | sed -e 's/./﹅/g' \
     >emphtmp
     
+    # 上記で作った基底文字ファイルとルビ文字ファイルを列単位に結合する
+    # その後、各行ごとに置換処理を行い、
+    # 中間ファイルtgtの各行を置換元とする置換先文字列を作成する。
+    ## →置換先文字列
+    ## 　各行ごとに「,」の前が基底文字、「,」の後がルビ文字となっているので、
+    ## 　これを利用してルビタグの文字列を作成する。
     paste -d , raw emphtmp \
     | while read line || [ -n "${line}" ]; do \
-      echo -n '/'
-      echo ${line##*,} | grep -o . | sed -e 's/^/<ruby class=\\\"ltlbg_emphasis\\\" data-emphasis=\\\"/' | sed -e 's/$/\\\">/' >1
-      echo ${line%%,*} | grep -o . >2
-      echo ${line##*,} | grep -o . | sed -e 's/^/<rt>/' | sed -e 's/$/<\\\/rt><\\\/ruby>/' >3
-      paste 1 2 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
+
+      echo ${line##*,} \
+      | grep -E -o "." \
+      | sed -e 's/^/<ruby class=\\\"ltlbg_emphasis\\\" data-emphasis=\\\"/' \
+      | sed -e 's/$/\\\">/' \
+      >2
+
+      echo ${line%%,*} \
+      | grep -E -o "(\^[^\^]+\^|\~[^~]{2}\~|<[^>]>[^<]+<\/>|.)" \
+      >1
+
+      echo ${line##*,} \
+      | grep -E -o "." \
+      | sed -e 's/^/<rt>/g' \
+      | sed -e 's/$/<\\\/rt><\\\/ruby>/g' \
+      >3
+
+      paste 2 1 3 | sed -e 's/\t//g' | sed -z 's/\n//g' | sed -e 's/$/\/g'\'' \\/'
       echo ''
       done \
     >rep
-    sed -e 's/"/\\\"/g' replaceSeed | sed -e 's/\//\\\//g' | sed -e 's/^/\| sed -e '\''s\//' | sed 's/\*/\\\*/g' >tgt
-    paste tgt rep | sed -e 's/\t//g' | sed -z 's/^/cat emphasisInput \\\n/' >tmp.sh
+
+    cat tgt \
+    | sed -e 's/"/\\\"/g' \
+    | sed -e 's/\//\\\//g' \
+    | sed -e 's/^/\| sed -e '\''s\//' \
+    | sed -e 's/$/\//g' \
+    >replaceSeed
+    
+    paste replaceSeed rep \
+    | sed -e 's/\t//g' \
+    | sed 's/\*/\\\*/g' \
+    | sed -z 's/^/cat emphasisInput \\\n/' \
+    >tmp.sh
     bash  tmp.sh >tmp
+
     cat tmp \
-    | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis="﹅">〼<rt>﹅<\/rt><\/ruby>/<span class="ltlbg_wSp"><\/span>/g' \
-    | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis="﹅">〿<rt>﹅<\/rt><\/ruby>/<span class="ltlbg_sSp"><\/span>/g' \
-    | sed -e 's/<ruby class="ltlbg_emphasis" data-emphasis="﹅">\([\*\^\~]\?\)<rt>﹅<\/rt><\/ruby>/\1/g' \
+    | sed -e 's/<ruby class="ltlbg_emphasis\" data-emphasis=\"﹅\">〼<rt>﹅<\/rt><\/ruby>/<span class=\"ltlbg_wSp\"><\/span>/g' \
+    | sed -e 's/<ruby class="ltlbg_emphasis\" data-emphasis=\"﹅\">〿<rt>﹅<\/rt><\/ruby>/<span class=\"ltlbg_sSp\"><\/span>/g' \
+    | sed -e 's/<ruby class="ltlbg_emphasis\" data-emphasis=\"﹅\">\([\*\^\~]\?\)<rt>﹅<\/rt><\/ruby>/\1/g' \
     >tmp2
     cat tmp2 >emphasisOutput
   else
     cat emphasisInput >emphasisOutput
   fi
-  cat emphasisOutput \
+  cat emphasisOutput  \
   >tmp
   ############################圏点対応
 
@@ -251,7 +284,7 @@ if [ "${1}" = "1" ] ; then
   >tgt
 
   ## 中間ファイルtgt(ルビタグで抽出した結果)の長さが0の場合、処理しない
-  if [ -s tgt ] ; then
+  if [ -s tgt ]; then
 
     ## 基底文字の長さを抽出。
     cat rubytmp \
@@ -275,6 +308,7 @@ if [ "${1}" = "1" ] ; then
     | sed -e 's/<rt>/\|/g' \
     | sed -e 's/<[^>]\+>//g' \
     | sed -e 's/|[^\|]\+$//g' \
+    | sed -e 's/\*//g' \
     | while read line || [ -n "${line}" ]; do 
         echo -n $line \
         | wc -m;
@@ -283,7 +317,7 @@ if [ "${1}" = "1" ] ; then
 
     ### 文字数の関係に従って付与する文字を出力する(該当箇所を置換する)。文字はシェルスクリプトになっている
     paste -d , 1 2 \
-    | sed 's/\([0-9]\+\)\,\([0-9]\+\)/ \
+    | sed -e 's/\([0-9]\+\)\,\([0-9]\+\)/ \
       i=$((\2 * 2)); \
       if [ $(( ${i} - \1 )) -gt 0 ] \&\& [ $(( \2 - \1 )) -lt 0 ]; then \
         echo '"'_center'"'; \
@@ -296,11 +330,11 @@ if [ "${1}" = "1" ] ; then
       >tmp.sh
     bash tmp.sh >ins
     
-    sed 's/.\+/<ruby class="ltlbg_ruby" data-ruby/' tgt >3
-    sed 's/<ruby class="ltlbg_ruby" data-ruby//' tgt >4
+    sed -e 's/.\+/<ruby class="ltlbg_ruby" data-ruby/' tgt >3
+    sed -e 's/<ruby class="ltlbg_ruby" data-ruby//' tgt >4
     paste 3 ins 4 | sed 's/\t//g' >rep
     paste -d \| tgt rep | sed 's/\([\"\/]\)/\\\\\1/g' >replaceSeed
-    cat  rubytmp >rslt
+    cat rubytmp >rslt
     ### 変換元文字列|変換先文字列に従って順次パラメータ名置換を行う
     while read line
     do
@@ -390,11 +424,11 @@ if [ "${1}" = "1" ] ; then
   >tmp
 
   #タグで括るタイプの修飾_複数文字
+  ## ~と~に囲まれた2文字の範囲を<br class="ltlbg_tcyA">縦中横</span>に
   ## **太字**を<br class="ltlbg_wSize">―</span>に
   ## ^と^に囲まれた1〜3文字の範囲を、<br class="ltlbg_tcyM">縦中横</span>に。[^字^]は食わないように
-  ## ~と~に囲まれた2文字の範囲を<br class="ltlbg_tcyA">縦中横</span>に
   cat tmp \
-  | sed -e 's/\\\*/\*/g' | sed -e 's/~\([a-zA-Z0-9]\{2\}\)~/<span class="ltlbg_tcyA">\1<\/span>/g' \
+  | sed -e 's/~\([a-zA-Z0-9!?]\{2\}\)~/<span class="ltlbg_tcyA">\1<\/span>/g' \
   | sed -e 's/\*\*\([^\*]\+\)\*\*/<span class="ltlbg_bold">\1<\/span>/g' \
   | sed -e 's/\([^[]\)\^\([^\^]\{1,3\}\)\^\([^]]\)/\1<span class="ltlbg_tcyM">\2<\/span>\3/g' \
   > tmp2
@@ -429,7 +463,7 @@ if [ "${1}" = "1" ] ; then
 
   #スペシャルロジック
   ##########################################################################################
-  ## 圏点の中に他のタグ(現在は縦中横/自動縦中横)が含まれるものの対応
+  ## 圏点の中に縦中横/自動縦中横が含まれるものの対応
   ##########################################################################################
   cat tmp2 >emphasisInput
   cat emphasisInput \
@@ -471,6 +505,16 @@ if [ "${1}" = "1" ] ; then
     cat emphasisInput >emphasisOutput
   fi
   cat emphasisOutput >tmp2
+
+  ##########################################################################################
+  ## 圏点の中に太字が含まれるものの対応
+  ##########################################################################################
+#  cat tmp2 >tmp
+#  cat tmp >emphasisInput
+#  cat emphasisInput \
+#  | grep -E -o "《《》》" \
+#  > emphtmp
+
 
   cat tmp2 \
   | sed -e 's/＆ａｍｐ/\&amp;/g' \
@@ -655,6 +699,7 @@ eval $rmstrBase'rubyInput'
 eval $rmstrBase'rubyOutput'
 eval $rmstrBase'rubytmp'
 eval $rmstrBase'monorubyInput'
+eval $rmstrBase'monorubyOutput'
 eval $rmstrBase'emphtmp'
 eval $rmstrBase'replaceSeed'
 eval $rmstrBase'rslt'
