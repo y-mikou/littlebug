@@ -417,11 +417,11 @@ if [ "${1}" = "1" ] ; then
 
   #タグで括るタイプの修飾_1文字
   ## [-字-]を<span class="ltlbg_wdfix">へ。特定の文字についてはltlbg_wSpを挿入されている可能性がるのでそれも考慮した置換を行う
-  ## [^字^]を<span class="ltlbg_rotate">へ。^字^でtcyになっている可能性があるので考慮する。
+  ## [^字^]を<span class="ltlbg_rotate">へ。
   ## [l[偏旁]r]を<span class="ltlbg_forcedGouji1/2">へ
   cat tmp2 \
   | sed -e 's/\[\-\(.\)\(<span class="ltlbg_wSp"><\/span>\)\?\-\]/<span class="ltlbg_wdfix">\1<\/span>\2/g' \
-  | sed -e 's/\[\(\^\|<span class="ltlbg_tcy.">\)\(.\)\(\^\|<\/span>\)\]/<span class="ltlbg_rotate">\2<\/span>/g' \
+  | sed -e 's/\[\^\(.\)\^\]/<span class="ltlbg_rotate">\1<\/span>/g' \
   | sed -e 's/\[l\[\(.\)\(.\)\]r\]/<span class="ltlbg_forceGouji1">\1<\/span><span class="ltlbg_forceGouji2">\2<\/span>/g' \
   >tmp
 
@@ -432,7 +432,11 @@ if [ "${1}" = "1" ] ; then
   cat tmp \
   | sed -e 's/~\([a-zA-Z0-9!?]\{2\}\)~/<span class="ltlbg_tcyA">\1<\/span>/g' \
   | sed -e 's/\*\*\([^\*]\+\)\*\*/<span class="ltlbg_bold">\1<\/span>/g' \
+  | sed -e 's/\^<span class="ltlbg_sSp"><\/span>\(..\)\^/^〿\1^/g' \
+  | sed -e 's/\^\(.\)<span class="ltlbg_sSp"><\/span>\(.\)\^/^\1〿\2^/g' \
+  | sed -e 's/\(..\)\^<span class="ltlbg_sSp"><\/span>\^/^\1〿^/g' \
   | sed -e 's/\([^[]\)\^\([^\^]\{1,3\}\)\^\([^]]\)/\1<span class="ltlbg_tcyM">\2<\/span>\3/g' \
+  | sed -e 's/〿/＆ｎｂｓｐ/g' \
   > tmp2
 
   #タグに置換するタイプの変換
