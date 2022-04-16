@@ -435,7 +435,7 @@ if [ "${1}" = "1" ] ; then
   | sed -e 's/\^<span class="ltlbg_sSp"><\/span>\(..\)\^/^〿\1^/g' \
   | sed -e 's/\^\(.\)<span class="ltlbg_sSp"><\/span>\(.\)\^/^\1〿\2^/g' \
   | sed -e 's/\(..\)\^<span class="ltlbg_sSp"><\/span>\^/^\1〿^/g' \
-  | sed -e 's/\([^[]\)\^\([^\^]\{1,3\}\)\^\([^]]\)/\1<span class="ltlbg_tcyM">\2<\/span>\3/g' \
+  | sed -e 's/\^\([^\^]\{1,3\}\)\^/<span class="ltlbg_tcyM">\1<\/span>/g' \
   | sed -e 's/〿/＆ｎｂｓｐ/g' \
   > tmp2
 
