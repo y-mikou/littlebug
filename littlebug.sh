@@ -10,6 +10,86 @@ if [ ! -e ${2} ]; then
   exit 1
 fi
 
+##警告表示####################################################################
+# 変換不能なケースを予め抽出する。
+# 処理は中断せず最後まで行うが、警告表示を行う。
+# おそらく変換処理は成功しない。
+##############################################################################
+## ルビ指定の基底文字に圏点の同時指定
+cat ${tgtFile} \
+| grep -E -o -n '(\{《《[^》]+》》｜[^\}]+\})|(《《{[^｜]+｜[^\}]+}》》)' \
+>warn_ltlbgtmp
+if [ -s warn_ltlbgtmp ] ; then 
+  cat warn_ltlbgtmp
+  echo '🤔 ↑でルビと圏点が同時に設定されています。不適切な指定です。変換結果は保証されません。' 
+fi
+## 縦中横指定の一部に太字指定
+cat ${tgtFile} \
+| grep -E -o -n '(\^[^\*]+\*\*10\*\*[^\^]?\^)|(\^[^\*]?\*\*10\*\*[^\^]+\^)' \
+>warn_ltlbgtmp
+if [ -s warn_ltlbgtmp ] ; then 
+  cat warn_ltlbgtmp
+  echo '🤔 ↑で縦中横の一部にだけ太字が指定されています。この変換は非対応です。変換結果は保証されません。' 
+fi
+# 4文字以上の縦中横
+cat ${tgtFile} \
+| grep -E -o -n '\^[a-zA-Z0-9]{4,}\^' \
+>warn_ltlbgtmp
+if [ -s warn_ltlbgtmp ] ; then 
+  cat warn_ltlbgtmp
+  echo '🤔 ↑で4桁以上の縦中横が指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
+fi
+# 縦中横指定の一部にのみ圏点指定
+cat ${tgtFile} \
+| grep -E -o -n '(\^[a-zA-Z0-9]?《《[a-zA-Z0-9]+》》[a-zA-Z0-9]+\^)|\^[a-zA-Z0-9]+《《[a-zA-Z0-9]+》》[a-zA-Z0-9]?\^' \
+>warn_ltlbgtmp
+if [ -s warn_ltlbgtmp ] ; then 
+  cat warn_ltlbgtmp
+  echo '🤔 ↑で縦中横の一部に圏点が指定されています。不適切な指定です。変換は実施しますが結果は保証されません。' 
+fi
+# ルビ指定全体に回転指定
+cat ${tgtFile} \
+| grep -E -o -n '\[\^\{[^｜]+｜[^\}]+\}\^\]' \
+>warn_ltlbgtmp
+if [ -s warn_ltlbgtmp ] ; then 
+  cat warn_ltlbgtmp
+  echo '🤔 ↑でルビ指定の全体に回転が指定されています。不適切な指定です。変換は実施しますが結果は保証されません。' 
+fi
+# 強制合字の一部を太字指定
+cat ${tgtFile} \
+| grep -E -o -n '\[l\[\*\*.\*\*.\]r\]' \
+>warn_ltlbgtmp
+if [ -s warn_ltlbgtmp ] ; then 
+  cat warn_ltlbgtmp
+  echo '🤔 ↑で合字生成指定の一部にのみ太字が指定されています。不適切な指定です。変換は実施しますが結果は保証されません。' 
+fi
+# 強制合字の一部に回転指定
+cat ${tgtFile} \
+| grep -E -o -n '(\[l\[.\^.\^\]r\])|(\^\[l\[[^]]{2}\]r\]\^)' \
+>warn_ltlbgtmp
+if [ -s warn_ltlbgtmp ] ; then 
+  cat warn_ltlbgtmp
+  echo '🤔 ↑で合字生成と回転が同時に指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
+fi
+# アへ濁点に回転指定
+cat ${tgtFile} \
+| grep -E -o -n '\[\^.゛\^\]' \
+>warn_ltlbgtmp
+if [ -s warn_ltlbgtmp ] ; then 
+  cat warn_ltlbgtmp
+  echo '🤔 ↑で濁点合字と回転が同時に指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
+fi
+# ルビ文字に特殊指定
+cat ${tgtFile} \
+| grep -E -o -n '(\{[^｜]+｜[^\*]?\*\*[^\*]+\*\*[^\*]?\})|({[^｜]+｜[^}]?\[\^[^\}]+\^\][^｜]?})|({[^｜]+｜[^}]?《《[^}]+》》[^}]?\})|({[^｜]+｜{[^｜]+｜[^\}]+\}\})|({[^｜]+｜[^\}]?\[l\[[^]]{2}\]r\][^\}]?\})' \
+>warn_ltlbgtmp
+if [ -s warn_ltlbgtmp ] ; then 
+  cat warn_ltlbgtmp
+  echo '🤔 ↑でルビ文字に修飾が指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
+fi
+
+# 警告表示ここまで############################################################
+
 if [ "${chrset##*charset=}" = "unknown-8bit" ]; then
   iconv -f SHIFT_JIS -t UTF-8 ${tgtFile} > tmp1_ltlbgtmp
   cat tmp1_ltlbgtmp >${tgtFile}
@@ -206,7 +286,7 @@ if [ "${1}" = "1" ] ; then
   cat tmp1_ltlbgtmp >emphasisInput_ltlbgtmp
   cat emphasisInput_ltlbgtmp \
   | grep -E -o "《《[^》]+》》"  \
-  | uniq /
+  | uniq \
   >tgt_ltlbgtmp
 
   ## 中間ファイルreplaceSeed(《《[^》]*》》で抽出したもの)の長さが0の場合、処理しない
