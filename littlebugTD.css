@@ -207,14 +207,17 @@ span.ltlbg_wquote::after{
     transform: scale(0.5, 0.5);
 }
 
+/*forceGouji1と2で1文字を作ります。
+  偏と旁の比率は自分でいじってください。
+  複数必要な場合は増やしてください。*/
 span.ltlbg_forceGouji1{
     transform-origin: center right;
-    transform: scale(0.6,1 )  translate(-1rem,0);
+    transform: scale(0.4,1 )  translate(-2rem,0);
     display: inline-block;    
 }
 span.ltlbg_forceGouji2{
     transform-origin: center left;
-    transform: scale(0.8,1 ) translate(0.4rem,-1rem);
+    transform: scale(0.6,1 ) translate(1rem,-1rem);
     display: inline-block;
     margin-bottom: -1rem;
 }
