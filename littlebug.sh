@@ -198,12 +198,16 @@ if [ "${1}" = "1" ] ; then
   | sed -e 's/^〝\(.\+\)〟/<span class=\"ltlbg_wquote\">\1<\/span><\!--ltlbg_wquote-->/g' \
   >tmp2_ltlbgtmp
 
-  cat tmp2_ltlbgtmp >emphasisInput_ltlbgtmp
+  cat tmp2_ltlbgtmp >tmp1_ltlbgtmp
   ############################圏点対応
   ##《《基底文字》》となっているものを基底文字と同文字数の﹅をふるルビへ置換する
   ## <ruby class="ltlbg_emphasis" data-ruby="﹅">基底文字<rt>﹅</rt></ruby>
   ### 圏点用変換元文字列|変換先文字列を作成する
-  grep -E -o "《《[^》]+》》" emphasisInput_ltlbgtmp | uniq >tgt_ltlbgtmp
+  cat tmp1_ltlbgtmp >emphasisInput_ltlbgtmp
+  cat emphasisInput_ltlbgtmp \
+  | grep -E -o "《《[^》]+》》"  \
+  | uniq /
+  >tgt_ltlbgtmp
 
   ## 中間ファイルreplaceSeed(《《[^》]*》》で抽出したもの)の長さが0の場合、処理しない
   if [ -s tgt_ltlbgtmp ]; then 
@@ -222,7 +226,11 @@ if [ "${1}" = "1" ] ; then
     # 傍点観点では1文字として扱う。
     cat raw_ltlbgtmp \
     | sed -e 's/\*\*//g' \
-    | sed -e 's/\(\[\^.\^\]\|\[l\[..\]r\]\|\^.\{1,3\}\^\|~.\{2\}~\)/﹅/g' \
+    | sed -e 's/゛//g' \
+    | sed -e 's/\[\^.\^\]/﹅/g' \
+    | sed -e 's/\[l\[..\]r\]/﹅/g' \
+    | sed -e 's/\^.\{1,3\}\^/﹅/g' \
+    | sed -e 's/~.\{2\}~/﹅/g' \
     | sed -e 's/./﹅/g' \
     >emphtmp_ltlbgtmp
   
@@ -242,7 +250,7 @@ if [ "${1}" = "1" ] ; then
       >1_ltlbgtmp
 
       echo "${line%%,*}" \
-      | grep -E -o "(\[\^.\^\]|\^[^\^]+\^|\~[^~]{2}\~|<[^>]>[^<]+<\/>|\{[^｜]\+｜[^\}]\+\}|.)" \
+      | grep -E -o "(\[\^.\^\]|\^[^\^]+\^|\~[^~]{2}\~|<[^>]>[^<]+<\/>|\{[^｜]\+｜[^\}]\+\}|.゛|.)" \
       >2_ltlbgtmp
 
       echo "${line##*,}" \
@@ -323,7 +331,10 @@ if [ "${1}" = "1" ] ; then
     | while read line || [ -n "${line}" ]; do 
         echo -n "${line%%｜*}" \
         | sed -e 's/\*//g' \
-        | sed -e 's/\(\[l\[[^\]\{2\}\]r\]\)\|\(\[\^.\^\]\)\|\(\~[^\~]\{2\}\~\)\|\(\^[^\^]\{1,3\}\^\)/■/g' \
+        | sed -e 's/\[l\[[^\]\{2\}\]r\]/■/g' \
+        | sed -e 's/\[\^.\^\]/■/g' \
+        | sed -e 's/\~[^\~]\{2\}\~/■/g' \
+        | sed -e 's/\^[^\^]\{1,3\}\^/■/g' \
         | wc -m;
       done \
     >1_ltlbgtmp
@@ -556,14 +567,20 @@ if [ "${1}" = "1" ] ; then
   #タグに置換するタイプの変換
   ## [newpage]を、<br class="ltlbg_newpage">に
   ## ---を<span class="ltlbg_hr">へ。但し直後の改行は除去
-  ## ／＼もしくは〱を、<span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>に
+  ## ／＼もしくは〱を、<span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>に。モノルビ化しているものも対応
   ## 「゛」を、<span class="ltlbg_dakuten">に変換する。 後ろスペース挿入されているケースを考慮する
   cat tmp2_ltlbgtmp \
   | sed -e '/\[newpage\]/c <div class="ltlbg_newpage"></div>' \
   | sed -e 's/-\{3,\}/<hr class=\"ltlbg_hr\">/g' \
   | sed -e 's/<hr class=\"ltlbg_hr\"><br class=\"ltlbg_br\">/<hr class=\"ltlbg_hr\">/g' \
-  | sed -e 's/／＼\|〱/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/g' \
-  | sed -e 's/\([！？♥♪☆]\)<span class="ltlbg_wSp"><\/span>゛/<span class="ltlbg_dakuten">\1<\/span><span class="ltlbg_wSp"><\/span>/g' | sed -e 's/\(.\)゛/<span class="ltlbg_dakuten">\1<\/span>/g' \
+  | sed -e 's/／＼/<span class=\"ltlbg_odori1\"><\/span><span class=\"ltlbg_odori2\"><\/span>/g' \
+  | sed -e 's/〱/<span class=\"ltlbg_odori1\"><\/span><span class=\"ltlbg_odori2\"><\/span>/g' \
+  | sed -e 's/<ruby class=\"ltlbg_ruby\" data-ruby_center=\"\([^\"]\+\)\">／<rt>[^\<]\+<\/rt><\/ruby><ruby class=\"ltlbg_ruby\" data-ruby_center=\"\([^\"]\+\)\">＼<rt>[^\<]\+<\/rt><\/ruby>/<ruby class=\"ltlbg_ruby\" data-ruby_center=\"\1\"><span class=\"ltlbg_odori1\"><\/span><rt>\1<\/rt><\/ruby><ruby class=\"ltlbg_ruby\" data-ruby_center=\"\2\"><span class=\"ltlbg_odori2\"><\/span><rt>\2<\/rt><\/ruby>/g' \
+  | sed -e 's/<ruby class=\"ltlbg_ruby\" data-ruby_center=\"\([^\"]\+\)\">〳<rt>[^\<]\+<\/rt><\/ruby><ruby class=\"ltlbg_ruby\" data-ruby_center=\"\([^\"]\+\)\">〵<rt>[^\<]\+<\/rt><\/ruby>/<ruby class=\"ltlbg_ruby\" data-ruby_center=\"\1\"><span class=\"ltlbg_odori1\"><\/span><rt>\1<\/rt><\/ruby><ruby class=\"ltlbg_ruby\" data-ruby_center=\"\2\"><span class=\"ltlbg_odori2\"><\/span><rt>\2<\/rt><\/ruby>/g' \
+  | sed -e 's/<ruby class=\"ltlbg_emphasis\" data-emphasis=\"﹅\">／<rt>﹅<\/rt><\/ruby><ruby class=\"ltlbg_emphasis\" data-emphasis=\"﹅\">＼<rt>﹅<\/rt><\/ruby>/<ruby class=\"ltlbg_emphasis\" data-emphasis=\"﹅\"><span class=\"ltlbg_odori1\"><\/span><rt>﹅<\/rt><\/ruby><ruby class=\"ltlbg_emphasis\" data-emphasis=\"﹅\"><span class=\"ltlbg_odori2\"><\/span><rt>﹅<\/rt><\/ruby>/g' \
+  | sed -e 's/<ruby class=\"ltlbg_emphasis\" data-emphasis=\"﹅\">〳<rt>﹅<\/rt><\/ruby><ruby class=\"ltlbg_emphasis\" data-emphasis=\"﹅\">〵<rt>﹅<\/rt><\/ruby>/<ruby class=\"ltlbg_emphasis\" data-emphasis=\"﹅\"><span class=\"ltlbg_odori1\"><\/span><rt>﹅<\/rt><\/ruby><ruby class=\"ltlbg_emphasis\" data-emphasis=\"﹅\"><span class=\"ltlbg_odori2\"><\/span><rt>﹅<\/rt><\/ruby>/g' \
+  | sed -e 's/\([！？♥♪☆]\)<span class="ltlbg_wSp"><\/span>゛/<span class="ltlbg_dakuten">\1<\/span><span class="ltlbg_wSp"><\/span>/g' \
+  | sed -e 's/\(.\)゛/<span class="ltlbg_dakuten">\1<\/span>/g' \
   >tmp1_ltlbgtmp
 
   ##########################################################################################
@@ -686,7 +703,8 @@ elif [ "${1}" = "2" ] ; then
       | sed -e 's/<span class=\"ltlbg_dakuten\">\(.\)<\/span>/\1゛/g' \
       | sed -e 's/<span class=\"ltlbg_tcyM\">\([^<]\{1,3\}\)<\/span>/^\1^/g' \
       | sed -e 's/<span class=\"ltlbg_wSize\">\(.\)<\/span>/\1\1/g' \
-      | sed -e 's/<span class=\"ltlbg_odori1\"><\/span><span class=\"ltlbg_odori2\"><\/span>/／＼/g' \
+      | sed -e 's/<span class=\"ltlbg_odori1\"><\/span>/／/g' \
+      | sed -e 's/<span class=\"ltlbg_odori2\"><\/span>/＼/g' \
       >tmp2_ltlbgtmp
 
       ## 強制合字<span class="ltlbg_forceGouji1">、<span class="ltlbg_forceGouji2">を[l[]r]へ復旧
