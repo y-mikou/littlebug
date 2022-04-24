@@ -16,6 +16,10 @@ section.ltlbg_section{
 p.ltlbg_p{
     margin-right: 2rem;
 }
+/*擬似段落*/
+p.ltlbg_p_brctGrp{
+    margin-right: 2rem;
+}
 
 /* 縦中横。AもMもスタイル自体は同じ*/
 span.ltlbg_tcyA {
@@ -102,7 +106,18 @@ span.ltlbg_talk::before{
 span.ltlbg_talk::after{
     content: "」";
 }
-
+/*会話『』をぶら下げインデントにする。*/
+span.ltlbg_talk2{
+    display: inline-block;
+}
+span.ltlbg_talk2::before{
+    display: inline-block;
+    content: "『";
+    margin-top: -1rem;
+}
+span.ltlbg_talk2::after{
+    content: "』";
+}
 /*思考（）をぶら下げインデントにする。*/
 span.ltlbg_think{
     display: inline-block;
@@ -114,8 +129,7 @@ span.ltlbg_think::before{
 }
 span.ltlbg_think::after{
     content: "）";
-}
-  
+} 
 /*強調〝〟をぶら下げインデントにする。*/
 span.ltlbg_wquote{
     display: inline-block;
@@ -127,6 +141,35 @@ span.ltlbg_wquote::before{
 }
 span.ltlbg_wquote::after{
     content: "〟";
+}
+/*ダッシュ会話―をぶら下げインデントにする。*/
+span.ltlbg_dash{
+    display: inline-block;
+}
+span.ltlbg_dash::before{
+    display: inline-block;
+    content: "―";
+    transform: scale(1, 2) translate(0rem, -0.3rem);
+    margin-top: -1rem;
+}
+/*遠距離会話―をぶら下げインデントにする。*/
+span.ltlbg_dash{
+    display: inline-block;
+}
+span.ltlbg_dash::before{
+    display: inline-block;
+    content: "―";
+    transform: scale(1, 2) translate(0rem, -0.3rem);
+    margin-top: -1rem;
+}
+/*引用記号＞をぶら下げインデントにする。*/
+span.ltlbg_citation{
+    display: inline-block;
+}
+span.ltlbg_citation::before{
+    display: inline-block;
+    content: "＞";
+    margin-top: -1rem;
 }
 
 /*特殊ルビ_ルビが長い*/
@@ -207,14 +250,17 @@ span.ltlbg_wquote::after{
     transform: scale(0.5, 0.5);
 }
 
+/*forceGouji1と2で1文字を作ります。
+  偏と旁の比率は自分でいじってください。
+  複数必要な場合は増やしてください。*/
 span.ltlbg_forceGouji1{
     transform-origin: center right;
-    transform: scale(0.6,1 )  translate(-1rem,0);
+    transform: scale(0.4,1 )  translate(-2rem,0);
     display: inline-block;    
 }
 span.ltlbg_forceGouji2{
     transform-origin: center left;
-    transform: scale(0.8,1 ) translate(0.4rem,-1rem);
+    transform: scale(0.6,1 ) translate(1rem,-1rem);
     display: inline-block;
     margin-bottom: -1rem;
 }
