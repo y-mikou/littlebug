@@ -226,8 +226,8 @@ if [ "${1}" = "1" ] ; then
   ## 行頭括弧類の前に<p class="ltlbg_brctGrp">タグ
   cat tmp1_ltlbgtmp \
   | sed -e 's/^　/<p class=\"ltlbg_p\">/g' \
-  | sed -e 's/^「/<p class=\"ltlbg_p_brctGrp\">\n「/g' \
-  | sed -z 's/」\n<p class=\"ltlbg_p_brctGrp\">\n「/」\n「/g' \
+  | sed -e 's/^\([「（―『＞]\)/<p class=\"ltlbg_p_brctGrp\">\n\1/g' \
+  | sed -z 's/\([」）』]\)\?\n<p class=\"ltlbg_p_brctGrp\">\n\([「（―『＞]\)/\1\n\2/g' \
   >tmp2_ltlbgtmp
 
   ## <p>の手前に</p>
@@ -236,7 +236,7 @@ if [ "${1}" = "1" ] ; then
   ## 段落は複数行に渡る可能性があるため、閉じタグに<\!--ltlbg_p/_brctGrp-->を付与する
   cat tmp2_ltlbgtmp \
   | sed -z 's/\n<p class=\"ltlbg_p\">/<\/p><\!--ltlbg_p-->\n<p class=\"ltlbg_p\">/g' \
-  | sed -z 's/」<\/p><\!--ltlbg_p-->/」\n<\/p><\!--ltlbg_p_brctGrp-->/g' \
+  | sed -z 's/\([」）』＞]\)<\/p><\!--ltlbg_p-->/\1\n<\/p><\!--ltlbg_p_brctGrp-->/g' \
   | sed -z 's/\n<\/section><\!--ltlbg_section-->/<\/p><\!--ltlbg_p-->\n<\/section><\!--ltlbg_section-->/g' \
   | sed -z 's/\n<\/section><\!--ltlbg_section-->/<\/p><\!--ltlbg_p_brctGrp-->\n<\/section><\!--ltlbg_section-->/g' \
   | sed -z 's/<\/h2>\n<\/p><\!--ltlbg_p-->/<\/h2>/g' \
@@ -269,13 +269,20 @@ if [ "${1}" = "1" ] ; then
   >tmp2_ltlbgtmp
 
   ## 行頭「ではじまる、」までを<div class="ltlbg_talk">にする
-  ## 行頭（ではじまる、）までを<div class="ltlbg_talk">にする
+  ## 行頭（ではじまる、）までを<div class="ltlbg_think">にする
   ## 行頭〝ではじまる、〟までを<div class="ltlbg_wquote">にする
+  ## 行頭『ではじまる、』までを<div class="ltlbg_talk2">にする
+  ## 行頭―ではじまる、改行までを<div class="ltlbg_dash">にする
+  ## 行頭＞ではじまる、改行までを<div class="ltlbg_citation">にする
   ## これらのspanタグは複数行に渡る可能性があるため、閉じタグに<\!--ltlbg_XXX-->を付与する
   cat tmp1_ltlbgtmp \
   | sed -e 's/^「\(.\+\)」/<span class=\"ltlbg_talk\">\1<\/span><\!--ltlbg_talk-->/g' \
   | sed -e 's/^（\(.\+\)）/<span class=\"ltlbg_think\">\1<\/span><\!--ltlbg_think-->/g' \
   | sed -e 's/^〝\(.\+\)〟/<span class=\"ltlbg_wquote\">\1<\/span><\!--ltlbg_wquote-->/g' \
+  | sed -e 's/^『\(.\+\)』/<span class=\"ltlbg_talk2\">\1<\/span><\!--ltlbg_talk2-->/g' \
+  | sed -e 's/^―\(.\+\)<br class=\"ltlbg_br\">/<span class=\"ltlbg_dash\">\1<\/span><\!--ltlbg_dash-->/g' \
+  | sed -e 's/^＞\(.\+\)<br class=\"ltlbg_br\">/<span class=\"ltlbg_citation\">\1<\/span><\!--ltlbg_citation-->/g' \
+  | sed -z 's/\(<br class=\"ltlbg_br\">\n\)\?<br class=\"ltlbg_blankline\">\n<p class=\"ltlbg_p_brctGrp\">/<p class=\"ltlbg_p_brctGrp\">/g' \
   >tmp2_ltlbgtmp
 
   cat tmp2_ltlbgtmp >tmp1_ltlbgtmp

@@ -16,6 +16,10 @@ section.ltlbg_section{
 p.ltlbg_p{
     margin-top: 2rem;
 }
+/*擬似段落*/
+p.ltlbg_p_brctGrp{
+    margin-top: 2rem;
+}
 
 /*アへ濁点*/
 span.ltlbg_dakuten::after {
@@ -65,6 +69,18 @@ span.ltlbg_talk::before{
 span.ltlbg_talk::after{
     content: "」";
 }
+/*会話『』をぶら下げインデントにする。*/
+span.ltlbg_talk2{
+    display: inline-block;
+}
+span.ltlbg_talk2::before{
+    display: inline-block;
+    content: "『";
+    margin-left: -1rem;    
+}
+span.ltlbg_talk2::after{
+    content: "』";
+}
 /*思考（）をぶら下げインデントにする。*/
 span.ltlbg_think{
     display: inline-block;
@@ -88,6 +104,24 @@ span.ltlbg_think::before{
 }
 span.ltlbg_think::after{
     content: "〟";
+}
+/*ダッシュ会話―をぶら下げインデントにする。*/
+span.ltlbg_dash{
+    display: inline-block;
+}
+span.ltlbg_dash::before{
+    display: inline-block;
+    content: "―";
+    margin-left: -1rem;    
+}
+/*引用記号＞をぶら下げインデントにする。*/
+span.ltlbg_citation{
+    display: inline-block;
+}
+span.ltlbg_citation::before{
+    display: inline-block;
+    content: "＞";
+    margin-left: -1rem;    
 }
 
 /*特殊ルビ_ルビが長い*/
