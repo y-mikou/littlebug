@@ -431,6 +431,7 @@ if [ "${1}" = "1" ] ; then
     | sed -e 's/[\{\}]//g' \
     | while read line || [ -n "${line}" ]; do 
         echo -n "${line##*｜}" \
+        | sed -e 's/\~//g' \
         | wc -m;
       done \
     >2_ltlbgtmp
@@ -481,11 +482,11 @@ if [ "${1}" = "1" ] ; then
     cat rubytmp_ltlbgtmp \
     | sed -e 's/[\{\}]//g' \
     | sed -e 's/^[^｜]\+｜//g' \
+    | sed -e 's/\~\([a-zA-Z0-9!?]\{2\}\)\~/\1/g' \
     | sed -e 's/\//\\\//g' \
     | sed -e 's/\[/\\\[/g' \
     | sed -e 's/\]/\\\]/g' \
     | sed -e 's/\^/\\\^/g' \
-    | sed -e 's/\~/\\\~/g' \
     | sed -e 's/\*/\\\*/g' \
     | sed -e 's/\"/\\\"/g' \
     | sed -e 's/〼/　/g' \
@@ -601,6 +602,7 @@ if [ "${1}" = "1" ] ; then
       >tmp.sh
 
       bash tmp.sh >monorubyOutput_ltlbgtmp
+
     else
       cat monorubyInput_ltlbgtmp >monorubyOutput_ltlbgtmp
     fi
