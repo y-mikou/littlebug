@@ -11,6 +11,9 @@
 特に、小説のような形式で書かれた日本語文章に特化します。
 
 ## 変換概要
+# 当スクリプトでの変換対象一覧
+> 細かい挙動や仕様は、仕様書を参照してください。
+
 | 効果             | 対象文字、状況       | htmlタグとClass(終了タグ省略)                    | 概要/デフォ設定
 | ---------------- | -------------------- | -------------------------------------------- | -----------------
 | 改行             | 改行コード           | `<br class="ltlbg_br">`                      | 特殊style無し
@@ -20,8 +23,11 @@
 | 踊字             | `／＼`or`〱`         | `<span class="ltlbg_odori1">`                | 1字目。横書時回転
 |                  |                      | `<span class="ltlbg_odori2">`                | 2字目。横書時回転
 | 「会話」         | 行頭`「`から`」`     | `<span class="ltlbg_talk">`                  | ぶら下がりIndent
+| 『会話2』        | 行頭`『`から`』`     | `<span class="ltlbg_talk2">`                  | ぶら下がりIndent
 | （思考）         | 行頭`（`から`）`     | `<span class="ltlbg_think">`                 | ぶら下がりIndent
 | 〝強調〟         | 行頭`〝`から`〟`     | `<span class="ltlbg_wqote">`                 | ぶら下がりIndent
+| ――会話          | 行頭`―`か`――`から改行まで | `<span class="ltlbg_dash">`                 | ぶら下がりIndent
+| ＞会話          | 行頭`＞`(全角)から改行まで | `<span class="ltlbg_citation">`           | ぶら下がりIndent
 | 会話等の疑似段落  | 連続する括弧類の行    | `<p class="ltlbg_p_brctGrp">`                | 擬似的な段落
 | 右大不等号       | `<`                  | `&lt;`                                       | クラス化なし
 | 左大不等号       | `>`                  | `&gt;`                                       | クラス化なし
@@ -50,8 +56,6 @@
 | 字幅対応         | `[-字-]`             | `<span class="ltlbg_wdfix">`                             | 全半角1字。1em幅確保
 | 強制合字         | `[l[字]r]`           | `<span class="ltlbg_forceGouji">`                        | 左右のやつ限定「忄実」みたいの
 
-
-
 # 仕様
 [仕様書的なもの](https://github.com/y-mikou/littlebug/wiki/20_%E4%BB%95%E6%A7%98%E6%9B%B8%E7%9A%84%E3%81%AA%E3%82%82%E3%81%AE)参照
 
@@ -59,7 +63,6 @@
 ```
 bash littlebug.sh [引数1:変換方法] [引数2:(パスと)対象ファイル]
 ```
-
 
 ---
 
