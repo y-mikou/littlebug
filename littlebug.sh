@@ -759,11 +759,17 @@ elif [ "${1}" = "2" ] ; then
       ## 括弧類を復旧
       cat tmp1_ltlbgtmp \
       | sed -e 's/<\/span><!--ltlbg_talk-->/」/g' \
+      | sed -e 's/<\/span><!--ltlbg_talk2-->/』/g' \
       | sed -e 's/<\/span><!--ltlbg_think-->/）/g' \
       | sed -e 's/<\/span><!--ltlbg_wquote-->/〟/g' \
+      | sed -e 's/<\/span><!--ltlbg_dash-->//g' \
+      | sed -e 's/<\/span><!--ltlbg_citation-->//g' \
       | sed -e 's/<span class="ltlbg_talk">/「/g' \
+      | sed -e 's/<span class="ltlbg_talk2">/『/g' \
       | sed -e 's/<span class="ltlbg_think">/（/g' \
       | sed -e 's/<span class="ltlbg_wquote">/〝/g' \
+      | sed -e 's/<span class="ltlbg_dash">/――/g' \
+      | sed -e 's/<span class="ltlbg_citation">/＞/g' \
       >tmp2_ltlbgtmp
 
       ## 縦中横と横幅修正を除去
