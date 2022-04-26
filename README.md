@@ -23,11 +23,11 @@
 | 踊字             | `／＼`or`〱`         | `<span class="ltlbg_odori1">`                | 1字目。横書時回転
 |                  |                      | `<span class="ltlbg_odori2">`                | 2字目。横書時回転
 | 「会話」         | 行頭`「`から`」`     | `<span class="ltlbg_talk">`                  | ぶら下がりIndent
-| 『会話2』        | 行頭`『`から`』`     | `<span class="ltlbg_talk2">`                  | ぶら下がりIndent
+| 『会話』         | 行頭`『`から`』`     | `<span class="ltlbg_talk2">`                  | ぶら下がりIndent
 | （思考）         | 行頭`（`から`）`     | `<span class="ltlbg_think">`                 | ぶら下がりIndent
 | 〝強調〟         | 行頭`〝`から`〟`     | `<span class="ltlbg_wqote">`                 | ぶら下がりIndent
-| ――会話          | 行頭`―`か`――`から改行まで | `<span class="ltlbg_dash">`                 | ぶら下がりIndent
-| ＞会話          | 行頭`＞`(全角)から改行まで | `<span class="ltlbg_citation">`           | ぶら下がりIndent
+| ――会話         | 行頭`――`から改行まで | `<span class="ltlbg_dash">`                 | ぶら下がりIndent
+| ＞会話           | 行頭`＞`から改行まで  | `<span class="ltlbg_citation">`              | ぶら下がりIndent
 | 会話等の疑似段落  | 連続する括弧類の行    | `<p class="ltlbg_p_brctGrp">`                | 擬似的な段落
 | 右大不等号       | `<`                  | `&lt;`                                       | クラス化なし
 | 左大不等号       | `>`                  | `&gt;`                                       | クラス化なし
