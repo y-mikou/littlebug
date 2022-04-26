@@ -206,7 +206,7 @@ if [ "${1}" = "1" ] ; then
   ## 行頭括弧類の前に<p class="ltlbg_brctGrp">タグ
   cat tmp1_ltlbgtmp \
   | sed -e 's/^　\(.\+\)/<p class=\"ltlbg_p\">\1<\/p><!--ltlbg_p-->/g' \
-  | sed -e 's/^\([「（―『＞].\+[」』）〟―＜]\)/<p class=\"ltlbg_p_brctGrp\">\1\n<\/p><\!--ltlbg_p_brctGrp-->/g' \
+  | sed -e 's/^\([「（〝―『＞].\+[」』）〟―＜]\)/<p class=\"ltlbg_p_brctGrp\">\1\n<\/p><\!--ltlbg_p_brctGrp-->/g' \
   >tmp2_ltlbgtmp
 
   #ltlbg_p_brctGrpタグの整理
@@ -227,6 +227,7 @@ if [ "${1}" = "1" ] ; then
   | sed -z 's/<\/p><\!--ltlbg_p--><br class=\"ltlbg_br\">\n<p class=\"ltlbg_p_brctGrp\">/<\/p><\!--ltlbg_p-->\n<p class=\"ltlbg_p_brctGrp\">/g' \
   | sed -z 's/\(<br class=\"ltlbg_br\">\n\)\+<h2 class=\"ltlbg_sectionName\">/\n<h2 class=\"ltlbg_sectionName\">/g' \
   | sed -z 's/<\/h2>\(\n<br class=\"ltlbg_br\">\)\+/<\/h2>/g' \
+  | sed -z 's/<\!--ltlbg_section--><br class=\"ltlbg_br\">/<\!--ltlbg_section-->/g' \
   >tmp2_ltlbgtmp
 
   cat tmp2_ltlbgtmp \

@@ -142,16 +142,6 @@ span.ltlbg_wquote::before{
 span.ltlbg_wquote::after{
     content: "〟";
 }
-/*ダッシュ会話―をぶら下げインデントにする。*/
-span.ltlbg_dash{
-    display: inline-block;
-}
-span.ltlbg_dash::before{
-    display: inline-block;
-    content: "―";
-    transform: scale(1, 2) translate(0rem, -0.3rem);
-    margin-top: -1rem;
-}
 /*会話―をぶら下げインデントにする。*/
 span.ltlbg_dash{
     display: inline-block;
