@@ -105,7 +105,7 @@ span.ltlbg_think::before{
 span.ltlbg_think::after{
     content: "〟";
 }
-/*ダッシュ会話―をぶら下げインデントにする。*/
+/*会話―をぶら下げインデントにする。*/
 span.ltlbg_dash{
     display: inline-block;
 }
