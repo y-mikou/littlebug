@@ -152,7 +152,7 @@ span.ltlbg_dash::before{
     transform: scale(1, 2) translate(0rem, -0.3rem);
     margin-top: -1rem;
 }
-/*遠距離会話―をぶら下げインデントにする。*/
+/*会話―をぶら下げインデントにする。*/
 span.ltlbg_dash{
     display: inline-block;
 }
