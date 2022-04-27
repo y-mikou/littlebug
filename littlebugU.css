@@ -33,6 +33,10 @@ hr.ltlbg_hr{
 */
 
 html{
+    /* フォント */
+    font-family: 'Noto Serif JP', serif;
+    font-weight: normal;
+
     padding: 2.5em;
     line-height: 2em;    
 }
