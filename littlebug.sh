@@ -692,12 +692,12 @@ if [ "${1}" = "1" ] ; then
   ##########################################################################################
   #cat tmp2_ltlbgtmp >tmp1_ltlbgtmp
   cat tmp1_ltlbgtmp \
-  | sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css"\>\n/' \
-  | sed -z 's/^/\<\!--\<link rel=\"stylesheet\" href=\"\.\.\/littlebugRL\.css"\>-->\n/' \
-  | sed -z 's/^/\<link rel=\"stylesheet\" href=\"\.\.\/littlebugU\.css"\>\n/' \
-  | sed -z 's/^/\<link rel=\"preconnect\" href=\"https:\/\/fonts\.googleapis\.com\">\n/' \
-  | sed -z 's/^/\<link rel=\"preconnect\" href=\"https:\/\/fonts\.gstatic\.com\" crossorigin>\n/' \
-  | sed -z 's/^/\<link href=\"https:\/\/fonts\.googleapis\.com\/css2\?family=Noto\+Serif\+JP:wght\@300\&display=swap\" rel=\"stylesheet">\n/' \
+  | sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css">\n/' \
+  | sed -z 's/^/<\!--\<link rel=\"stylesheet\" href=\"\.\.\/littlebugRL\.css">-->\n/' \
+  | sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/littlebugU\.css">\n/' \
+  | sed -z 's/^/<link rel=\"preconnect\" href=\"https:\/\/fonts\.googleapis\.com\">\n/' \
+  | sed -z 's/^/<link rel=\"preconnect\" href=\"https:\/\/fonts\.gstatic\.com\" crossorigin>\n/' \
+  | sed -z 's/^/<link href=\"https:\/\/fonts\.googleapis\.com\/css2\?family=Noto\+Serif\+JP:wght\@300\&display=swap\" rel=\"stylesheet">\n/' \
   >${destFile}
 
   echo "✨ "${destFile}"を出力しました[html化]"
@@ -803,7 +803,7 @@ elif [ "${1}" = "2" ] ; then
       ## <h2 class="ltlbg_sectionName">\1<\/h2>を行頭◆へ
       ## <hr class="ltlbg_hr">を---へ。
       cat tmp2_ltlbgtmp \
-      | sed -e 's/<h2 class=\"ltlbg_sectionName\">\([^<]\+\)<\/h2>/◆\1/g' \
+      | sed -e 's/<h2 class=\"ltlbg_sectionName\">\([^<]\+\)<\/h2>/\1/g' \
       | sed -e 's/<hr class=\"ltlbg_hr\">/---/g' \
       >tmp1_ltlbgtmp
 
