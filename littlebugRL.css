@@ -1,6 +1,5 @@
 html {
     /* 組み方向 */
-    /* 縦    writing-mode: vertical-rl; */
     /* 横 */ writing-mode: horizontal-tb; 
 
     orphans: 1;
@@ -22,10 +21,12 @@ p.ltlbg_p_brctGrp{
 }
 
 /*アへ濁点*/
+/*フォントによって位置がずれる。ユーザ側で調整してください*/
 span.ltlbg_dakuten::after {
-    content: "゛";
+    display: inline-block;
+/*    transform: translate(0.3rem,-1.6rem);
+    content: "゛";*/
 }
-
 
 /*二倍化。自動変換対象ではないが、～などを伸ばすのにも使える。*/
 span.ltlbg_wSize{
@@ -201,6 +202,9 @@ span.ltlbg_citation::before{
     letter-spacing: 1rem;
 }
 
+/*forceGouji1と2で1文字を作ります。
+  偏と旁の比率はユーザ側でいじってください。
+  複数必要な場合は増やしてください。*/
 span.ltlbg_forceGouji1{
     transform-origin: center right;
     transform: scale(0.6,1 )  translate(-0.7rem,0);
