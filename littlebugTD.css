@@ -10,6 +10,12 @@ html {
 section.ltlbg_section{
     margin-left: 5rem;
 }
+/*章名称*/
+h2.ltlbg_sectionName{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
 
 /*段落*/
 p.ltlbg_p{

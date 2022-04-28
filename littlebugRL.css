@@ -10,6 +10,11 @@ html {
 section.ltlbg_section{
     margin-bottom: 5rem;
 }
+/*章名称*/
+h2.ltlbg_sectionName{
+    display: block;
+    text-align: center;
+}
 
 /*段落*/
 p.ltlbg_p{
