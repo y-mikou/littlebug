@@ -220,7 +220,7 @@ if [ "${1}" = "1" ] ; then
 
   ## 行頭§◆■の次に空白(なくても良い)に続く行を、<h2 class="ltlbg_sectionName">章タイトルに
   cat tmp2_ltlbgtmp \
-  | sed -e 's/^[§◆■]\(.\+\)/<h2 class=\"ltlbg_sectionName\">\1<\/h2>/g' \
+  | sed -e 's/^\([§◆■]\)\(.\{0,\}\)/<h2 class=\"ltlbg_sectionName\">\1\2<\/h2>/g' \
   >tmp1_ltlbgtmp
 
   ## 行頭全角スペースで始まる行を<p>タグに

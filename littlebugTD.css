@@ -1,7 +1,6 @@
 html {
     /* 組み方向 */
     /* 縦 */ writing-mode: vertical-rl;
-    /* 横    writing-mode: horizontal-tb; */ 
     
     orphans: 1;
     widows: 1;
@@ -10,6 +9,12 @@ html {
 /*章*/
 section.ltlbg_section{
     margin-left: 5rem;
+}
+/*章名称*/
+h2.ltlbg_sectionName{
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
 
 /*段落*/
@@ -32,13 +37,18 @@ span.ltlbg_tcyM {
 }
 
 /*アへ濁点*/
+/*フォントによって位置がずれる。ユーザ側で調整してください*/
 span.ltlbg_dakuten{
     margin-bottom: -1rem;
 }
 span.ltlbg_dakuten::after {
     display: inline-block;
     content: "゛";
-    transform: translate(0.3rem,-1.6rem);
+    transform: translate(1rem,-1rem);
+
+    /*デフォルトのフォントを使用する場合、
+      VivliosyleViewerでは以下の値になる
+    transform: translate(0.3rem,-1.6rem);*/
 }
 
 
@@ -241,7 +251,7 @@ span.ltlbg_citation::before{
 }
 
 /*forceGouji1と2で1文字を作ります。
-  偏と旁の比率は自分でいじってください。
+  偏と旁の比率はユーザ側でいじってください。
   複数必要な場合は増やしてください。*/
 span.ltlbg_forceGouji1{
     transform-origin: center right;

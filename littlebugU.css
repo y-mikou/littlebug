@@ -34,6 +34,8 @@ hr.ltlbg_hr{
 
 html{
     /* フォント */
+    /*webフォントを指定している。*/
+    /*html側で読み込んでいるので、不要であれば変更・除去してください*/
     font-family: 'Noto Serif JP', serif;
     font-weight: normal;
 
