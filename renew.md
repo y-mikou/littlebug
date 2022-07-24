@@ -1,18 +1,18 @@
 ## 組版パーツ
 - ブロック要素…登場順序がほぼ決まっている。再帰しない。
   - ファイル単位
-    - 本:header>Title
+    - 本:header>Book
   - 意味段落
     1.  段落・疑似段落
-        - 段落:p.ltlbg_Paragraph
-        - 会話集合などの疑似段落:p.ltlbg_SubParagraph
+        - 段落:p.ltlbg_DANRAKU
+        - 会話集合などの疑似段落:p.ltlbg_KAIWA
     2.  セクション
-        1.  項:section.ltlbg_SubSection
-        2.  節:section.ltlbg_Section
-        3.  章:section.ltlbg_Chapter
+        1.  条:section.ltlbg_JO
+        2.  節:section.ltlbg_SETU
+        3.  章:section.ltlbg_SYO
     3.  大区切り
-        1.  部:article.ltlbg_Part
-        2.  作品article.ltlbg_workTitle
+        1.  部:article.ltlbg_BU
+        2.  作品article.ltlbg_Title
   - 形式段落
     - 静的改ページ:pagebreak-after
     - 静的改段:実現できるか？
