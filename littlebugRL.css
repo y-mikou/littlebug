@@ -6,6 +6,20 @@ html {
     widows: 1;
 }
 
+@media (orientation: portrait){
+    body {
+        margin: 0 auto;
+        width: 100%;
+    }    
+}
+
+@media (orientation: landscape){
+    body {
+        margin: 0 auto;
+        width: 60%;
+    }    
+}
+
 /*章*/
 section.ltlbg_section{
     margin-bottom: 5rem;
