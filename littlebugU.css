@@ -60,7 +60,6 @@ span.ltlbg_emphasis{
 
 /*章タイトル*/
 h2.ltlbg_sectionName{
-    display: inline-block;
     line-height: 3em;
     font-size: 1.6em;
 }
