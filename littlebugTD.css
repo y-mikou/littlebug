@@ -2,16 +2,19 @@ html {
     /* 組み方向 */
     /* 縦 */ writing-mode: vertical-rl;
     
-    orphans: 1;
-    widows: 1;
+    orphans: 0;
+    widows: 0;
 }
 
 /*章*/
 section.ltlbg_section{
-    margin-left: 5rem;
+    margin: 0;
 }
 /*章名称*/
 h2.ltlbg_sectionName{
+    font-size: 1rem;
+    margin-left: 2rem;
+    margin-right: 2rem;
     display:flex;
     justify-content:center;
     align-items:center;
@@ -19,11 +22,20 @@ h2.ltlbg_sectionName{
 
 /*段落*/
 p.ltlbg_p{
-    margin-right: 2rem;
+    margin: 0;
+    break-inside: avoid-page;
+    break-after: avoid;
+    }
+p.ltlbg_p::before{
+    content: "　";
 }
+
 /*擬似段落*/
 p.ltlbg_p_brctGrp{
     margin-right: 2rem;
+    margin-left: 2rem;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 
 /* 縦中横。AもMもスタイル自体は同じ*/
@@ -101,51 +113,48 @@ span.ltlbg_semicolon{
 span.ltlbg_colon{
     display: inline-block;
     text-align: center;
-    height: 1rem;
+    line-height: 1rem;
 }
 
 /*会話「」をぶら下げインデントにする。*/
 span.ltlbg_talk{
-    display: inline-block;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 span.ltlbg_talk::before{
-    display: inline-block;
     content: "「";
-    margin-top: -1rem;
 }
 span.ltlbg_talk::after{
     content: "」";
 }
 /*会話『』をぶら下げインデントにする。*/
 span.ltlbg_talk2{
-    display: inline-block;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 span.ltlbg_talk2::before{
-    display: inline-block;
     content: "『";
-    margin-top: -1rem;
 }
 span.ltlbg_talk2::after{
     content: "』";
 }
 /*思考（）をぶら下げインデントにする。*/
 span.ltlbg_think{
-    display: inline-block;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 span.ltlbg_think::before{
-    display: inline-block;
     content: "（";
-    margin-top: -1rem;
 }
 span.ltlbg_think::after{
     content: "）";
 } 
 /*強調〝〟をぶら下げインデントにする。*/
 span.ltlbg_wquote{
-    display: inline-block;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 span.ltlbg_wquote::before{
-    display: inline-block;
     content: "〝";
     margin-top: -1rem;
 }
@@ -154,20 +163,20 @@ span.ltlbg_wquote::after{
 }
 /*会話―をぶら下げインデントにする。*/
 span.ltlbg_dash{
-    display: inline-block;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 span.ltlbg_dash::before{
-    display: inline-block;
     content: "―";
     transform: scale(1, 2) translate(0rem, -0.3rem);
     margin-top: -1rem;
 }
 /*引用記号＞をぶら下げインデントにする。*/
 span.ltlbg_citation{
-    display: inline-block;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 span.ltlbg_citation::before{
-    display: inline-block;
     content: "＞";
     margin-top: -1rem;
 }

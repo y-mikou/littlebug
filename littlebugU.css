@@ -32,16 +32,15 @@ hr.ltlbg_hr{
 
 */
 
-html{
+html {
     /* フォント */
     /*webフォントを指定している。*/
     /*html側で読み込んでいるので、不要であれば変更・除去してください*/
     font-family: 'Noto Serif JP', serif;
     font-weight: normal;
-
-    padding: 2.5em;
-    line-height: 2em;    
-}
+    padding: 2rem;
+    line-height: 2rem;    
+    }
 
 /*改ページ*/
 div.ltlbg_newpage{
@@ -56,12 +55,6 @@ span.ltlbg_bold{
 /*傍点 デフォルトはゴマなので、必要であれば変える*/
 span.ltlbg_emphasis{
     text-emphasis-style: filled sesame;
-}
-
-/*章タイトル*/
-h2.ltlbg_sectionName{
-    line-height: 3em;
-    font-size: 1.6em;
 }
 
 /*1文字幅*/

@@ -1,0 +1,9 @@
+html {
+    font-size: 15px;
+    column-count: 2;
+}
+@page{
+    size:A4;
+    margin-right: 3rem;
+    margin-left: 5rem;
+}
