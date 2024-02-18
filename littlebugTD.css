@@ -1,3 +1,5 @@
+/* 縦書き様に読み込むCSS */
+
 html {
     /* 組み方向 */
     /* 縦 */ writing-mode: vertical-rl;

@@ -688,13 +688,14 @@ if [ "${1}" = "1" ] ; then
   >tmp1_ltlbgtmp
 
   ##########################################################################################
-  # 先頭にlittlebugU.css、littlebugTD.cssを読み込むよう追記する
+  # 先頭にlittlebugXXX.css読み込むよう追記する
   ##########################################################################################
   #cat tmp2_ltlbgtmp >tmp1_ltlbgtmp
   cat tmp1_ltlbgtmp \
-  | sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css">\n/' \
-  | sed -z 's/^/<\!--\<link rel=\"stylesheet\" href=\"\.\.\/littlebugRL\.css">-->\n/' \
-  | sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/littlebugU\.css">\n/' \
+  | sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugI\.css">\n/' \
+  | sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugTD\.css">\n/' \
+  | sed -z 's/^/<\!--\<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugRL\.css">-->\n/' \
+  | sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugU\.css">\n/' \
   | sed -z 's/^/<link rel=\"preconnect\" href=\"https:\/\/fonts\.googleapis\.com\">\n/' \
   | sed -z 's/^/<link rel=\"preconnect\" href=\"https:\/\/fonts\.gstatic\.com\" crossorigin>\n/' \
   | sed -z 's/^/<link href=\"https:\/\/fonts\.googleapis\.com\/css2\?family=Noto\+Serif\+JP:wght\@300\&display=swap\" rel=\"stylesheet">\n/' \
