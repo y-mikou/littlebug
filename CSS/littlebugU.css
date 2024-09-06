@@ -63,8 +63,8 @@ span.ltlbg_emphasis{
 span.ltlbg_wdfix{
     display: inline-block;
     text-align: center;
-    width: 1em;
-    height: 1em;
+    width: 1rem;
+    height: 1rem;
 }
 
 /*特殊ルビ用。

@@ -6,12 +6,6 @@ html {
     
     orphans: 0;
     widows: 0;
-}
-
-/*章*/
-section.ltlbg_section{
-    margin: 0;
-
     /* 方眼紙模様に必須のスタイル */
     background-image: linear-gradient(0deg, transparent calc(100% - 1px), #f0f0f0 calc(100% - 1px)),
                         linear-gradient(90deg, transparent calc(100% - 1px), #f0f0f0 calc(100% - 1px));
@@ -20,7 +14,14 @@ section.ltlbg_section{
     background-position: center center;
     
     /* 以下任意のスタイル */
-    padding: 0px;
+    padding: 0rem;
+}
+
+/*章*/
+section.ltlbg_section{
+    margin-top: 0.3rem;
+    margin-right: 2.8rem;
+
 }
 /*章名称*/
 h2.ltlbg_sectionName{
