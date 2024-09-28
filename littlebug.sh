@@ -382,7 +382,6 @@ if [ "${convMode}" = '-H' ] ; then
   cat emphasisOutput_ltlbgtmp \
   >tmp1_ltlbgtmp
   ############################圏点対応
-exit
 
   cat tmp1_ltlbgtmp >rubyInput_ltlbgtmp
   ############################ルビ対応
