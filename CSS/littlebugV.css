@@ -240,17 +240,17 @@ span.ltlbg_citation::before{
     position: absolute;
     top: 0;
     bottom: 0;
-    left: 70%;
+    left: 80%;
     white-space: nowrap;
     text-indent: 0;
 
     display: flex;
     justify-content: center;
     transform-origin: left center;
-    transform: scale(0.5, 0.5);
+    transform: scale(0.6, 0.6);
 
-    margin-top: 0.5rem;
-    letter-spacing: 1rem;
+    margin-top: 0.4rem;
+    letter-spacing: 0.5rem;
 }
 
 /*特殊傍点*/
