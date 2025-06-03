@@ -3,8 +3,31 @@ html {
     font-size: 15px;
     column-count: 1;
 }
-@page{
-    size:A5;
-    margin-right: 3rem;
-    margin-left: 5rem;
+
+
+@page :left{
+    @left-middle {
+        content: "";
+        writing-mode: horizontal-tb;
+        transform: translate(0,0) rotate(180deg);
+    }
+}
+@page :right{
+    @top-right {
+        font-family: 'BIZ UDMincho';
+        content: "// DeGrad[u]ation //";
+        writing-mode: horizontal-tb;
+        transform: translate(-30px,0) rotate(0);
+    }
+}
+
+@page sukebe:left{
+    background: url(../img/sukebeLabel_L.jpg) no-repeat ;
+    background-size: 120px;
+    background-position: left -12px top -12px;
+}
+@page sukebe:right{
+    background: url(../img/sukebeLabel_R.jpg) no-repeat ;
+    background-size: 120px;
+    background-position: right -12px top -12px;
 }

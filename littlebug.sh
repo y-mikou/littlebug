@@ -1,26 +1,38 @@
 #!/bin/bash
 export lang=ja_jp.utf-8
 
-tgtFile=${1}   #引数で指定されたファイルを対象とする
-tgtFile_AfterCD='../'${tgtFile}   #一時ディレクトリの内側から参照するとき用
-convMode=${2}  #'-t2h'でtxt→html、'-h2t'でhtml→txt、それ以外は今の所はエラー
-chrset=$(file -i ${tgtFile})
+tgtFile=${2}   #引数で指定されたファイルを対象とする
 
+if [[ "${tgtFile/ /}" = "" ]];then
+  echo "💩対象ファイルを指定してください"
+  exit 1
+fi
+
+tgtFile_AfterCD='../'${tgtFile}   #一時ディレクトリの内側から参照するとき用
+
+if [ ! -e ${tgtFile} ]; then
+  echo "💩 ${tgtFile}なんてファイルいないです"
+  exit 1
+fi
+
+convMode=${1}  #'-t2h'でtxt→html、'-h2t'でhtml→txt、それ以外は今の所はエラー
+
+if [[ "${convMode}" != '-t2h' ]] && [[ "${convMode}" != '-h2t' ]] ; then
+  echo "💩 引数1は-t2h(txt→html)か-h2t(html→txt)で指定してください"
+  exit 1
+fi
+
+chrset=$(file -i ${tgtFile})
 tmpDirName=$(mktemp -u ltlbgtmpDir_XXXXX)  #作業用ディレクトリを作成し
 mkdir ${tmpDirName}                        #その中で作業する。
 cd ${tmpDirName}                           #最後にディレクトリごと削除する。
-
-if [ ! -e ${tgtFile_AfterCD} ]; then
-  echo "💩 そんなファイルいないです"
-  exit 1
-fi
 
 if [ "${chrset##*charset=}" = "unknown-8bit" ]; then
   iconv -f SHIFT_JIS -t UTF-8 ${tgtFile_AfterCD} > tmp1_ltlbgtmp
   cat tmp1_ltlbgtmp >${tgtFile_AfterCD}
 fi
 
-if [ "${convMode}" = '-H' ] ; then
+if [ "${convMode}" = '-t2h' ] ; then
 
   ## txt→html ############################################################################################
 
@@ -203,35 +215,46 @@ if [ "${convMode}" = '-H' ] ; then
   | sed -e 's/\([^!！?？\&#;]\)\(?!\|？！\)\([^!！?？\&#;]\)/\1~?!~\3/g' \
   >tmp2_ltlbgtmp
 
-  ## [capter]を<section class="ltlbg_section">に。:XXXXXはid="XXXX"に。
-  ## 章区切りのない文章対応で、先頭に必ず章を付与し、重なった章開始を除去
-  cat tmp2_ltlbgtmp \
-  | sed -z 's/^/<section class=\"ltlbg_section\">\n/g' \
-  | sed -e 's/\[chapter:/[chapter id=/g' \
-  | sed -e 's/\[chapter\( id=\([^[]\+\)\)\?\]/<section class="ltlbg_section"\1>/g' \
-  | sed -e 's/id=\([^>]\+\)\+>/id=\"\1\">/' \
-  | sed -z 's/<section class=\"ltlbg_section\">\n<section class=\"ltlbg_section\"/<section class=\"ltlbg_section\"/g' \
-  >tmp1_ltlbgtmp
+#TODO:[capter]による章指定を廃止。なくて問題なさそうなら永続的に削除する
+#
+#  ## [capter]を<section class="ltlbg_section">に。:XXXXXはid="XXXX"に。
+#  ## 章区切りのない文章対応で、先頭に必ず章を付与し、重なった章開始を除去
+#  cat tmp2_ltlbgtmp \
+#  | sed -z 's/^/<section class=\"ltlbg_section\">\n/g' \
+#  | sed -e 's/\[chapter:/[chapter id=/g' \
+#  | sed -e 's/\[chapter\( id=\([^[]\+\)\)\?\]/<section class="ltlbg_section"\1>/g' \
+#  | sed -e 's/id=\([^>]\+\)\+>/id=\"\1\">/' \
+#  | sed -z 's/<section class=\"ltlbg_section\">\n<section class=\"ltlbg_section\"/<section class=\"ltlbg_section\"/g' \
+#  >tmp1_ltlbgtmp
+#
+#  ## 章を閉じる
+#  ## 置換の都合上必ず生じる先頭の章閉じは削除
+#  ## 作品の末尾には必ず章閉じを付与
+#  ## 章区切りは複数行に渡る可能性があるので閉じタグに<\!--ltlbg_section-->を付与する
+#  cat tmp1_ltlbgtmp \
+#  | sed -e 's/<section/<\/section><\!--ltlbg_section-->\n<section/g' \
+#  | sed -z '1,/<\/section><\!--ltlbg_section-->\n/s/<\/section><\!--ltlbg_section-->\n//' \
+#  | sed -z 's/$/\n<\/section><\!--ltlbg_section-->\n/' \
+#  >tmp2_ltlbgtmp
 
-  ## 章を閉じる
-  ## 置換の都合上必ず生じる先頭の章閉じは削除
-  ## 作品の末尾には必ず章閉じを付与
-  ## 章区切りは複数行に渡る可能性があるので閉じタグに<\!--ltlbg_section-->を付与する
-  cat tmp1_ltlbgtmp \
-  | sed -e 's/<section/<\/section><\!--ltlbg_section-->\n<section/g' \
-  | sed -z '1,/<\/section><\!--ltlbg_section-->\n/s/<\/section><\!--ltlbg_section-->\n//' \
-  | sed -z 's/$/\n<\/section><\!--ltlbg_section-->\n/' \
-  >tmp2_ltlbgtmp
-
-  ## 行頭§◆■の次に空白(なくても良い)に続く行を、<h2 class="ltlbg_sectionName">章タイトルに
+  ## 行頭§§§の次に空白(なくても良い)に続く行を、<h2 class="ltlbg_sectionName" style="page: sukebe;">章タイトルに
+  ### style="page: sukebe;"はCSS側で、当該セクション(に属すページ)がエッチシーンであることを示す
+  ### ':'';'は当スクリプト内で特殊文字として操作しているため、ここには含めず、スクリプトの最後に付与し直している
+  ### 印刷上は§１つだけになる
+  ## 行頭§の次に空白(なくても良い)に続く行を、<h2 class="ltlbg_sectionName">章タイトルに
+  ## 章タイトル付与時に、<section>の閉じ＋開始タグを付与する。
+  ## 1行目が</section><!--ltlbg_section-->になるので、削除する
+  ## 今は§で節を表示している
   cat tmp2_ltlbgtmp \
-  | sed -e 's/^\([§◆■]\)\(.\{0,\}\)/<h2 class=\"ltlbg_sectionName\">\1\2<\/h2>/g' \
+  | sed -e 's/^\(§§§\)\(.\{0,\}\)/<\/section><\!--ltlbg_section-->\n<section class=\"ltlbg_section\" style=\"page sukebe\"><h2 class=\"ltlbg_sectionName\">§ \2<\/h2>/g' \
+  | sed -e 's/^\(§\)\(.\{0,\}\)/<\/section><\!--ltlbg_section-->\n<section class=\"ltlbg_section\"><h2 class=\"ltlbg_sectionName\">§ \2<\/h2>/g' \
+  | sed -e '1d' \
   >tmp1_ltlbgtmp
 
   ## 行頭全角スペースで始まる行を<p>タグに
   ## 行頭括弧類の前に<p class="ltlbg_brctGrp">タグ
   cat tmp1_ltlbgtmp \
-  | sed -e 's/^　\(.\+\)/<p class=\"ltlbg_p\">\1<\/p><!--ltlbg_p-->/g' \
+  | sed -e 's/^　\(.\+\)/<p class=\"ltlbg_p\">\1<\/p><\!--ltlbg_p-->/g' \
   | sed -e 's/^\([「（―『＞].\+[」』）〟―＜]\)/<p class=\"ltlbg_p_brctGrp\">\1\n<\/p><\!--ltlbg_p_brctGrp-->/g' \
   >tmp2_ltlbgtmp
 
@@ -253,6 +276,7 @@ if [ "${convMode}" = '-H' ] ; then
   | sed -z 's/<\/p><\!--ltlbg_p--><br class=\"ltlbg_br\">\n<p class=\"ltlbg_p_brctGrp\">/<\/p><\!--ltlbg_p-->\n<p class=\"ltlbg_p_brctGrp\">/g' \
   | sed -z 's/\(<br class=\"ltlbg_br\">\n\)\+<h2 class=\"ltlbg_sectionName\">/\n<h2 class=\"ltlbg_sectionName\">/g' \
   | sed -z 's/<\/h2>\(\n<br class=\"ltlbg_br\">\)\+/<\/h2>/g' \
+  | sed -z 's/<\/section><\!--ltlbg_section--><br class=\"ltlbg_br\">/<\/section><\!--ltlbg_section--\>/g' \
   >tmp2_ltlbgtmp
 
   cat tmp2_ltlbgtmp \
@@ -689,26 +713,28 @@ if [ "${convMode}" = '-H' ] ; then
   | sed -e 's/＆＃０９２/\&#092;/g' \
   | sed -e 's/〿/<span class="ltlbg_sSp"><\/span>/g' \
   | sed -e 's/〼/<span class="ltlbg_wSp"><\/span>/g' \
+  | sed -e 's/style="page sukebe"/style="page: sukebe;"/g' \
   | sed -z 's/\n\n/\n/g' \
-  >tmp1_ltlbgtmp
+  >${destFile}
 
+  #>tmp2_ltlbgtmp
   ##########################################################################################
   # 先頭にlittlebugXXX.css読み込むよう追記する
   ##########################################################################################
   #cat tmp2_ltlbgtmp >tmp1_ltlbgtmp
-  cat tmp1_ltlbgtmp \
-  | sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugI\.css">\n/' \
-  | sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugTD\.css">\n/' \
-  | sed -z 's/^/<\!--\<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugRL\.css">-->\n/' \
-  | sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugU\.css">\n/' \
-  | sed -z 's/^/<link rel=\"preconnect\" href=\"https:\/\/fonts\.googleapis\.com\">\n/' \
-  | sed -z 's/^/<link rel=\"preconnect\" href=\"https:\/\/fonts\.gstatic\.com\" crossorigin>\n/' \
-  | sed -z 's/^/<link href=\"https:\/\/fonts\.googleapis\.com\/css2\?family=Noto\+Serif\+JP:wght\@300\&display=swap\" rel=\"stylesheet">\n/' \
-  >${destFile}
+  #cat tmp1_ltlbgtmp \
+  #| sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugI\.css">\n/' \
+  #| sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugTD\.css">\n/' \
+  #| sed -z 's/^/<\!--\<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugRL\.css">-->\n/' \
+  #| sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugU\.css">\n/' \
+  #| sed -z 's/^/<link rel=\"preconnect\" href=\"https:\/\/fonts\.googleapis\.com\">\n/' \
+  #| sed -z 's/^/<link rel=\"preconnect\" href=\"https:\/\/fonts\.gstatic\.com\" crossorigin>\n/' \
+  #| sed -z 's/^/<link href=\"https:\/\/fonts\.googleapis\.com\/css2\?family=Noto\+Serif\+JP:wght\@300\&display=swap\" rel=\"stylesheet">\n/' \
+  #>${destFile}
 
   echo "✨ "${destFile}"を出力しました[html化]"
 
-elif [ "${convMode}" = '-T' ] ; then
+elif [ "${convMode}" = '-h2t' ] ; then
   ## html→txt ############################################################################################
 
   destFile=${tgtFile_AfterCD/".html"/"_removed.txt"} #出力ファイルの指定する
@@ -986,10 +1012,6 @@ elif [ "${convMode}" = '-T' ] ; then
 
   cat tmp1_ltlbgtmp >${destFile}
   echo "✨ "${destFile}"を出力しました[txtもどし]"
-
-else
-  echo "💩 引数2は-H(txt→html)か-T(html→txt)で指定してください"
-  exit 1
 fi
 
 ##########################################################################################

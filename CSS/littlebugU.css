@@ -34,6 +34,40 @@ hr.ltlbg_hr{
 
 */
 
+@page {
+    size:105mm 152mm ;
+    bleed: 3mm;
+    /*marks: crop cross;*/
+    @bottom-center {
+        font-family: 'BIZ UDMincho';
+        content: "- " counter(page) " -";
+    }
+}
+@page :left{
+    margin-right: 4rem;
+    margin-left: 4rem;
+}
+@page :right{
+    margin-left: 5rem;
+    margin-right: 3rem;
+}
+
+
+/*変なページ制御をしない*/
+*{
+    break-inside: auto;
+    padding: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+    line-break: anywhere;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    font-feature-settings: "halt" 1;
+}
+
 html {
     /* フォント */
     /*webフォントを指定している。*/
