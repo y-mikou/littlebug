@@ -33,24 +33,24 @@ hr.ltlbg_hr{
 }
 
 */
-
-@page {
-    size:105mm 152mm ;
-    bleed: 3mm;
-    /*marks: crop cross;*/
-    @bottom-center {
-        font-family: 'BIZ UDMincho';
-        content: "- " counter(page) " -";
+    @page {
+        size:105mm 152mm ;
+        padding-top: 3mm;/*サイズを誤ったので無理矢理修正*/
+        bleed: 3mm;
+        /*marks: crop cross;*/
+        @bottom-center {
+            font-family: 'BIZ UDMincho';
+            content: "- " counter(page) " -";
+        }
     }
-}
-@page :left{
-    margin-right: 4rem;
-    margin-left: 4rem;
-}
-@page :right{
-    margin-left: 5rem;
-    margin-right: 3rem;
-}
+    @page :left{
+        margin-right: 4rem;
+        margin-left: 4rem;
+    }
+    @page :right{
+        margin-left: 5rem;
+        margin-right: 3rem;
+    }
 
 
 /*変なページ制御をしない*/
@@ -68,15 +68,12 @@ hr.ltlbg_hr{
     font-feature-settings: "halt" 1;
 }
 
+
 html {
-    /* フォント */
-    /*webフォントを指定している。*/
-    /*html側で読み込んでいるので、不要であれば変更・除去してください*/
-    font-family: 'Noto Serif JP', serif;
-    font-weight: normal;
-    padding: 2rem;
-    line-height: 2rem;    
-    }
+    line-height: 1.8rem;
+    widows: 1;
+    orphans: 1;
+}
 
 /*改ページ*/
 div.ltlbg_newpage{
