@@ -27,7 +27,7 @@ p.ltlbg_p::before{
 }
 
 /*擬似段落*/
-p.ltlbg_p_brctGrp{
+div.ltlbg_p_brctGrp{
     margin-top: 0.8rem;
     margin-bottom: 0.8rem;
 }
@@ -72,67 +72,67 @@ span.ltlbg_wSp{
 }
 
 /*会話「」をぶら下げインデントにする。*/
-span.ltlbg_talk{
+p.ltlbg_talk{
     display: inline-block;
 }
-span.ltlbg_talk::before{
+p.ltlbg_talk::before{
     display: inline-block;
     content: "「";
     margin-left: -1rem;    
 }
-span.ltlbg_talk::after{
+p.ltlbg_talk::after{
     content: "」";
 }
 /*会話『』をぶら下げインデントにする。*/
-span.ltlbg_talk2{
+p.ltlbg_talk2{
     display: inline-block;
 }
-span.ltlbg_talk2::before{
+p.ltlbg_talk2::before{
     display: inline-block;
     content: "『";
     margin-left: -1rem;    
 }
-span.ltlbg_talk2::after{
+p.ltlbg_talk2::after{
     content: "』";
 }
 /*思考（）をぶら下げインデントにする。*/
-span.ltlbg_think{
+p.ltlbg_think{
     display: inline-block;
 }
-span.ltlbg_think::before{
+p.ltlbg_think::before{
     display: inline-block;
     content: "（";
     margin-left: -1rem;    
 }
-span.ltlbg_think::after{
+p.ltlbg_think::after{
     content: "）";
 }
 /*強調〝〟をぶら下げインデントにする。*/
-span.ltlbg_wquote{
+p.ltlbg_wquote{
     display: inline-block;
 }
-span.ltlbg_wquote::before{
+p.ltlbg_wquote::before{
     display: inline-block;
     content: "〝";
     margin-left: -1rem;    
 }
-span.ltlbg_wquote::after{
+p.ltlbg_wquote::after{
     content: "〟";
 }
 /*会話―をぶら下げインデントにする。*/
-span.ltlbg_dash{
+p.ltlbg_dash{
     display: inline-block;
 }
-span.ltlbg_dash::before{
+p.ltlbg_dash::before{
     display: inline-block;
     content: "――";
     margin-left: -1rem;    
 }
 /*引用記号＞をぶら下げインデントにする。*/
-span.ltlbg_citation{
+p.ltlbg_citation{
     display: inline-block;
 }
-span.ltlbg_citation::before{
+p.ltlbg_citation::before{
     display: inline-block;
     content: "＞";
     margin-left: -1rem;    
