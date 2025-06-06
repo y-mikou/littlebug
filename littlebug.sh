@@ -717,9 +717,7 @@ if [ "${convMode}" = '-t2h' ] ; then
   | sed -z 's/\n\n/\n/g' \
   >tmp_converted_content_ltlbgtmp
 
-  head -n 11 ../雛形.html >${destFile}
-  cat tmp_converted_content_ltlbgtmp >>${destFile}
-  tail -n 2 ../雛形.html >>${destFile}
+  sed "s/{{LITTLEBUG_CONTENT_PLACEHOLDER}}/$(cat tmp_converted_content_ltlbgtmp | sed 's/[[\.*^$()+?{|]/\\&/g' | sed ':a;N;$!ba;s/\n/\\n/g')/" ../雛形.html >${destFile}
 
   #>tmp2_ltlbgtmp
   ##########################################################################################
