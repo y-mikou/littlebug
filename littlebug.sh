@@ -715,7 +715,11 @@ if [ "${convMode}" = '-t2h' ] ; then
   | sed -e 's/〼/<span class="ltlbg_wSp"><\/span>/g' \
   | sed -e 's/style="page sukebe"/style="page: sukebe;"/g' \
   | sed -z 's/\n\n/\n/g' \
-  >${destFile}
+  >tmp_converted_content_ltlbgtmp
+
+  head -n 11 ../雛形.html >${destFile}
+  cat tmp_converted_content_ltlbgtmp >>${destFile}
+  tail -n 2 ../雛形.html >>${destFile}
 
   #>tmp2_ltlbgtmp
   ##########################################################################################
