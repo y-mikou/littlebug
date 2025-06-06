@@ -43,7 +43,7 @@ p.ltlbg_p::before{
     content: "　";
 }
 
-/*擬似段落*/
+/*擬似段落(div)*/
 div.ltlbg_p_brctGrp{
     margin-right: 2rem;
     margin-left: 2rem;

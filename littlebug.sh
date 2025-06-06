@@ -252,13 +252,13 @@ if [ "${convMode}" = '-t2h' ] ; then
   >tmp1_ltlbgtmp
 
   ## 行頭全角スペースで始まる行を<p>タグに
-  ## 行頭括弧類の前に<p class="ltlbg_brctGrp">タグ
+  ## 行頭括弧類の前に<div class="ltlbg_p_brctGrp">タグ
   cat tmp1_ltlbgtmp \
   | sed -e 's/^　\(.\+\)/<p class=\"ltlbg_p\">\1<\/p><\!--ltlbg_p-->/g' \
   | sed -e 's/^\([「（―『＞].\+[」』）〟―＜]\)/<div class=\"ltlbg_p_brctGrp\">\1\n<\/div><\!--ltlbg_p_brctGrp-->/g' \
   >tmp2_ltlbgtmp
 
-  #ltlbg_p_brctGrpタグの整理
+  #ltlbg_p_brctGrp(div)タグの整理
   cat tmp2_ltlbgtmp \
   | sed -z 's/<div class=\"ltlbg_p_brctGrp\">/<div class=\"ltlbg_p_brctGrp\">\n/g' \
   | sed -z 's/\([」』）〟―＜]\)\n<\/div><\!--ltlbg_p_brctGrp-->\n<div class=\"ltlbg_p_brctGrp\">\n\([「（〝『―＞]\)/\1\n\2/g' \
