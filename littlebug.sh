@@ -717,7 +717,19 @@ if [ "${convMode}" = '-t2h' ] ; then
   | sed -z 's/\n\n/\n/g' \
   >tmp_converted_content_ltlbgtmp
 
-  sed "s/{{LITTLEBUG_CONTENT_PLACEHOLDER}}/$(cat tmp_converted_content_ltlbgtmp | sed 's/[[\.*^$()+?{|]/\\&/g' | sed ':a;N;$!ba;s/\n/\\n/g')/" ../雛形.html >${destFile}
+  cp ../雛形.html tmp_template_ltlbgtmp
+  sed -i 's/{{LITTLEBUG_CONTENT_PLACEHOLDER}}/TEMP_MARKER_FOR_CONTENT/' tmp_template_ltlbgtmp
+  awk '
+  /TEMP_MARKER_FOR_CONTENT/ {
+    while ((getline line < "tmp_converted_content_ltlbgtmp") > 0) {
+      print line
+    }
+    close("tmp_converted_content_ltlbgtmp")
+    next
+  }
+  { print }
+  ' tmp_template_ltlbgtmp >${destFile}
+  rm tmp_template_ltlbgtmp
 
   #>tmp2_ltlbgtmp
   ##########################################################################################
