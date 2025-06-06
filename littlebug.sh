@@ -764,7 +764,7 @@ elif [ "${convMode}" = '-h2t' ] ; then
   | sed -z 's/<link rel=\"stylesheet\" href=\".\+littlebug.\+css\">//' \
   | sed -z 's/<link rel=\"preconnect\" href=\"https:\/\/fonts\.googleapis\.com\">\n//' \
   | sed -z 's/<link rel=\"preconnect\" href=\"https:\/\/fonts\.gstatic\.com\" crossorigin>\n//' \
-  | sed -z 's/<link href=\"https:\/\/fonts\.googleapis\.com\/css2\?family=Noto\+Serif\+JP:wght\@300\&display=swap\" rel=\"stylesheet\">\n\?//' \
+  | sed -z 's/<link href=\"https:\/\/fonts\.googleapis\.com\/css2?family=Noto+Serif+JP:wght@300&display=swap\" rel=\"stylesheet\">\n\?//' \
   | sed -z 's/{{LITTLEBUG_CONTENT_PLACEHOLDER}}//' \
   | sed -z 's/<\/section>\n\?$//' \
   >tmp1_ltlbgtmp
