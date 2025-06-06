@@ -252,16 +252,16 @@ if [ "${convMode}" = '-t2h' ] ; then
   >tmp1_ltlbgtmp
 
   ## 行頭全角スペースで始まる行を<p>タグに
-  ## 行頭括弧類の前に<div class="ltlbg_p_brctGrp">タグ
+  ## 行頭括弧類の前に<div class="ltlbg_div_brctGrp">タグ
   cat tmp1_ltlbgtmp \
   | sed -e 's/^　\(.\+\)/<p class=\"ltlbg_p\">\1<\/p><\!--ltlbg_p-->/g' \
-  | sed -e 's/^\([「（―『＞].\+[」』）〟―＜]\)/<div class=\"ltlbg_p_brctGrp\">\1\n<\/div><\!--ltlbg_p_brctGrp-->/g' \
+  | sed -e 's/^\([「（―『＞].\+[」』）〟―＜]\)/<div class=\"ltlbg_div_brctGrp\">\1\n<\/div><\!--ltlbg_div_brctGrp-->/g' \
   >tmp2_ltlbgtmp
 
-  #ltlbg_p_brctGrp(div)タグの整理
+  #ltlbg_div_brctGrp(div)タグの整理
   cat tmp2_ltlbgtmp \
-  | sed -z 's/<div class=\"ltlbg_p_brctGrp\">/<div class=\"ltlbg_p_brctGrp\">\n/g' \
-  | sed -z 's/\([」』）〟―＜]\)\n<\/div><\!--ltlbg_p_brctGrp-->\n<div class=\"ltlbg_p_brctGrp\">\n\([「（〝『―＞]\)/\1\n\2/g' \
+  | sed -z 's/<div class=\"ltlbg_div_brctGrp\">/<div class=\"ltlbg_div_brctGrp\">\n/g' \
+  | sed -z 's/\([」』）〟―＜]\)\n<\/div><\!--ltlbg_div_brctGrp-->\n<div class=\"ltlbg_div_brctGrp\">\n\([「（〝『―＞]\)/\1\n\2/g' \
   >tmp1_ltlbgtmp
 
   ## 改行→改行タグ
@@ -270,10 +270,10 @@ if [ "${convMode}" = '-t2h' ] ; then
   cat tmp1_ltlbgtmp \
   | sed -z 's/\n/<br class=\"ltlbg_br\">\n/g' \
   | sed -e 's/<\/h2><br class=\"ltlbg_br\">/<\/h2>/g' \
-  | sed -e 's/<div class=\"ltlbg_p_brctGrp\"><br class=\"ltlbg_br\">/<div class=\"ltlbg_p_brctGrp\">/g' \
-  | sed -e 's/<\/div><\!--ltlbg_p_brctGrp--><br class=\"ltlbg_br\">/<\/div><\!--ltlbg_p_brctGrp-->/g' \
+  | sed -e 's/<div class=\"ltlbg_div_brctGrp\"><br class=\"ltlbg_br\">/<div class=\"ltlbg_div_brctGrp\">/g' \
+  | sed -e 's/<\/div><\!--ltlbg_div_brctGrp--><br class=\"ltlbg_br\">/<\/div><\!--ltlbg_div_brctGrp-->/g' \
   | sed -e 's/\(<section.*>\)<br class=\"ltlbg_br\">/\1/g' \
-  | sed -z 's/<\/p><\!--ltlbg_p--><br class=\"ltlbg_br\">\n<div class=\"ltlbg_p_brctGrp\">/<\/p><\!--ltlbg_p-->\n<div class=\"ltlbg_p_brctGrp\">/g' \
+  | sed -z 's/<\/p><\!--ltlbg_p--><br class=\"ltlbg_br\">\n<div class=\"ltlbg_div_brctGrp\">/<\/p><\!--ltlbg_p-->\n<div class=\"ltlbg_div_brctGrp\">/g' \
   | sed -z 's/\(<br class=\"ltlbg_br\">\n\)\+<h2 class=\"ltlbg_sectionName\">/\n<h2 class=\"ltlbg_sectionName\">/g' \
   | sed -z 's/<\/h2>\(\n<br class=\"ltlbg_br\">\)\+/<\/h2>/g' \
   | sed -z 's/<\/section><\!--ltlbg_section--><br class=\"ltlbg_br\">/<\/section><\!--ltlbg_section--\>/g' \
@@ -282,7 +282,7 @@ if [ "${convMode}" = '-t2h' ] ; then
   cat tmp2_ltlbgtmp \
   | sed -e 's/^<br class=\"ltlbg_br\">/<br class=\"ltlbg_blankline\">/' \
   | sed -z 's/<br class=\"ltlbg_blankline\">\n<p class=\"ltlbg_p\">/<p class=\"ltlbg_p\">/g' \
-  | sed -z 's/<br class=\"ltlbg_blankline\">\n<div class=\"ltlbg_p_brctGrp\">/<div class=\"ltlbg_p_brctGrp\">/g' \
+  | sed -z 's/<br class=\"ltlbg_blankline\">\n<div class=\"ltlbg_div_brctGrp\">/<div class=\"ltlbg_div_brctGrp\">/g' \
   | sed -e 's/<\/p><\!--ltlbg_p--><br class=\"ltlbg_br\">/<\/p><\!--ltlbg_p-->/g' \
   >tmp1_ltlbgtmp
 
@@ -804,8 +804,8 @@ elif [ "${convMode}" = '-h2t' ] ; then
 
       ## 括弧類の擬似段落記号を除去
       cat tmp2_ltlbgtmp \
-      | sed -e 's/<div class="ltlbg_p_brctGrp">//g' \
-      | sed -e 's/<\/div><\!--ltlbg_p_brctGrp-->//g' \
+      | sed -e 's/<div class="ltlbg_div_brctGrp">//g' \
+      | sed -e 's/<\/div><\!--ltlbg_div_brctGrp-->//g' \
       >tmp1_ltlbgtmp
 
       ## <span class="ltlbg_dakuten">を「゛」に復旧

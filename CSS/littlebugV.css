@@ -44,7 +44,7 @@ p.ltlbg_p::before{
 }
 
 /*擬似段落(div)*/
-div.ltlbg_p_brctGrp{
+div.ltlbg_div_brctGrp{
     margin-right: 2rem;
     margin-left: 2rem;
     break-inside: avoid-page;

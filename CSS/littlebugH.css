@@ -27,7 +27,7 @@ p.ltlbg_p::before{
 }
 
 /*擬似段落(div)*/
-div.ltlbg_p_brctGrp{
+div.ltlbg_div_brctGrp{
     margin-top: 0.8rem;
     margin-bottom: 0.8rem;
 }

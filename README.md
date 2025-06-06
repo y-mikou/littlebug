@@ -28,7 +28,7 @@
 | 〝強調〟         | 行頭`〝`から`〟`     | `<p class="ltlbg_wqote">`                   | ぶら下がりIndent
 | ――会話         | 行頭`――`から改行まで | `<p class="ltlbg_dash">`                   | ぶら下がりIndent
 | ＞会話           | 行頭`＞`から改行まで  | `<p class="ltlbg_citation">`                | ぶら下がりIndent
-| 会話等の疑似段落  | 連続する括弧類の行    | `<div class="ltlbg_p_brctGrp">`              | 擬似的な段落
+| 会話等の疑似段落  | 連続する括弧類の行    | `<div class="ltlbg_div_brctGrp">`            | 擬似的な段落
 | 右大不等号       | `<`                  | `&lt;`                                       | クラス化なし
 | 左大不等号       | `>`                  | `&gt;`                                       | クラス化なし
 | アンパサンド     | `&`                  | `&amp;`                                      | クラス化なし
