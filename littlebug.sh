@@ -754,12 +754,19 @@ elif [ "${convMode}" = '-h2t' ] ; then
   destFile=${tgtFile_AfterCD/".html"/"_removed.txt"} #出力ファイルの指定する
   touch ${destFile}                          #出力先ファイルを生成
 
-  ## littlebugXX.cssの読み込みを除去する
   cat ${tgtFile_AfterCD} \
+  | sed -z 's/<html lang="ja">\n//' \
+  | sed -z 's/<head>\n//' \
+  | sed -z 's/<\/head>\n//' \
+  | sed -z 's/<body>\n//' \
+  | sed -z 's/<\/body>\n//' \
+  | sed -z 's/<\/html>\n\?//' \
   | sed -z 's/<link rel=\"stylesheet\" href=\".\+littlebug.\+css\">//' \
   | sed -z 's/<link rel=\"preconnect\" href=\"https:\/\/fonts\.googleapis\.com\">\n//' \
   | sed -z 's/<link rel=\"preconnect\" href=\"https:\/\/fonts\.gstatic\.com\" crossorigin>\n//' \
-  | sed -z 's/<link href=\"https:\/\/fonts\.googleapis\.com\/css2\?family=Noto\+Serif\+JP:wght\@300\&display=swap\" rel=\"stylesheet">\n//' \
+  | sed -z 's/<link href=\"https:\/\/fonts\.googleapis\.com\/css2\?family=Noto\+Serif\+JP:wght\@300\&display=swap\" rel=\"stylesheet\">\n\?//' \
+  | sed -z 's/{{LITTLEBUG_CONTENT_PLACEHOLDER}}//' \
+  | sed -z 's/<\/section>\n\?$//' \
   >tmp1_ltlbgtmp
   
   ############################################################################################
