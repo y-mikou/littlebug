@@ -1,25 +1,42 @@
 #!/bin/bash
 export lang=ja_jp.utf-8
 
-convMode=${1}  #1でtxt→html、2でhtml→txt、それ以外は今の所はエラー
 tgtFile=${2}   #引数で指定されたファイルを対象とする
-chrset=$(file -i ${tgtFile})
 
-if [ ! -e ${2} ]; then
-  echo "💩 そんなファイルいないです"
+if [[ "${tgtFile/ /}" = "" ]];then
+  echo "💩対象ファイルを指定してください"
   exit 1
 fi
 
-if [ "${chrset##*charset=}" = "unknown-8bit" ]; then
-  iconv -f SHIFT_JIS -t UTF-8 ${tgtFile} > tmp1_ltlbgtmp
-  cat tmp1_ltlbgtmp >${tgtFile}
+tgtFile_AfterCD='../'${tgtFile}   #一時ディレクトリの内側から参照するとき用
+
+if [ ! -e ${tgtFile} ]; then
+  echo "💩 ${tgtFile}なんてファイルいないです"
+  exit 1
 fi
 
-if [ "${1}" = "1" ] ; then
+convMode=${1}  #'-t2h'でtxt→html、'-h2t'でhtml→txt、それ以外は今の所はエラー
+
+if [[ "${convMode}" != '-t2h' ]] && [[ "${convMode}" != '-h2t' ]] ; then
+  echo "💩 引数1は-t2h(txt→html)か-h2t(html→txt)で指定してください"
+  exit 1
+fi
+
+chrset=$(file -i ${tgtFile})
+tmpDirName=$(mktemp -u ltlbgtmpDir_XXXXX)  #作業用ディレクトリを作成し
+mkdir ${tmpDirName}                        #その中で作業する。
+cd ${tmpDirName}                           #最後にディレクトリごと削除する。
+
+if [ "${chrset##*charset=}" = "unknown-8bit" ]; then
+  iconv -f SHIFT_JIS -t UTF-8 ${tgtFile_AfterCD} > tmp1_ltlbgtmp
+  cat tmp1_ltlbgtmp >${tgtFile_AfterCD}
+fi
+
+if [ "${convMode}" = '-t2h' ] ; then
 
   ## txt→html ############################################################################################
 
-  destFile=${tgtFile/".txt"/"_tagged.html"} #出力ファイルの指定する
+  destFile=${tgtFile_AfterCD/".txt"/"_tagged.html"} #出力ファイルの指定する
   touch ${destFile}                        #出力先ファイルを生成
 
   ##警告表示####################################################################
@@ -28,7 +45,7 @@ if [ "${1}" = "1" ] ; then
   # おそらく変換処理は成功しない。
   ##############################################################################
   ## ルビ指定の基底文字に圏点の同時指定
-  cat ${tgtFile} \
+  cat ${tgtFile_AfterCD} \
   | grep -E -o -n '(\{《《[^》]+》》｜[^\}]+\})|(《《{[^｜]+｜[^\}]+}》》)' \
   >warn_ltlbgtmp
   if [ -s warn_ltlbgtmp ] ; then 
@@ -36,7 +53,7 @@ if [ "${1}" = "1" ] ; then
     echo '🤔 ↑でルビと圏点が同時に設定されています。不適切な指定です。変換結果は保証されません。' 
   fi
   ## 縦中横指定の一部に太字指定
-  cat ${tgtFile} \
+  cat ${tgtFile_AfterCD} \
   | grep -E -o -n '(\^[^\*]+\*\*10\*\*[^\^]?\^)|(\^[^\*]?\*\*10\*\*[^\^]+\^)' \
   >warn_ltlbgtmp
   if [ -s warn_ltlbgtmp ] ; then 
@@ -44,7 +61,7 @@ if [ "${1}" = "1" ] ; then
     echo '🤔 ↑で縦中横の一部にだけ太字が指定されています。この変換は非対応です。変換結果は保証されません。' 
   fi
   # 4文字以上の縦中横
-  cat ${tgtFile} \
+  cat ${tgtFile_AfterCD} \
   | grep -E -o -n '\^[a-zA-Z0-9]{4,}\^' \
   >warn_ltlbgtmp
   if [ -s warn_ltlbgtmp ] ; then 
@@ -52,7 +69,7 @@ if [ "${1}" = "1" ] ; then
     echo '🤔 ↑で4桁以上の縦中横が指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
   fi
   # 縦中横指定の一部にのみ圏点指定
-  cat ${tgtFile} \
+  cat ${tgtFile_AfterCD} \
   | grep -E -o -n '(\^[a-zA-Z0-9]?《《[a-zA-Z0-9]+》》[a-zA-Z0-9]+\^)|\^[a-zA-Z0-9]+《《[a-zA-Z0-9]+》》[a-zA-Z0-9]?\^' \
   >warn_ltlbgtmp
   if [ -s warn_ltlbgtmp ] ; then 
@@ -60,7 +77,7 @@ if [ "${1}" = "1" ] ; then
     echo '🤔 ↑で縦中横の一部に圏点が指定されています。不適切な指定です。変換は実施しますが結果は保証されません。' 
   fi
   # ルビ指定全体に回転指定
-  cat ${tgtFile} \
+  cat ${tgtFile_AfterCD} \
   | grep -E -o -n '\[\^\{[^｜]+｜[^\}]+\}\^\]' \
   >warn_ltlbgtmp
   if [ -s warn_ltlbgtmp ] ; then 
@@ -68,7 +85,7 @@ if [ "${1}" = "1" ] ; then
     echo '🤔 ↑でルビ指定の全体に回転が指定されています。不適切な指定です。変換は実施しますが結果は保証されません。' 
   fi
   # 強制合字の一部を太字指定
-  cat ${tgtFile} \
+  cat ${tgtFile_AfterCD} \
   | grep -E -o -n '\[l\[\*\*.\*\*.\]r\]' \
   >warn_ltlbgtmp
   if [ -s warn_ltlbgtmp ] ; then 
@@ -76,7 +93,7 @@ if [ "${1}" = "1" ] ; then
     echo '🤔 ↑で合字生成指定の一部にのみ太字が指定されています。不適切な指定です。変換は実施しますが結果は保証されません。' 
   fi
   # 強制合字の一部に回転指定
-  cat ${tgtFile} \
+  cat ${tgtFile_AfterCD} \
   | grep -E -o -n '(\[l\[.\^.\^\]r\])|(\^\[l\[[^]]{2}\]r\]\^)' \
   >warn_ltlbgtmp
   if [ -s warn_ltlbgtmp ] ; then 
@@ -84,7 +101,7 @@ if [ "${1}" = "1" ] ; then
     echo '🤔 ↑で合字生成と回転が同時に指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
   fi
   # アへ濁点に回転指定
-  cat ${tgtFile} \
+  cat ${tgtFile_AfterCD} \
   | grep -E -o -n '\[\^.゛\^\]' \
   >warn_ltlbgtmp
   if [ -s warn_ltlbgtmp ] ; then 
@@ -92,7 +109,7 @@ if [ "${1}" = "1" ] ; then
     echo '🤔 ↑で濁点合字と回転が同時に指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
   fi
   # ルビ文字に特殊指定
-  cat ${tgtFile} \
+  cat ${tgtFile_AfterCD} \
   | grep -E -o -n '(\{[^｜]+｜[^\*]?\*\*[^\*]+\*\*[^\*]?\})|({[^｜]+｜[^}]?\[\^[^\}]+\^\][^｜]?})|({[^｜]+｜[^}]?《《[^}]+》》[^}]?\})|({[^｜]+｜{[^｜]+｜[^\}]+\}\})|({[^｜]+｜[^\}]?\[l\[[^]]{2}\]r\][^\}]?\})' \
   >warn_ltlbgtmp
   if [ -s warn_ltlbgtmp ] ; then 
@@ -114,7 +131,7 @@ if [ "${1}" = "1" ] ; then
   ## 最後に復旧する。
   ## ――を―へ変換
   ## 改行コードをlfに統一
-  cat ${tgtFile} \
+  cat ${tgtFile_AfterCD} \
   | sed -e 's/\&/＆ａｍｐ/g' \
   | sed -e 's/\&amp;/＆ａｍｐ/g' \
   | sed -e 's/\//＆＃０４７/g' \
@@ -198,35 +215,46 @@ if [ "${1}" = "1" ] ; then
   | sed -e 's/\([^!！?？\&#;]\)\(?!\|？！\)\([^!！?？\&#;]\)/\1~?!~\3/g' \
   >tmp2_ltlbgtmp
 
-  ## [capter]を<section class="ltlbg_section">に。:XXXXXはid="XXXX"に。
-  ## 章区切りのない文章対応で、先頭に必ず章を付与し、重なった章開始を除去
-  cat tmp2_ltlbgtmp \
-  | sed -z 's/^/<section class=\"ltlbg_section\">\n/g' \
-  | sed -e 's/\[chapter:/[chapter id=/g' \
-  | sed -e 's/\[chapter\( id=\([^[]\+\)\)\?\]/<section class="ltlbg_section"\1>/g' \
-  | sed -e 's/id=\([^>]\+\)\+>/id=\"\1\">/' \
-  | sed -z 's/<section class=\"ltlbg_section\">\n<section class=\"ltlbg_section\"/<section class=\"ltlbg_section\"/g' \
-  >tmp1_ltlbgtmp
+#TODO:[capter]による章指定を廃止。なくて問題なさそうなら永続的に削除する
+#
+#  ## [capter]を<section class="ltlbg_section">に。:XXXXXはid="XXXX"に。
+#  ## 章区切りのない文章対応で、先頭に必ず章を付与し、重なった章開始を除去
+#  cat tmp2_ltlbgtmp \
+#  | sed -z 's/^/<section class=\"ltlbg_section\">\n/g' \
+#  | sed -e 's/\[chapter:/[chapter id=/g' \
+#  | sed -e 's/\[chapter\( id=\([^[]\+\)\)\?\]/<section class="ltlbg_section"\1>/g' \
+#  | sed -e 's/id=\([^>]\+\)\+>/id=\"\1\">/' \
+#  | sed -z 's/<section class=\"ltlbg_section\">\n<section class=\"ltlbg_section\"/<section class=\"ltlbg_section\"/g' \
+#  >tmp1_ltlbgtmp
+#
+#  ## 章を閉じる
+#  ## 置換の都合上必ず生じる先頭の章閉じは削除
+#  ## 作品の末尾には必ず章閉じを付与
+#  ## 章区切りは複数行に渡る可能性があるので閉じタグに<\!--ltlbg_section-->を付与する
+#  cat tmp1_ltlbgtmp \
+#  | sed -e 's/<section/<\/section><\!--ltlbg_section-->\n<section/g' \
+#  | sed -z '1,/<\/section><\!--ltlbg_section-->\n/s/<\/section><\!--ltlbg_section-->\n//' \
+#  | sed -z 's/$/\n<\/section><\!--ltlbg_section-->\n/' \
+#  >tmp2_ltlbgtmp
 
-  ## 章を閉じる
-  ## 置換の都合上必ず生じる先頭の章閉じは削除
-  ## 作品の末尾には必ず章閉じを付与
-  ## 章区切りは複数行に渡る可能性があるので閉じタグに<\!--ltlbg_section-->を付与する
-  cat tmp1_ltlbgtmp \
-  | sed -e 's/<section/<\/section><\!--ltlbg_section-->\n<section/g' \
-  | sed -z '1,/<\/section><\!--ltlbg_section-->\n/s/<\/section><\!--ltlbg_section-->\n//' \
-  | sed -z 's/$/\n<\/section><\!--ltlbg_section-->\n/' \
-  >tmp2_ltlbgtmp
-
-  ## 行頭§◆■の次に空白(なくても良い)に続く行を、<h2 class="ltlbg_sectionName">章タイトルに
+  ## 行頭§§§の次に空白(なくても良い)に続く行を、<h2 class="ltlbg_sectionName" style="page: sukebe;">章タイトルに
+  ### style="page: sukebe;"はCSS側で、当該セクション(に属すページ)がエッチシーンであることを示す
+  ### ':'';'は当スクリプト内で特殊文字として操作しているため、ここには含めず、スクリプトの最後に付与し直している
+  ### 印刷上は§１つだけになる
+  ## 行頭§の次に空白(なくても良い)に続く行を、<h2 class="ltlbg_sectionName">章タイトルに
+  ## 章タイトル付与時に、<section>の閉じ＋開始タグを付与する。
+  ## 1行目が</section><!--ltlbg_section-->になるので、削除する
+  ## 今は§で節を表示している
   cat tmp2_ltlbgtmp \
-  | sed -e 's/^\([§◆■]\)\(.\{0,\}\)/<h2 class=\"ltlbg_sectionName\">\1\2<\/h2>/g' \
+  | sed -e 's/^\(§§§\)\(.\{0,\}\)/<\/section><\!--ltlbg_section-->\n<section class=\"ltlbg_section\" style=\"page sukebe\"><h2 class=\"ltlbg_sectionName\">§ \2<\/h2>/g' \
+  | sed -e 's/^\(§\)\(.\{0,\}\)/<\/section><\!--ltlbg_section-->\n<section class=\"ltlbg_section\"><h2 class=\"ltlbg_sectionName\">§ \2<\/h2>/g' \
+  | sed -e '1d' \
   >tmp1_ltlbgtmp
 
   ## 行頭全角スペースで始まる行を<p>タグに
   ## 行頭括弧類の前に<p class="ltlbg_brctGrp">タグ
   cat tmp1_ltlbgtmp \
-  | sed -e 's/^　\(.\+\)/<p class=\"ltlbg_p\">\1<\/p><!--ltlbg_p-->/g' \
+  | sed -e 's/^　\(.\+\)/<p class=\"ltlbg_p\">\1<\/p><\!--ltlbg_p-->/g' \
   | sed -e 's/^\([「（―『＞].\+[」』）〟―＜]\)/<p class=\"ltlbg_p_brctGrp\">\1\n<\/p><\!--ltlbg_p_brctGrp-->/g' \
   >tmp2_ltlbgtmp
 
@@ -248,6 +276,7 @@ if [ "${1}" = "1" ] ; then
   | sed -z 's/<\/p><\!--ltlbg_p--><br class=\"ltlbg_br\">\n<p class=\"ltlbg_p_brctGrp\">/<\/p><\!--ltlbg_p-->\n<p class=\"ltlbg_p_brctGrp\">/g' \
   | sed -z 's/\(<br class=\"ltlbg_br\">\n\)\+<h2 class=\"ltlbg_sectionName\">/\n<h2 class=\"ltlbg_sectionName\">/g' \
   | sed -z 's/<\/h2>\(\n<br class=\"ltlbg_br\">\)\+/<\/h2>/g' \
+  | sed -z 's/<\/section><\!--ltlbg_section--><br class=\"ltlbg_br\">/<\/section><\!--ltlbg_section--\>/g' \
   >tmp2_ltlbgtmp
 
   cat tmp2_ltlbgtmp \
@@ -684,32 +713,35 @@ if [ "${1}" = "1" ] ; then
   | sed -e 's/＆＃０９２/\&#092;/g' \
   | sed -e 's/〿/<span class="ltlbg_sSp"><\/span>/g' \
   | sed -e 's/〼/<span class="ltlbg_wSp"><\/span>/g' \
+  | sed -e 's/style="page sukebe"/style="page: sukebe;"/g' \
   | sed -z 's/\n\n/\n/g' \
-  >tmp1_ltlbgtmp
+  >${destFile}
 
+  #>tmp2_ltlbgtmp
   ##########################################################################################
-  # 先頭にlittlebugU.css、littlebugTD.cssを読み込むよう追記する
+  # 先頭にlittlebugXXX.css読み込むよう追記する
   ##########################################################################################
   #cat tmp2_ltlbgtmp >tmp1_ltlbgtmp
-  cat tmp1_ltlbgtmp \
-  | sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/littlebugTD\.css">\n/' \
-  | sed -z 's/^/<\!--\<link rel=\"stylesheet\" href=\"\.\.\/littlebugRL\.css">-->\n/' \
-  | sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/littlebugU\.css">\n/' \
-  | sed -z 's/^/<link rel=\"preconnect\" href=\"https:\/\/fonts\.googleapis\.com\">\n/' \
-  | sed -z 's/^/<link rel=\"preconnect\" href=\"https:\/\/fonts\.gstatic\.com\" crossorigin>\n/' \
-  | sed -z 's/^/<link href=\"https:\/\/fonts\.googleapis\.com\/css2\?family=Noto\+Serif\+JP:wght\@300\&display=swap\" rel=\"stylesheet">\n/' \
-  >${destFile}
+  #cat tmp1_ltlbgtmp \
+  #| sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugI\.css">\n/' \
+  #| sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugTD\.css">\n/' \
+  #| sed -z 's/^/<\!--\<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugRL\.css">-->\n/' \
+  #| sed -z 's/^/<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugU\.css">\n/' \
+  #| sed -z 's/^/<link rel=\"preconnect\" href=\"https:\/\/fonts\.googleapis\.com\">\n/' \
+  #| sed -z 's/^/<link rel=\"preconnect\" href=\"https:\/\/fonts\.gstatic\.com\" crossorigin>\n/' \
+  #| sed -z 's/^/<link href=\"https:\/\/fonts\.googleapis\.com\/css2\?family=Noto\+Serif\+JP:wght\@300\&display=swap\" rel=\"stylesheet">\n/' \
+  #>${destFile}
 
   echo "✨ "${destFile}"を出力しました[html化]"
 
-elif [ "${1}" = "2" ] ; then
+elif [ "${convMode}" = '-h2t' ] ; then
   ## html→txt ############################################################################################
 
-  destFile=${tgtFile/".html"/"_removed.txt"} #出力ファイルの指定する
+  destFile=${tgtFile_AfterCD/".html"/"_removed.txt"} #出力ファイルの指定する
   touch ${destFile}                          #出力先ファイルを生成
 
   ## littlebugXX.cssの読み込みを除去する
-  cat ${tgtFile} \
+  cat ${tgtFile_AfterCD} \
   | sed -z 's/<link rel=\"stylesheet\" href=\".\+littlebug.\+css\">//' \
   | sed -z 's/<link rel=\"preconnect\" href=\"https:\/\/fonts\.googleapis\.com\">\n//' \
   | sed -z 's/<link rel=\"preconnect\" href=\"https:\/\/fonts\.gstatic\.com\" crossorigin>\n//' \
@@ -980,17 +1012,14 @@ elif [ "${1}" = "2" ] ; then
 
   cat tmp1_ltlbgtmp >${destFile}
   echo "✨ "${destFile}"を出力しました[txtもどし]"
-
-else
-  echo "💩 引数1は1(txt→html)か2(html→txt)で指定してください"
-  exit 1
 fi
 
 ##########################################################################################
 # ファイルが上書きできないため使用している中間ファイルのゴミ掃除。なんとかならんか…
 ##########################################################################################
-pth=$(pwd)
-rmstrBase='rm -rf '${pth}'/'
-eval $rmstrBase'*_ltlbgtmp'
-eval $rmstrBase'tmp.sh'
+cd ../
+
+if [ ! "${tmpDirName}" = '' ]; then 
+  rm -rf ${tmpDirName}
+fi
 exit 0

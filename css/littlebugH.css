@@ -1,9 +1,6 @@
 html {
     /* 組み方向 */
     /* 横 */ writing-mode: horizontal-tb; 
-
-    orphans: 1;
-    widows: 1;
 }
 
 /*章*/
@@ -14,23 +11,34 @@ section.ltlbg_section{
 h2.ltlbg_sectionName{
     display: block;
     text-align: center;
+    page-break-before: always; 
+    margin-bottom: 5rem;
 }
+
 
 /*段落*/
 p.ltlbg_p{
-    margin-top: 2rem;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: -1rem;
 }
+p.ltlbg_p::before{
+    content: "　　　";
+}
+
 /*擬似段落*/
 p.ltlbg_p_brctGrp{
-    margin-top: 2rem;
+    margin-top: 0.8rem;
+    margin-bottom: 0.8rem;
 }
 
 /*アへ濁点*/
 /*フォントによって位置がずれる。ユーザ側で調整してください*/
 span.ltlbg_dakuten::after {
     display: inline-block;
-/*    transform: translate(0.3rem,-1.6rem);
-    content: "゛";*/
+    transform: translate(-0.1rem,0);
+    content: "゛";
+    letter-spacing: -1rem;
 }
 
 /*二倍化。自動変換対象ではないが、～などを伸ばすのにも使える。*/
@@ -93,22 +101,22 @@ span.ltlbg_think{
 }
 span.ltlbg_think::before{
     display: inline-block;
-    content: "「";
+    content: "（";
     margin-left: -1rem;    
 }
 span.ltlbg_think::after{
-    content: "」";
+    content: "）";
 }
 /*強調〝〟をぶら下げインデントにする。*/
-span.ltlbg_think{
+span.ltlbg_wquote{
     display: inline-block;
 }
-span.ltlbg_think::before{
+span.ltlbg_wquote::before{
     display: inline-block;
     content: "〝";
     margin-left: -1rem;    
 }
-span.ltlbg_think::after{
+span.ltlbg_wquote::after{
     content: "〟";
 }
 /*会話―をぶら下げインデントにする。*/
@@ -117,7 +125,7 @@ span.ltlbg_dash{
 }
 span.ltlbg_dash::before{
     display: inline-block;
-    content: "―";
+    content: "――";
     margin-left: -1rem;    
 }
 /*引用記号＞をぶら下げインデントにする。*/
@@ -139,7 +147,7 @@ span.ltlbg_citation::before{
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 70%;
+    bottom: 80%;
     white-space: nowrap;
     text-indent: 0;
 
@@ -156,7 +164,7 @@ span.ltlbg_citation::before{
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 70%;
+    bottom: 80%;
     white-space: nowrap;
     text-indent: 0;
 
@@ -176,7 +184,7 @@ span.ltlbg_citation::before{
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 70%;
+    bottom: 80%;
     white-space: nowrap;
     text-indent: 0;
 
@@ -196,7 +204,7 @@ span.ltlbg_citation::before{
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 70%;
+    bottom: 80%;
     white-space: nowrap;
     text-indent: 0;
 

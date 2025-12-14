@@ -1,0 +1,106 @@
+/* 本全体に影響するスタイルを記述するCSS */
+
+@charset "UTF-8";
+/*issueに沿って実装追加*/
+
+/*命名のみのクラス。
+  html側で仕様を宣言されているが、littlebugでの付与を明示する目的しかないもの。
+  実際に独自のスタイリングはしていない。
+  必要になった場合は、ここからアンコメントして記述する。
+
+改行
+br.ltlbg_br{
+}
+
+段落
+p.ltlbg_p{
+}
+
+括弧類段落
+p.ltlbg_p_brctGrp{
+}
+
+空行
+br.ltlbg_blankline{
+}
+
+ルビ
+ruby.ltlbg_ruby{
+}
+
+水平線
+hr.ltlbg_hr{
+}
+
+*/
+    @page {
+        size:105mm 152mm ;
+        padding-top: 3mm;/*サイズを誤ったので無理矢理修正*/
+        bleed: 3mm;
+        /*marks: crop cross;*/
+        @bottom-center {
+            font-family: 'BIZ UDMincho';
+            content: "- " counter(page) " -";
+        }
+    }
+    @page :left{
+        margin-right: 4rem;
+        margin-left: 4rem;
+    }
+    @page :right{
+        margin-left: 5rem;
+        margin-right: 3rem;
+    }
+
+
+/*変なページ制御をしない*/
+*{
+    break-inside: auto;
+    padding: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+    line-break: anywhere;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    font-feature-settings: "halt" 1;
+}
+
+
+html {
+    line-height: 1.8rem;
+    widows: 1;
+    orphans: 1;
+}
+
+/*改ページ*/
+div.ltlbg_newpage{
+    page-break-after: always;
+}
+
+/*太字*/
+span.ltlbg_bold{
+    font-weight:bold;
+}
+
+/*傍点 デフォルトはゴマなので、必要であれば変える*/
+span.ltlbg_emphasis{
+    text-emphasis-style: filled sesame;
+}
+
+/*1文字幅*/
+span.ltlbg_wdfix{
+    display: inline-block;
+    text-align: center;
+    width: 1rem;
+    height: 1rem;
+}
+
+/*特殊ルビ用。
+  rubyのクラスは縦横別なのでそれぞれに記載*/
+rt {
+    display: none;
+}
+

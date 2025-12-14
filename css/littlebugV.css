@@ -1,17 +1,33 @@
+/* 縦書き様に読み込むCSS */
+
 html {
     /* 組み方向 */
     /* 縦 */ writing-mode: vertical-rl;
     
-    orphans: 1;
-    widows: 1;
+    orphans: 0;
+    widows: 0;
+    /* 方眼紙模様に必須のスタイル */
+    background-image: linear-gradient(0deg, transparent calc(100% - 1px), #f0f0f0 calc(100% - 1px)),
+                        linear-gradient(90deg, transparent calc(100% - 1px), #f0f0f0 calc(100% - 1px));
+    background-size: 1rem 1rem;
+    background-repeat: repeat;
+    background-position: center center;
+    
+    /* 以下任意のスタイル */
+    padding: 0rem;
 }
 
 /*章*/
 section.ltlbg_section{
-    margin-left: 5rem;
+    margin-top: 0.3rem;
+    margin-right: 2.8rem;
+
 }
 /*章名称*/
 h2.ltlbg_sectionName{
+    font-size: 1rem;
+    margin-left: 2rem;
+    margin-right: 2rem;
     display:flex;
     justify-content:center;
     align-items:center;
@@ -19,11 +35,20 @@ h2.ltlbg_sectionName{
 
 /*段落*/
 p.ltlbg_p{
-    margin-right: 2rem;
+    margin: 0;
+    break-inside: avoid-page;
+    break-after: avoid;
+    }
+p.ltlbg_p::before{
+    content: "　";
 }
+
 /*擬似段落*/
 p.ltlbg_p_brctGrp{
     margin-right: 2rem;
+    margin-left: 2rem;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 
 /* 縦中横。AもMもスタイル自体は同じ*/
@@ -101,51 +126,48 @@ span.ltlbg_semicolon{
 span.ltlbg_colon{
     display: inline-block;
     text-align: center;
-    height: 1rem;
+    line-height: 1rem;
 }
 
 /*会話「」をぶら下げインデントにする。*/
 span.ltlbg_talk{
-    display: inline-block;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 span.ltlbg_talk::before{
-    display: inline-block;
     content: "「";
-    margin-top: -1rem;
 }
 span.ltlbg_talk::after{
     content: "」";
 }
 /*会話『』をぶら下げインデントにする。*/
 span.ltlbg_talk2{
-    display: inline-block;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 span.ltlbg_talk2::before{
-    display: inline-block;
     content: "『";
-    margin-top: -1rem;
 }
 span.ltlbg_talk2::after{
     content: "』";
 }
 /*思考（）をぶら下げインデントにする。*/
 span.ltlbg_think{
-    display: inline-block;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 span.ltlbg_think::before{
-    display: inline-block;
     content: "（";
-    margin-top: -1rem;
 }
 span.ltlbg_think::after{
     content: "）";
 } 
 /*強調〝〟をぶら下げインデントにする。*/
 span.ltlbg_wquote{
-    display: inline-block;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 span.ltlbg_wquote::before{
-    display: inline-block;
     content: "〝";
     margin-top: -1rem;
 }
@@ -154,20 +176,20 @@ span.ltlbg_wquote::after{
 }
 /*会話―をぶら下げインデントにする。*/
 span.ltlbg_dash{
-    display: inline-block;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 span.ltlbg_dash::before{
-    display: inline-block;
     content: "―";
     transform: scale(1, 2) translate(0rem, -0.3rem);
     margin-top: -1rem;
 }
 /*引用記号＞をぶら下げインデントにする。*/
 span.ltlbg_citation{
-    display: inline-block;
+    break-inside: avoid-page;
+    break-after: avoid;
 }
 span.ltlbg_citation::before{
-    display: inline-block;
     content: "＞";
     margin-top: -1rem;
 }
@@ -218,17 +240,17 @@ span.ltlbg_citation::before{
     position: absolute;
     top: 0;
     bottom: 0;
-    left: 70%;
+    left: 80%;
     white-space: nowrap;
     text-indent: 0;
 
     display: flex;
     justify-content: center;
     transform-origin: left center;
-    transform: scale(0.5, 0.5);
+    transform: scale(0.6, 0.6);
 
-    margin-top: 0.5rem;
-    letter-spacing: 1rem;
+    margin-top: 0.4rem;
+    letter-spacing: 0.5rem;
 }
 
 /*特殊傍点*/
