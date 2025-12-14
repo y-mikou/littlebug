@@ -3,35 +3,110 @@ html {
     /* 横 */ writing-mode: horizontal-tb; 
 }
 
+/*章(section)関連========================================================*/
 /*章*/
 section.ltlbg_section{
-    margin-bottom: 5rem;
+    /*章の区切りに差し込まれるスペース*/
+    margin-top: 1rem;
+    margin-bottom: 2rem;
 }
 /*章名称*/
 h2.ltlbg_sectionName{
     display: block;
     text-align: center;
+    font-size: 2rem;
     page-break-before: always; 
-    margin-bottom: 5rem;
+    /*章タイトルの後、文章が始まるまでのスペース*/
+    margin-bottom: 2rem;
 }
 
 
-/*段落*/
-p.ltlbg_p{
-    margin-top: 0;
-    margin-bottom: 0;
-    margin-left: -1rem;
+/*段落(ｐ)関連========================================================*/
+/*説明・会話部分の分離マージン*/
+div.ltlbg_Desc-TalkPart{
+    margin-bottom: 1rem;
 }
-p.ltlbg_p::before{
+
+/*地の文用の形式段落---------------------------------------------*/
+p.ltlbg_desciption{
+    display: inline-block;
+}
+/*字下げ量を調整(下の例では全角スペース3つぶん)*/
+p.ltlbg_desciption::before{
     content: "　　　";
 }
 
-/*擬似段落*/
-p.ltlbg_p_brctGrp{
-    margin-top: 0.8rem;
-    margin-bottom: 0.8rem;
+/*ブラケットが付与される文の形式段落-----------------------------*/
+/*「」をぶら下げインデントにする。*/
+p.ltlbg_talk{
+    margin-left: 1rem;
+}
+p.ltlbg_talk::before{
+    display: inline-block;
+    content: "「";
+    margin-left: -1rem;
+}
+p.ltlbg_talk::after{
+    content: "」";
+}
+/*『』をぶら下げインデントにする。*/
+p.ltlbg_talk2{
+    margin-left: 1rem;
+}
+p.ltlbg_talk2::before{
+    display: inline-block;
+    content: "『";
+    margin-left: -1rem;    
+}
+p.ltlbg_talk2::after{
+    content: "』";
+}
+/*（）をぶら下げインデントにする。*/
+p.ltlbg_think{
+    margin-left: 1rem;
+}
+p.ltlbg_think::before{
+    display: inline-block;
+    content: "（";
+    margin-left: -1rem;    
+}
+p.ltlbg_think::after{
+    content: "）";
+}
+/*〝〟をぶら下げインデントにする。*/
+p.ltlbg_wquote{
+    margin-left: 1rem;
+}
+p.ltlbg_wquote::before{
+    display: inline-block;
+    content: "〝";
+    margin-left: -1rem;    
+}
+p.ltlbg_wquote::after{
+    content: "〟";
+}
+/*―をぶら下げインデントにする。*/
+p.ltlbg_dash{
+    margin-left: 1rem;
+}
+p.ltlbg_dash::before{
+    display: inline-block;
+    content: "――";
+    margin-left: -1rem;    
+}
+/*＞をぶら下げインデントにする。*/
+p.ltlbg_citation{
+    margin-left: 1rem;
+}
+p.ltlbg_citation::before{
+    display: inline-block;
+    content: "＞";
+    margin-left: -1rem;    
 }
 
+
+
+/*特殊文字関連========================================================*/
 /*アへ濁点*/
 /*フォントによって位置がずれる。ユーザ側で調整してください*/
 span.ltlbg_dakuten::after {
@@ -40,7 +115,6 @@ span.ltlbg_dakuten::after {
     content: "゛";
     letter-spacing: -1rem;
 }
-
 /*二倍化。自動変換対象ではないが、～などを伸ばすのにも使える。*/
 span.ltlbg_wSize{
     display: inline-block;
@@ -48,7 +122,6 @@ span.ltlbg_wSize{
     transform: scale(1.8, 1) translateX(1px);
     margin-right: 1rem;
 }
-
 /*踊り字*/
 span.ltlbg_odori1::after{
     display: inline-block;
@@ -61,6 +134,8 @@ span.ltlbg_odori2::before{
     content: "〳";
 }
 
+/*スペース系の退避========================================================*/
+/*横書きの場合はright、縦書きのときはbottomにmarginを差し込む*/
 /*半角SP*/
 span.ltlbg_sSp{
     margin-right: 0.5rem;
@@ -71,74 +146,19 @@ span.ltlbg_wSp{
     margin-right: 1.0rem;
 }
 
-/*会話「」をぶら下げインデントにする。*/
-span.ltlbg_talk{
-    display: inline-block;
-}
-span.ltlbg_talk::before{
-    display: inline-block;
-    content: "「";
-    margin-left: -1rem;    
-}
-span.ltlbg_talk::after{
-    content: "」";
-}
-/*会話『』をぶら下げインデントにする。*/
-span.ltlbg_talk2{
-    display: inline-block;
-}
-span.ltlbg_talk2::before{
-    display: inline-block;
-    content: "『";
-    margin-left: -1rem;    
-}
-span.ltlbg_talk2::after{
-    content: "』";
-}
-/*思考（）をぶら下げインデントにする。*/
-span.ltlbg_think{
-    display: inline-block;
-}
-span.ltlbg_think::before{
-    display: inline-block;
-    content: "（";
-    margin-left: -1rem;    
-}
-span.ltlbg_think::after{
-    content: "）";
-}
-/*強調〝〟をぶら下げインデントにする。*/
-span.ltlbg_wquote{
-    display: inline-block;
-}
-span.ltlbg_wquote::before{
-    display: inline-block;
-    content: "〝";
-    margin-left: -1rem;    
-}
-span.ltlbg_wquote::after{
-    content: "〟";
-}
-/*会話―をぶら下げインデントにする。*/
-span.ltlbg_dash{
-    display: inline-block;
-}
-span.ltlbg_dash::before{
-    display: inline-block;
-    content: "――";
-    margin-left: -1rem;    
-}
-/*引用記号＞をぶら下げインデントにする。*/
-span.ltlbg_citation{
-    display: inline-block;
-}
-span.ltlbg_citation::before{
-    display: inline-block;
-    content: "＞";
-    margin-left: -1rem;    
-}
+/*ルビ・傍点関連========================================================*/
+/*ルビは基本的に全てグループルビである。
+  母字とルビの文字数の関係によって配置を変えるのみ
+  ・母字の方が長くルビが短い場合、中央寄せになる。
+  　但し母字の方が長くルビが極端に短い場合とで、文字間を変える余地を残している。
+  ・母字とルビが同じかルビが長い場合は頭を合わせて流す。行送りではみ出す場合に注意。
+  ・母字とルビが同じ場合、littlebug.shで1文字に1ルビの形に変換され、
+　　1母字1ルビ文字のモノルビのようになる。
+　・圏点は母字とルビが同じ場合と同じ扱い。
+  */
 
-/*特殊ルビ_ルビが長い*/
+/*特殊ルビ_ルビと母字が同じかルビが長い……頭を合わせて流す(text-align: centerが無い)
+  1文字モノルビのケースもこれに含まれる*/
 [data-ruby_long] {
     position: relative;
 }
@@ -155,7 +175,7 @@ span.ltlbg_citation::before{
     transform: scale(0.5, 0.5);
 }
 
-/*特殊ルビ_ルビが少し短い*/
+/*特殊ルビ_ルビが少し短い……中寄せ「非常に短い」に対してletter-spacingが違うだけ*/
 [data-ruby_center] {
     position: relative;
 }
@@ -175,7 +195,7 @@ span.ltlbg_citation::before{
     margin-left: -0.25rem;
 }
 
-/*特殊ルビ_ルビが短い*/
+/*特殊ルビ_ルビが非常に短い……中寄せ「少し短い」に対してletter-spacingが違うだけ*/
 [data-ruby_short] {
     position: relative;
 }
@@ -195,7 +215,8 @@ span.ltlbg_citation::before{
     letter-spacing: 1rem;
 }
 
-/*特殊傍点*/
+/*特殊傍点……内部的にはルビと母字が同じか長いルビと同じ
+  littlebug.shで1文字に1圏点のルビに変換されている前提*/
 [data-emphasis] {
     position: relative;
 }
@@ -215,6 +236,7 @@ span.ltlbg_citation::before{
     letter-spacing: 1rem;
 }
 
+/*特殊合字========================================================*/
 /*forceGouji1と2で1文字を作ります。
   偏と旁の比率はユーザ側でいじってください。
   複数必要な場合は増やしてください。*/

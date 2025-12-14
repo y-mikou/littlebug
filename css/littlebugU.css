@@ -55,7 +55,8 @@ hr.ltlbg_hr{
 
 /*変なページ制御をしない*/
 *{
-    break-inside: auto;
+    break-inside: always;
+    page-break-after: always;
     padding: 0;
     margin-top: 0;
     margin-bottom: 0;
