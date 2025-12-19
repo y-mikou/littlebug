@@ -3,13 +3,15 @@ export lang=ja_jp.utf-8
 
 # 作業用一時ディレクトリの後始末用関数とトラップ設定
 function cleanup_tmpdir() {
+  #ディレクトリそのものを消す
   cd ../
   if [[ ! "${tmpDirName}" = '' ]] ; then 
-    rm -rf ${tmpDirName}
+    rm -rf "${tmpDirName}"
   fi
 }
 # trap cleanup_tmpdir INT
 # trap cleanup_tmpdir EXIT
+
 
 #sed -z を使用するため、GNU sed であることを確認する
 if [[ $(sed > /dev/null 2>&1 ) =~ 'GNU sed' ]] ; then
@@ -17,44 +19,43 @@ if [[ $(sed > /dev/null 2>&1 ) =~ 'GNU sed' ]] ; then
     return 1
 fi
 
-tgtFile=$(basename "${2}")   #引数で指定されたファイルを対象とする
-
+declare tgtFile="$(basename "${2}")"   #引数で指定されたファイルを対象とする
 if [[ "${tgtFile/ /}" = '' ]];then
   echo "💩対象ファイルを指定してください"
   exit 1
 fi
 
-tgtFile_AfterCD='../'${tgtFile}   #一時ディレクトリの内側から参照するとき用
-
-if [ ! -e ${tgtFile} ]; then
+if [[ ! -e "${tgtFile}" ]]; then
   echo "💩 ${tgtFile}なんてファイルいないです"
   exit 1
 fi
 
-convMode=${1}  #'-t2h'でtxt→html、'-h2t'でhtml→txt、それ以外は今の所はエラー
+convMode="${1}"  #'-t2h'でtxt→html、'-h2t'でhtml→txt、それ以外は今の所はエラー
 
 if [[ "${convMode}" != '-t2h' ]] && [[ "${convMode}" != '-h2t' ]] ; then
   echo "💩 引数1は-t2h(txt→html)か-h2t(html→txt)で指定してください"
   exit 1
 fi
 
-chrset=$(file -i ${tgtFile})
-tmpDirName=$(mktemp -u ltlbgtmpDir_XXXXX)  #作業用ディレクトリを作成し
-mkdir ${tmpDirName}                        #その中で作業する。
-cd ${tmpDirName}                           #最後にディレクトリごと削除する。
+chrset="$(file -i ${tgtFile})"
+tmpDirName="$(mktemp -u ltlbgtmpDir_XXXXX)"  #作業用ディレクトリを作成し
+mkdir "${tmpDirName}"                        #その中で作業する。
+cd "${tmpDirName}"                           #最後にディレクトリごと削除する。
 
-if [ "${chrset##*charset=}" = "unknown-8bit" ]; then
-  iconv -f SHIFT_JIS -t UTF-8 ${tgtFile_AfterCD} > tmp1_ltlbgtmp
-  cat tmp1_ltlbgtmp >${tgtFile_AfterCD}
+declare tgtFile_AfterCD="../${tgtFile}"      #一時ディレクトリの内側から参照するとき用
+declare tmpfile=$(mktemp -u ltlbgtmpFile_XXXXX)
+declare copyfile=$(mktemp -u ltlbgtmpFile_XXXXX)
+echo '' > "${tmpfile}"
+
+if [[ "${chrset##*charset=}" = "unknown-8bit" ]] ; then
+  iconv -f SHIFT_JIS -t UTF-8 "${tgtFile_AfterCD}" > "${tmpfile}"
+  cat "${tmpfile}" > "${tgtFile_AfterCD}"
 fi
 
 # if [[ "${convMode}" = '-t2h' ]]; then
-
   ## txt→html ############################################################################################
   destFile="${tgtFile_AfterCD/'.txt'/'_tagged.html'}" #出力ファイルの指定する
-  touch "${destFile}"                        #出力先ファイルを生成
-echo "------${tgtFile_AfterCD}"
-exit 1
+  echo '' > "${destFile}"                             #出力先ファイルを生成
 
   ##警告表示####################################################################
   # 変換不能なケースを予め抽出する。
@@ -64,73 +65,73 @@ exit 1
   ## ルビ指定の基底文字に傍点の同時指定
   cat "${tgtFile_AfterCD}" \
   | grep -E -o -n '(\{《《[^》]+》》｜[^\}]+\})|(《《{[^｜]+｜[^\}]+}》》)' \
-  >warn_ltlbgtmp
-  if [[ -s warn_ltlbgtmp ]]; then 
-    cat warn_ltlbgtmp
+  >"${tmpfile}"
+  if [[ -s "${tmpfile}" ]]; then 
+    cat "${tmpfile}"
     echo '🤔 ↑でルビと傍点が同時に設定されています。不適切な指定です。変換結果は保証されません。' 
   fi
   ## 縦中横指定の一部に太字指定
   cat "${tgtFile_AfterCD}" \
   | grep -E -o -n '(\^[^\*]+\*\*10\*\*[^\^]?\^)|(\^[^\*]?\*\*10\*\*[^\^]+\^)' \
-  >warn_ltlbgtmp
-  if [[ -s warn_ltlbgtmp ]]; then 
-    cat warn_ltlbgtmp
+  >"${tmpfile}"
+  if [[ -s "${tmpfile}" ]]; then 
+    cat "${tmpfile}"
     echo '🤔 ↑で縦中横の一部にだけ太字が指定されています。この変換は非対応です。変換結果は保証されません。' 
   fi
   # 4文字以上の縦中横
   cat "${tgtFile_AfterCD}" \
   | grep -E -o -n '\^[a-zA-Z0-9]{4,}\^' \
-  >warn_ltlbgtmp
-  if [[ -s warn_ltlbgtmp ]]; then 
-    cat warn_ltlbgtmp
+  >"${tmpfile}"
+  if [[ -s "${tmpfile}" ]]; then 
+    cat "${tmpfile}"
     echo '🤔 ↑で4桁以上の縦中横が指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
   fi
   # 縦中横指定の一部にのみ傍点指定
   cat "${tgtFile_AfterCD}" \
   | grep -E -o -n '(\^[a-zA-Z0-9]?《《[a-zA-Z0-9]+》》[a-zA-Z0-9]+\^)|\^[a-zA-Z0-9]+《《[a-zA-Z0-9]+》》[a-zA-Z0-9]?\^' \
-  >warn_ltlbgtmp
-  if [[ -s warn_ltlbgtmp ]]; then 
-    cat warn_ltlbgtmp
+  >"${tmpfile}"
+  if [[ -s "${tmpfile}" ]]; then 
+    cat "${tmpfile}"
     echo '🤔 ↑で縦中横の一部に傍点が指定されています。不適切な指定です。変換は実施しますが結果は保証されません。' 
   fi
   # ルビ指定全体に回転指定
   cat "${tgtFile_AfterCD}" \
   | grep -E -o -n '\[\^\{[^｜]+｜[^\}]+\}\^\]' \
-  >warn_ltlbgtmp
-  if [[ -s warn_ltlbgtmp ]]; then 
-    cat warn_ltlbgtmp
+  >"${tmpfile}"
+  if [[ -s "${tmpfile}" ]]; then 
+    cat "${tmpfile}"
     echo '🤔 ↑でルビ指定の全体に回転が指定されています。不適切な指定です。変換は実施しますが結果は保証されません。' 
   fi
   # 強制合字の一部を太字指定
   cat "${tgtFile_AfterCD}" \
   | grep -E -o -n '\[l\[\*\*.\*\*.\]r\]' \
-  >warn_ltlbgtmp
-  if [[ -s warn_ltlbgtmp ]]; then 
-    cat warn_ltlbgtmp
+  >"${tmpfile}"
+  if [[ -s "${tmpfile}" ]]; then 
+    cat "${tmpfile}"
     echo '🤔 ↑で合字生成指定の一部にのみ太字が指定されています。不適切な指定です。変換は実施しますが結果は保証されません。' 
   fi
   # 強制合字の一部に回転指定
   cat "${tgtFile_AfterCD}" \
   | grep -E -o -n '(\[l\[.\^.\^\]r\])|(\^\[l\[[^]]{2}\]r\]\^)' \
-  >warn_ltlbgtmp
-  if [[ -s warn_ltlbgtmp ]]; then 
-    cat warn_ltlbgtmp
+  >"${tmpfile}"
+  if [[ -s "${tmpfile}" ]]; then 
+    cat "${tmpfile}"
     echo '🤔 ↑で合字生成と回転が同時に指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
   fi
   # アへ濁点に回転指定
   cat "${tgtFile_AfterCD}" \
   | grep -E -o -n '\[\^.゛\^\]' \
-  >warn_ltlbgtmp
-  if [[ -s warn_ltlbgtmp ]]; then 
-    cat warn_ltlbgtmp
+  >"${tmpfile}"
+  if [[ -s "${tmpfile}" ]]; then 
+    cat "${tmpfile}"
     echo '🤔 ↑で濁点合字と回転が同時に指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
   fi
   # ルビ文字に特殊指定
   cat "${tgtFile_AfterCD}" \
   | grep -E -o -n '(\{[^｜]+｜[^\*]?\*\*[^\*]+\*\*[^\*]?\})|({[^｜]+｜[^}]?\[\^[^\}]+\^\][^｜]?})|({[^｜]+｜[^}]?《《[^}]+》》[^}]?\})|({[^｜]+｜{[^｜]+｜[^\}]+\}\})|({[^｜]+｜[^\}]?\[l\[[^]]{2}\]r\][^\}]?\})' \
-  >warn_ltlbgtmp
-  if [[ -s warn_ltlbgtmp ]]; then 
-    cat warn_ltlbgtmp
+  >"${tmpfile}"
+  if [[ -s "${tmpfile}" ]]; then 
+    cat "${tmpfile}"
     echo '🤔 ↑でルビ文字に修飾が指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
   fi
 
@@ -138,39 +139,72 @@ exit 1
   ##########################################################################################
   # 先行変換：特殊文字など、htmlタグに含まれることが多いものを先に置換する
   ##########################################################################################
+  ## 改行コードをlfに統一
+  cat "${tgtFile_AfterCD}" \
+  | sed -zE 's/\r\n/\n/g' \
+  | sed -zE 's/\r/\n/g' \
+  > "${tmpfile}"
+  cat "${tmpfile}" > "${copyfile}"
+
+## 空白のみの行の空白を削除したうえで、空行を削除する
+## 章区切りなどを意図した空行は後で調整するため
+  cat "${copyfile}" \
+  | sed -E 's/^[ 　]$//g' \
+  | sed -zE 's/\n+/\n/g' \
+  > "${tmpfile}"
+  cat "${tmpfile}" > "${copyfile}"
+
   ## 「&」(半角)を「＆ａｍｐ」へ変換
   ## 「<」(半角)を「&ｌｔ」へ変換(最初から&lt;と書かれているものを考慮)
   ## 「>」(半角)を「&ｇｔ」へ変換(最初から&gt;と書かれているものを考慮)
   ## 「'」(半角)を「&ｑｕｏｔ」へ変換(最初から&quot;と書かれているものを考慮)
   ## 「"」(半角)を「＆＃３９」へ変換(最初から&#39;と書かれているものを考慮)
   ## 「/」(半角)を「＆＃０４７」へ変換(最初から&#047;と書かれているものを考慮)
-  ## ※全角であること、；をつけないのは以降の変換に引っかからないように。
-  ## 最後に復旧する。
-  ## ――を―へ変換
-  ## 改行コードをlfに統一
-  cat "${tgtFile_AfterCD}" \
-  | sed -i -E 's/\&/＆ａｍｐ/g' \
-  | sed -i -E 's/\&amp;/＆ａｍｐ/g' \
-  | sed -i -E 's/\//＆＃０４７/g' \
-  | sed -i -E 's/\(\(\&\|＆ａｍｐ\)#047;|\/\)/＆＃０４７/g' \
-  | sed -i -E 's/\\/＆＃０９２/g' \
-  | sed -i -E 's/\(\&\|＆ａｍｐ\)#092;/＆＃０９２/g' \
-  | sed -i -E 's/>/＆ｇｔ/g' \
-  | sed -i -E 's/\(\&\|＆ａｍｐ\)gt;/＆ｇｔ/g' \
-  | sed -i -E 's/</＆ｌｔ/g' \
-  | sed -i -E 's/\(\&\|＆ａｍｐ\)lt;/＆ｌｔ/g' \
-  | sed -i -E 's/'\''/＆＃３９/g' \
-  | sed -i -E 's/\(\&\|＆ａｍｐ\)#39;/＆＃３９/g' \
-  | sed -i -E 's/\"/＆ｑｕｏｔ/g' \
-  | sed -i -E 's/\(\&\|＆ａｍｐ\)#quot;/＆ｑｕｏｔ/g' \
-  | sed -i -E 's/――/―/g' \
-  | sed -i -z 's/\r\n/\n/g' \
-  | sed -i -z 's/\r/\n/g'
+  ## ※全角であること、；をつけないのは以降の変換に引っかからないように。最後に復旧する。
+  # cat "${copyfile}" \
+  # | sed -E 's/\&/＆ａｍｐ/g' \
+  # | sed -E 's/\&amp;/＆ａｍｐ/g' \
+  # | sed -E 's/\//＆＃０４７/g' \
+  # | sed -E 's/\(\(\&\|＆ａｍｐ\)#047;|\/\)/＆＃０４７/g' \
+  # | sed -E 's/\\/＆＃０９２/g' \
+  # | sed -E 's/\(\&\|＆ａｍｐ\)#092;/＆＃０９２/g' \
+  # | sed -E 's/>/＆ｇｔ/g' \
+  # | sed -E 's/\(\&\|＆ａｍｐ\)gt;/＆ｇｔ/g' \
+  # | sed -E 's/</＆ｌｔ/g' \
+  # | sed -E 's/\(\&\|＆ａｍｐ\)lt;/＆ｌｔ/g' \
+  # | sed -E 's/'\''/＆＃３９/g' \
+  # | sed -E 's/\(\&\|＆ａｍｐ\)#39;/＆＃３９/g' \
+  # | sed -E 's/\"/＆ｑｕｏｔ/g' \
+  # | sed -E 's/\(\&\|＆ａｍｐ\)#quot;/＆ｑｕｏｔ/g' \
+  # > "${tmpfile}"
+  # cat "${tmpfile}" > "${copyfile}"
+  sed -i -E "s/\&/＆ａｍｐ/g;  \
+             s/\&amp;/＆ａｍｐ/g; \
+             s/\//＆＃０４７/g; \
+             s/\(\(\&\|＆ａｍｐ\)#047;|\/\)/＆＃０４７/g; \
+             s/\\\/＆＃０９２/g; \
+             s/\(\&\|＆ａｍｐ\)#092;/＆＃０９２/g; \
+             s/>/＆ｇｔ/g; \
+             s/\(\&\|＆ａｍｐ\)gt;/＆ｇｔ/g; \
+             s/</＆ｌｔ/g; \
+             s/\(\&\|＆ａｍｐ\)lt;/＆ｌｔ/g; \
+             s/'\''/＆＃３９/g; \
+             s/\(\&\|＆ａｍｐ\)#39;/＆＃３９/g; \
+             s/\"/＆ｑｕｏｔ/g; \
+             s/\(\&\|＆ａｍｐ\)#quot;/＆ｑｕｏｔ/g" \
+  "${copyfile}"
 
-  ## 行頭にしか登場しない括弧類の補完
-  cat "${tgtFile_AfterCD}" \
-  | sed -i -E 's/^―\(.\+\)/―\1―/g' \
-  | sed -i -E 's/^＞\(.\+\)/＞\1＜/g'
+
+
+exit 1
+  ## 行頭にしか登場しない括弧類を末尾にも点けてくくる
+  ## 行頭の「―」(ダーシ)
+  ## 行頭の「＞」（引用）
+  # cat "${tgtFile_AfterCD}" \
+  # | sed -E 's/^―\(.\+\)/―\1―/g' \
+  # | sed -E 's/^＞\(.\+\)/＞\1＜/g' \
+  # > "${tmpfile}"
+  # cat "${tmpfile}" > "${copyfile}"
 
   #変換処理の都合で、マークアップ括り順を入れ替える########################################
   #※複数文字を対象にできるタグを外側に####################################################
@@ -179,13 +213,14 @@ exit 1
   ## ^《《字》》^となっているものは、《《^字^》》へ順序交換する
   ## ^{基底文字｜ルビ}^となっているものは、{^基底文字^｜ルビ}へ順序交換する
   ## [^**基底文字**^]となっているものは、**[^基底文字^]**へ順序交換する
-  cat "${tgtFile_AfterCD}" \
-  | sed -i -E 's/\[\^《《\([^\*]\+\)》》\^\]/《《\[\^\1\^\]》》/g' \
-  | sed -i -E 's/\^\*\*\([^\*]\+\)\*\*\^/\*\*\^\1\^\*\*/g' \
-  | sed -i -E 's/\^《《\([^\*]\+\)》》\^/《《\^\1\^》》/g' \
-  | sed -i -E 's/\^{\([^｜]\+\)｜\([^}]\+\)}\^/{\^\1\^｜\2}/g' \
-  | sed -i -E 's/《《\*\*\([^\*]\+\)\*\*》》/\*\*《《\1》》\*\*/g' \
-  | sed -i -E 's/\[\^\*\*\([^\*]\+\)\*\*\^\]/\*\*\[\^\1\^\]\*\*/g'
+  cat "${copyfile}" \
+  | sed -E 's/\[\^《《([^》]+)》》\^\]/《《\[\^\1\^\]》》/g' \
+  | sed -E 's/\^\*\*([^\*]+)\*\*\^/\*\*\^\1\^\*\*/g' \
+  | sed -E 's/\^《《([^\*]+)》》\^/《《\^\1\^》》/g' \
+  | sed -E 's/\^\{([^｜]+)｜([^}]+)\}\^/{\^\1\^｜\2}/g' \
+  | sed -E 's/《《\*\*([^\*]+)\*\*》》/\*\*《《\1》》\*\*/g' \
+  | sed -E 's/\[\^\*\*([^\*]+)\*\*\^\]/\*\*\[\^\1\^\]\*\*/g' \
+  > "${tmpfile}"
 
   #特殊文字変換類置換ここまで##############################################################
   #########################################################################################
@@ -194,34 +229,51 @@ exit 1
   # 以降でスペースを置換したい場合は、空白クラスのタグを置換すること
   #########################################################################################
 
+  ## 記号類の揺れを統一する。
+  ## ❤★■♪
+  ## ――を―へ変換(2倍化前提)
+  cat "${copyfile}" \
+  | sed -E 's/[♡♥]/❤/g' \
+  | sed -E 's/☆/★/g' \
+  | sed -E 's/□/■/g' \
+  | sed -E 's/[♫♬]/♪/g' \
+  | sed -E 's/――/―/g' \
+  > "${tmpfile}"
+  cat "${tmpfile}" > "${copyfile}"
+  
   ## 半角SPを<span class="ltlbg_sSp">へ。
   ## 特定の記号(の連続)のあとに全角SPを挿入する。直後に閉じ括弧類、改行、「゛」がある場合は回避する
   ## 行頭以外の全角SPを<span class="ltlbg_wSp">へ。
-  cat "${tgtFile_AfterCD}" \
-  | sed -i -E 's/\ /<span class=\"ltlbg_sSp\"><\/span>/g' \
-  | sed -i -E 's/\([！？♥♪☆\!\?]\+\)　\?/\1　/g' \
-  | sed -i -E 's/　\([」』）〟゛/n]\)/\1/g' \
-  | sed -i -E 's/\(.\)　/\1<span class=\"ltlbg_wSp\"><\/span>/g'
+  cat "${copyfile}" \
+  | sed -E 's/ /<span class=\"ltlbg_sSp\"><\/span>/g' \
+  | sed -E 's/([！!？?❤💞💕♪☆★💢]+)[^　」』\）〟゛]/\1　/g' \
+  | sed -E 's/(.)　/\1<span class=\"ltlbg_wSp\"><\/span>/g' \
+  > "${tmpfile}"
+ cat "${tmpfile}" > "${copyfile}"
 
   # 章区切り前後の空行を削除する
   ## 事前に、作品冒頭に空行がある場合は削除する
-  cat "${tgtFile_AfterCD}" \
-  | sed -i -z 's/\n*\(\[chapter[^]]\+\]\)\n\+/\n\1\n/g' \
-  | sed -i -z '1,/^\n*/s/^\n*//'
-  ## 文章中スペース類置換ここまで###########################################################
+  # cat "${tgtFile_AfterCD}" \
+  # | sed -z 's/\n*\(\§\+\]\)\n\+/\n\1\n/g' \
+  # | sed -z 's/\n*\(\[chapter[^]]\+\]\)\n\+/\n\1\n/g' \
+  # | sed -z '1,/^\n*/s/^\n*//' \
+  # > "${tmpfile}"
+  # cat "${tmpfile}" > "${copyfile}"
 
   ##########################################################################################
   ##先行変換： 傍点の中に自動縦中横が含まれるものの対応
   ##########################################################################################
 
   ## 英数字2文字と、！？!?の重なりを<span class="ltlbg_tcyA">の変換対象にする
-  cat "${tgtFile_AfterCD}" \
-  | LANG=C sed -i -e 's/\([^a-zA-Z0-9\<\>\^]\)\([a-zA-Z0-9]\{2\}\)\([^a-zA-Z0-9\<\>\^]\)/\1~\2~\3/g' \
-  | sed -i -E 's/\([^!！?？\&#;]\)\(!!\|！！\)\([^!！?？\&#;]\)/\1~!!~\3/g' \
-  | sed -i -E 's/\([^!！?？\&#;]\)\(??\|？？\)\([^!！?？\&#;]\)/\1~??~\3/g' \
-  | sed -i -E 's/\([^!！?？\&#;]\)\(!?\|！？\)\([^!！?？\&#;]\)/\1~!?~\3/g' \
-  | sed -i -E 's/\([^!！?？\&#;]\)\(?!\|？！\)\([^!！?？\&#;]\)/\1~?!~\3/g'
-
+  cat "${copyfile}" \
+  | LANG=C sed -E 's/([^a-zA-Z0-9<>\^])([a-zA-Z0-9]{2})([^a-zA-Z0-9<>\^])/\1~\2~\3/g' \
+  | sed -E 's/([^!！\?？\&#;])(!!|！！)([^!！\?？\&#;])/\1~!!~\3/g' \
+  | sed -E 's/([^!！\?？\&#;])(\?\?|？？)([^!！\?？\&#;])/\1~??~\3/g' \
+  | sed -E 's/([^!！\?？\&#;])(!\?|！？)([^!！\?？\&#;])/\1~!?~\3/g' \
+  | sed -E 's/([^!！\?？\&#;])(\?!|？！)([^!！\?？\&#;])/\1~?!~\3/g' \
+  > "${tmpfile}"
+  cat "${tmpfile}" > "${copyfile}"
+  
   ## 行頭§§§の次に空白(なくても良い)に続く行を、<h2 class="ltlbg_sectionName" style="page: sukebe;">章タイトルに
   ### style="page: sukebe;"はCSS側で、当該セクション(に属すページ)がエッチシーンであることを示す
   ### ':'';'は当スクリプト内で特殊文字として操作しているため、ここには含めず、スクリプトの最後に付与し直している
@@ -230,10 +282,14 @@ exit 1
   ## 章タイトル付与時に、<section>の閉じ＋開始タグを付与する。
   ## 1行目が</section><!--ltlbg_section-->になるので、削除する
   ## 今は§で節を表示している
-  cat "${tgtFile_AfterCD}" \
-  | sed -i -E 's/^\(§§§\)\(.\{0,\}\)/<\/section><\!--ltlbg_section-->\n<section class=\"ltlbg_section\" style=\"page sukebe\"><h2 class=\"ltlbg_sectionName\">§ \2<\/h2>/g' \
-  | sed -i -E 's/^\(§\)\(.\{0,\}\)/<\/section><\!--ltlbg_section-->\n<section class=\"ltlbg_section\"><h2 class=\"ltlbg_sectionName\">§ \2<\/h2>/g' \
-  | sed -i -E '1d'
+  cat "${copyfile}" \
+  | sed -E 's/^(§§§)(.{0,})/<\/section><!--ltlbg_section-->\n<section class=\"ltlbg_section\" style=\"page sukebe\">\n<h2 class=\"ltlbg_sectionName\">§ \2<\/h2>/g' \
+  | sed -E 's/^(§)(.{0,})/<\/section><!--ltlbg_section-->\n<section class=\"ltlbg_section\">\n<h2 class=\"ltlbg_sectionName\">§ \2<\/h2>/g' \
+  | sed -E '1d' \
+  | sed - '1d' \
+  > "${tmpfile}"
+  cat "${tmpfile}" > "${copyfile}"
+exit 1
 
   ## 行頭全角スペースで始まる行を<p>タグに
   ## 行頭括弧類の前に<p class="ltlbg_desciption">タグ
