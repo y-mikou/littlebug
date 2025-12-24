@@ -256,30 +256,55 @@ export lang=ja_jp.utf-8
     ### 印刷上は§１つだけになる
     ## 行頭§の次に空白(なくても良い)に続く行を、<h2 class="ltlbg_sectionName">章タイトルに
     ## 章タイトル付与時に、<section>の閉じ＋開始タグを付与する。
-    ## 1行目が</section><!--ltlbg_section-->になるので、削除する
     ## 今は§で節を表示している
-    sed -Ei "s/^§§§(.{0,})/<\/section><!--ltlbg_section-->\n<section class=\"ltlbg_section\" style=\"page sukebe\">\n<h2 class=\"ltlbg_sectionName\">§ \1 <\/h2>/g; \
-            s/^(§)(.{0,})/<\/section><!--ltlbg_section-->\n<section class=\"ltlbg_section\">\n<h2 class=\"ltlbg_sectionName\">§ \2<\/h2>/g; \
-            1d;" \
-    "${copyfile}"
+
+    if [[ ! $(cat ${copyfile} | head -n 1) =~ ^§+.* ]]; then
+      sed -zi '0,/^/ s/^/<section class="ltlbg_section">\n/;' "${copyfile}"
+    else
+      sed -Ei "s/^§§§(.{0,})/<\/section><!--ltlbg_section-->\n<section class=\"ltlbg_section\" style=\"page sukebe\">\n<h2 class=\"ltlbg_sectionName\">§ \1 <\/h2>/g; \
+              s/^§(.{0,})/<\/section><!--ltlbg_section-->\n<section class=\"ltlbg_section\">\n<h2 class=\"ltlbg_sectionName\">§ \1<\/h2>/g;" \
+      "${copyfile}"
+
+      ## 初回に登場する</section><!--ltlbg_section-->が開始のない終了タグになるので、削除する
+      sed -zi "0,/<\/section><!--ltlbg_section-->\n/ s/<\/section><!--ltlbg_section-->\n//;" "${copyfile}"
+
+    fi
+
   }
 
+
   : "段落・改行処理" && {
+    # 形式段落のタグ化の前に、括弧類のリレーの塊と、地の文の塊を、メタ形式段落(div)で区切る
+    ## 前段でセクションタグが冒頭に付与されているので、最初のdiv開始タグを付与する。その際、冒頭が通常の段落か括弧類かでクラス名を分ける
+
+
+
+
+
+    sed -zEi "s/(」)\n(　)/\1\n<\/div><!--ltlbg_div-->\n<div class=\"ltlbg_discript_group\">\n\2/g; \
+              s/([^」])\n(「)/\1\n<\/div><!--ltlbg_div-->\n<div class=\"ltlbg_bracket_group\">\n\2/g;" \
+    "${copyfile}"
+
+    # ## セクション名(</h2>)もしくはセクションタグ(<section class="ltlbg_section">)直後の</div><!--ltlbg_div-->が開始のない終了タグになるので、削除する
+    # sed -zi "0,/<\/h2>\n<\/div><!--ltlbg_div-->\n/ s/<\/h2>\n<\/div><!--ltlbg_div-->\n/<\/h2>\n/;" "${copyfile}"
+    # sed -zi "0,/<section class=\"ltlbg_section\">\n<\/div><!--ltlbg_div-->\n/ s/<section class=\"ltlbg_section\">\n<\/div><!--ltlbg_div-->\n/<section class=\"ltlbg_section\">\n/;" "${copyfile}"
+
+    ## 最終行に終了タグを付与する
+    sed -zi '$ s/$/<\div><!--ltlbg_div--><\/section><!--ltlbg_section-->/' "${copyfile}"
+  
     ## 以下のものを形式段落とする
     ### 行頭全角空白で始まり、次の行頭空白までの一括り(地の文の形式段落)…<p class="ltlbg_desciption">
     ### 行頭括弧類で始まり、次の行頭空白までの一括り(会話文など)…<p class="ltlbg_bracket">
-    ### ※直接話法内の形式段落を認めるため、カッコで始まりカッコで終わる、の考えは持たない。
-    ### 　あくまでも次の段落開始までが段落。
     ## 行頭括弧類の前に<p class="ltlbg_p">タグ
-    
-    cat "${tgtFile_AfterCD}" \
-    | sed -i -E 's/^　\(.\+\)/<p class=\"ltlbg_desciption\">\1<\/p><\!--ltlbg_desciption-->/g' \
-    | sed -i -E 's/^\([「（―『＞].\+[」』）〟―＜]\)/<p class=\"ltlbg_p_brctGrp\">\1\n<\/p><\!--ltlbg_p_brctGrp-->/g'
+    sed -Ei "s/^([「『（〝])(.+)([」』）〟])$/<p class=\"ltlbg_p\" data-head=\"\1\" data-foot=\"\3\">\2<\/p><\!--ltlbg_p-->/g; \
+             s/^([「『（〝＞―])(.+)$/<p class=\"ltlbg_p\" data-head=\"\1\" data-foot=\"-\">\2<\/p><\!--ltlbg_p-->/g; \
+             s/^　(.+)([」』）〟])$/<p class=\"ltlbg_p\" data-head=\"-\" data-foot=\"\2\">\1\2<\/p><\!--ltlbg_p-->/g; \
+             s/^　(.+)[^」』）〟]$/<p class=\"ltlbg_p\" data-head=\"-\" data-foot=\"-\">\1<\/p><\!--ltlbg_p-->/g;" \
+    "${copyfile}"
 
-    #ltlbg_p_brctGrpタグの整理
-    cat "${tgtFile_AfterCD}" \
-    | sed -i -z 's/<p class=\"ltlbg_p_brctGrp\">/<p class=\"ltlbg_p_brctGrp\">\n/g' \
-    | sed -i -z 's/\([」』）〟―＜]\)\n<\/p><\!--ltlbg_p_brctGrp-->\n<p class=\"ltlbg_p_brctGrp\">\n\([「（〝『―＞]\)/\1\n\2/g'
+cp "${copyfile}" "${destFile}"
+exit 1
+
 
     #   ## 改行→改行タグ
     #   ## crlf→lf してから lf→<br class="ltlbg_br">+lfに
