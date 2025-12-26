@@ -89,13 +89,13 @@ BEGIN {
   # 現在の行に開き括弧類が含まれるか（開始判定）
   # 含まれていれば、以降をクオート状態とし、次に行末閉じ括弧類が現れるまでクオート中を維持する
   # if ($0 ~ /^「/) { in_quote = 1}
-  if ($0 ~ /^[「『（〝＞―]/) { in_quote = 1}
+  if ($0 ~ /^[「『（]/) { in_quote = 1}
 
   # 判定：現在、クオート状態が継続中であるか、もしくは行頭開き括弧類か
   # もしそうであれば、pタグのクラスをbracketにする。
   # これに該当しない場合はクラスはdiscriptとなる
   # if ( in_quote == 1 || $0 ~ /^「/) {
-  if ( in_quote == 1 || $0 ~ /^[「『（〝＞―]/) {
+  if ( in_quote == 1 || $0 ~ /^[「『（]/) {
     current_type = "bracket-group"
   } else {
     current_type = "discript-group"
@@ -146,7 +146,7 @@ BEGIN {
   line = gensub(/゜/, "<span class=\"ltlbg_handakuten\"></span>", "g", line); #キチガイ半濁音
   line = gensub(/\[newpage\]/, "<br class=\"ltlbg_newpage\">", "g", line); # 改ページ
   line = gensub(/---/, "<span class=\"ltlbg_hr\"></span>", "g", line); # 水平線
-  line = gensub(/／＼|〱/, "<span class=\"ltlbg_odori1\"></span><span class=\"ltlbg_odori2\"></span>", "g", line); #踊り字。縦書き横書きどちらの踊り字になるかはスタイルによる
+  line = gensub(/／＼|〱/, "<span class=\"ltlbg_odori1\"></span><span class=\"ltlbg_odori2\"></span>", "g", line); #踊り字。
   
   
 
