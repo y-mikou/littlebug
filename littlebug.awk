@@ -1,8 +1,67 @@
 #!/usr/bin/awk -f
 
-#大きな範囲のタグなど、そのタグ自体で単一行とするようなものの追加は、その場で直接print出力する(行追加される)。
-#それ以外の小さなタグは行内挿入/部分置換によってline変数内で行い、
-#MAINセクションの最後もしくはnextコマンドの直前でline変数をprint出力する(変換後の行が出力される)。
+# ルビタグにクラスを付与して置換する関数
+# gawk拡張のmatch()第三引数を使用
+function apply_ruby_classes(text) {
+    new_text = ""
+    # テキスト内にルビパターンがなくなるまでループ
+    while (match(text, /｜([^《]+)《([^》]+)》/, m)) {
+        # マッチした部分より前のテキストを新しいテキストに追加
+        new_text = new_text substr(text, 1, RSTART - 1)
+
+        parent = m[1]
+        ruby = m[2]
+
+        # クラスの決定
+        class = ""
+        if (length(parent) == length(ruby)) {
+            class = "mono"
+        } else if (length(ruby) == 2 * length(parent)) {
+            class = "same"
+        } else if (length(ruby) > 2 * length(parent)) {
+            class = "long"
+        } else {
+            class = "short"
+        }
+
+        # 置換後のHTMLを生成
+        replacement = "<ruby class=\"" class "\">" parent "<rt>" ruby "</rt></ruby>"
+        # 新しいテキストに置換部分を追加
+        new_text = new_text replacement
+
+        # 未処理のテキスト部分を更新
+        text = substr(text, RSTART + RLENGTH)
+    }
+    # 残りのテキスト部分を追加
+    new_text = new_text text
+    return new_text
+}
+
+# 圏点（傍点）を文字ごとのルビに変換する関数
+function apply_emphasis_dots(text) {
+    new_text = ""
+    # 《《...》》 パターンがなくなるまでループ
+    while (match(text, /《《([^》]+)》》/, m)) {
+        # マッチ部分より前を new_text に追加
+        new_text = new_text substr(text, 1, RSTART - 1)
+
+        parent_text = m[1]
+        
+        replacement = ""
+        
+        # 親文字を1文字ずつループ
+        for (i = 1; i <= length(parent_text); i++) {
+            char = substr(parent_text, i, 1)
+            replacement = replacement "<ruby class=\"emphasis\">" char "<rt>﹅</rt></ruby>"
+        }
+        
+        new_text = new_text replacement
+        
+        text = substr(text, RSTART + RLENGTH)
+    }
+    new_text = new_text text
+    return new_text
+}
 
 BEGIN {
   state_p = "none"     # none, discript, bracket
@@ -71,8 +130,8 @@ BEGIN {
     state_section = "section"
 
     # §の行自体にもルビなどの置換を適用したい場合はここに記述
-    line = gensub(/｜([^《]+)《([^》]+)》/, "<ruby>\\1<rt>\\2</rt></ruby>", "g", line);
-    line = gensub(/《《([^》]+)》》/, "<emphasis>\\1</emphasis>", "g", line);
+    line = apply_ruby_classes(line)
+    line = apply_emphasis_dots(line)
     
     line = gensub(/(§+.*)/, "  <h2 class=\"section_name\">\\1</h2>", "g", line);
 
@@ -148,20 +207,17 @@ BEGIN {
   line = gensub(/---/, "<span class=\"ltlbg_hr\"></span>", "g", line); # 水平線
   line = gensub(/／＼|〱/, "<span class=\"ltlbg_odori1\"></span><span class=\"ltlbg_odori2\"></span>", "g", line); #踊り字。
   
+  ###########################################################
+  # ルビ・圏点……上部の関数で実装
+  ###########################################################
+  line = apply_ruby_classes(line)
+  line = apply_emphasis_dots(line)
+
   
-
-  ###########################################################
-  # ルビ
-  ###########################################################
-  line = gensub(/｜([^《]+)《([^》]+)》/, "<ruby>\\1<rt>\\2</rt></ruby>", "g", line);
-
-  ###########################################################
-  # 傍点
-  ###########################################################
-  line = gensub(/《《([^》]+)》》/, "<emphasis>\\1</emphasis>", "g", line);
-
-
-  #   ## 特殊文字の復旧
+  #############################################################################
+  ## 行末処理
+  #############################################################################
+  ## 特殊文字の復旧
   line = gensub(/＆ａｍｐ/, "&amp;", "g", line);
   line = gensub(/＆ｌｔ/, "&lt;", "g", line);
   line = gensub(/＆ｇｔ/, "&gt;", "g", line);
@@ -171,18 +227,14 @@ BEGIN {
   line = gensub(/＆＃０９２/, "&#092;", "g", line);
   line = gensub(/〿/, "<span class=\"ltlbg_sSp\"></span>", "g", line);
   line = gensub(/〼/, "<span class=\"ltlbg_wSp\"></span>", "g", line);
-  
 
+  # 行末 が」 かどうか（終了判定）
+  # 行末が」であれば、現在継続中のクオート状態を解除する。
+  if ($0 ~ /[」』）〟＜―]$/) { in_quote = 0 }
 
   # 行の出力
   print line
 
-  #############################################################################
-  ## 行末処理
-  #############################################################################
-  # 行末 が」 かどうか（終了判定）
-  # 行末が」であれば、現在継続中のクオート状態を解除する。
-  if ($0 ~ /[」』）〟＜―]$/) { in_quote = 0 }
 }
 
 END {
