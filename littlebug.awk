@@ -84,28 +84,27 @@ BEGIN {
   # 処理中に問題になる特殊文字の一次置換(最後に元に戻す)
   # htmlを意識して既に文字参照型で記述されているものも含む
   # スラッシュ
-  line = gensub(/&#047;/, "＆＃０４７", "g", line);
-  line = gensub(/\//, "＆＃０４７", "g", line);
+  line = gensub(/&#047;|\//, "＆＃０４７", "g", line);
   # バックスラッシュ
-  line = gensub(/&#092;/, "＆＃０９２", "g", line);
-  line = gensub(/\\/, "＆＃０９２", "g", line);
+  line = gensub(/&#092;|\\/, "＆＃０９２", "g", line);
   # 半角の>
-  line = gensub(/&gt;/, "＆ｇｔ", "g", line);
-  line = gensub(/>/, "＆ｇｔ", "g", line);
+  line = gensub(/&gt;|>/, "＆ｇｔ", "g", line);
   #半角の<
-  line = gensub(/&lt;/, "＆ｌｔ", "g", line);
-  line = gensub(/</, "＆ｌｔ", "g", line);
+  line = gensub(/&lt;|</, "＆ｌｔ", "g", line);
   # シングルクォーテーション
-  line = gensub(/&#39;/, "＆＃３９", "g", line);
-  line = gensub(/'/, "＆＃３９", "g", line);
+  line = gensub(/&#39;|'/, "＆＃３９", "g", line);
   # ダブルクォーテーション
-  line = gensub(/&#quot;/, "＆ｑｕｏｔ", "g", line);
-  line = gensub("\"", "＆ｑｕｏｔ", "g" , line);
-
+  line = gensub(/&#quot;|\\"/, "＆ｑｕｏｔ", "g", line);
   # 残ったアンパサンド
-  line = gensub(/&amp;/, "＆ａｍｐ", "g", line);
-  line = gensub(/&/, "＆ａｍｐ", "g", line);
+  line = gensub(/&amp;|&/, "＆ａｍｐ", "g", line);
 
+  # 全角スペースを<span class="ltlbg_sSp"></span>に置換
+  line = gensub("　", "<span class=\"ltlbg_sSp\"></span>", "g", line);
+
+  # 連続する感嘆符・疑問符・記号類の後に全角スペースを挿入し、
+  # それを<span class="ltlbg_wSp"></span>に置換
+  # 対象 ！!?？❤💞💕♪☆★💢
+  line = gensub(/([!?！？❤💞💕♪☆★💢]+)([^」』）])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
 
   #############################################################################
   ## 段落系処理
@@ -126,14 +125,14 @@ BEGIN {
     if (state_section != "none") {
       print "</section>"
     }
-    print "<section class=\"section\">"
+    print "<section class=\"ltlbg_section\">"
     state_section = "section"
 
     # §の行自体にもルビなどの置換を適用したい場合はここに記述
     line = apply_ruby_classes(line)
     line = apply_emphasis_dots(line)
     
-    line = gensub(/(§+.*)/, "  <h2 class=\"section_name\">\\1</h2>", "g", line);
+    line = gensub(/(§+.*)/, "  <h2 class=\"ltlbg_section_name\">\\1</h2>", "g", line);
 
     print line
     next
@@ -147,17 +146,15 @@ BEGIN {
 
   # 現在の行に開き括弧類が含まれるか（開始判定）
   # 含まれていれば、以降をクオート状態とし、次に行末閉じ括弧類が現れるまでクオート中を維持する
-  # if ($0 ~ /^「/) { in_quote = 1}
   if ($0 ~ /^[「『（]/) { in_quote = 1}
 
   # 判定：現在、クオート状態が継続中であるか、もしくは行頭開き括弧類か
   # もしそうであれば、pタグのクラスをbracketにする。
   # これに該当しない場合はクラスはdiscriptとなる
-  # if ( in_quote == 1 || $0 ~ /^「/) {
   if ( in_quote == 1 || $0 ~ /^[「『（]/) {
-    current_type = "bracket-group"
+    current_type = "ltlng_bracket-group"
   } else {
-    current_type = "discript-group"
+    current_type = "ltlng_discript-group"
   }
 
   # 状態が変わった（または最初の行）場合のタグ挿入
@@ -207,6 +204,8 @@ BEGIN {
   line = gensub(/---/, "<span class=\"ltlbg_hr\"></span>", "g", line); # 水平線
   line = gensub(/／＼|〱/, "<span class=\"ltlbg_odori1\"></span><span class=\"ltlbg_odori2\"></span>", "g", line); #踊り字。
   
+
+  
   ###########################################################
   # ルビ・圏点……上部の関数で実装
   ###########################################################
@@ -218,19 +217,19 @@ BEGIN {
   ## 行末処理
   #############################################################################
   ## 特殊文字の復旧
-  line = gensub(/＆ａｍｐ/, "&amp;", "g", line);
-  line = gensub(/＆ｌｔ/, "&lt;", "g", line);
-  line = gensub(/＆ｇｔ/, "&gt;", "g", line);
-  line = gensub(/＆＃３９/, "&#39;", "g", line);
-  line = gensub(/＆ｑｕｏｔ/, "&quot;", "g", line);
-  line = gensub(/＆＃０４７/, "&#047;", "g", line);
-  line = gensub(/＆＃０９２/, "&#092;", "g", line);
-  line = gensub(/〿/, "<span class=\"ltlbg_sSp\"></span>", "g", line);
-  line = gensub(/〼/, "<span class=\"ltlbg_wSp\"></span>", "g", line);
+  line = gensub(/＆ａｍｐ/, "\\&amp;", "g", line);
+  line = gensub(/＆ｌｔ/, "\\&lt;", "g", line);
+  line = gensub(/＆ｇｔ/, "\\&gt;", "g", line);
+  line = gensub(/＆＃３９/, "\\&#39;", "g", line);
+  line = gensub(/＆ｑｕｏｔ/, "\\&quot;", "g", line);
+  line = gensub(/＆＃０４７/, "\\&#047;", "g", line);
+  line = gensub(/＆＃０９２/, "\\&#092;", "g", line);
+  # line = gensub(/〿/, "<span class=\"ltlbg_sSp\"></span>", "g", line);
+  # line = gensub(/〼/, "<span class=\"ltlbg_wSp\"></span>", "g", line);
 
   # 行末 が」 かどうか（終了判定）
   # 行末が」であれば、現在継続中のクオート状態を解除する。
-  if ($0 ~ /[」』）〟＜―]$/) { in_quote = 0 }
+  if ($0 ~ /[」』）]$/) { in_quote = 0 }
 
   # 行の出力
   print line
@@ -243,4 +242,26 @@ END {
 
   #一度もsectionタグが登場していない場合、閉じる必要がない(割とあり得る)
   if (state_section != "none") { print "</section>" }
+
+
+  ##########################################################################################
+  # 先頭にlittlebugXXX.css読み込むよう追記する
+  ##########################################################################################
+  ## <html>
+  ##   <head>
+  ##     <link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugI\.css">\n/' \
+  ##     <link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugV\.css">\n/' \
+  ##     <\!--\<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugH\.css">-->\n/' \
+  ##     <link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugU\.css">\n/' \
+  ##   </head>
+  ## <html>
+  # print "<html>"
+  # print "  <head>"
+  # print "    <link rel=\"stylesheet\" href=\"../css/littlebugI.css\">"
+  # print "    <link rel=\"stylesheet\" href=\"../css/littlebugV.css\">"
+  # print "    <!--<link rel=\"stylesheet\" href=\"../css/littlebugH.css\">-->"
+  # print "    <link rel=\"stylesheet\" href=\"../css/littlebugU.css\">"
+  # print "  </head>"
+  # print "  <body>"
+  # print "    <div class=\"ltlbg_container\">"
 }
