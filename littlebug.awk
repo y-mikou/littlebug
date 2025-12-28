@@ -67,6 +67,7 @@ BEGIN {
   state_p = "none"     # none, discript, bracket
   state_section = "none"     # none, section
   in_quote = 0       # 1 = 「」の内部を処理中
+  output_count = 0   # 出力行数カウンタ
 }
 
 {
@@ -117,15 +118,15 @@ BEGIN {
     #初回の場合、pタググループは開始されていないので閉じない
     #初回以外では、セクションの境界でpタググループを必ず閉じる
     if (state_p != "none") {
-        print "  </div>"
+        output[++output_count] = "  </div>"
         state_p = "none"
     }
     #初回の場合、セクションを開始する(セクション状態を開始する)
     #初回以外では、セクションを閉じてから開き直す
     if (state_section != "none") {
-      print "</section>"
+      output[++output_count] = "</section>"
     }
-    print "<section class=\"ltlbg_section\">"
+    output[++output_count] = "<section class=\"ltlbg_section\">"
     state_section = "section"
 
     # §の行自体にもルビなどの置換を適用したい場合はここに記述
@@ -134,7 +135,7 @@ BEGIN {
     
     line = gensub(/(§+.*)/, "  <h2 class=\"ltlbg_section_name\">\\1</h2>", "g", line);
 
-    print line
+    output[++output_count] = line
     next
   }
 
@@ -159,8 +160,8 @@ BEGIN {
 
   # 状態が変わった（または最初の行）場合のタグ挿入
   if (state_p != current_type) {
-    if (state_p != "none") { print "  </div>" }
-    print "  <div class=\"" current_type "\">"
+    if (state_p != "none") { output[++output_count] = "  </div>" }
+    output[++output_count] = "  <div class=\"" current_type "\">"
     state_p = current_type
   }
   
@@ -231,17 +232,22 @@ BEGIN {
   # 行末が」であれば、現在継続中のクオート状態を解除する。
   if ($0 ~ /[」』）]$/) { in_quote = 0 }
 
-  # 行の出力
-  print line
+  # 行の出力（メモリに溜め込む）
+  output[++output_count] = line
 
 }
 
 END {
   #一度もpタグが登場していない場合、閉じる必要がない(ほぼあり得ないが)
-  if (state_p != "none") { print "  </div>" }
+  if (state_p != "none") { output[++output_count] = "  </div>" }
 
   #一度もsectionタグが登場していない場合、閉じる必要がない(割とあり得る)
-  if (state_section != "none") { print "</section>" }
+  if (state_section != "none") { output[++output_count] = "</section>" }
+
+  # メモリに溜め込んだ全ての出力を一度に出力
+  for (i = 1; i <= output_count; i++) {
+    print output[i]
+  }
 
 
   ##########################################################################################
