@@ -67,7 +67,7 @@ BEGIN {
   state_p = "none"     # none, discript, bracket
   state_section = "none"     # none, section
   in_quote = 0       # 1 = 「」の内部を処理中
-  output_count = 0   # 出力行数カウンタ
+  output_buffer = ""   # 出力バッファ
 }
 
 {
@@ -118,15 +118,15 @@ BEGIN {
     #初回の場合、pタググループは開始されていないので閉じない
     #初回以外では、セクションの境界でpタググループを必ず閉じる
     if (state_p != "none") {
-        output[++output_count] = "  </div>"
+        output_buffer = output_buffer "  </div>" ORS
         state_p = "none"
     }
     #初回の場合、セクションを開始する(セクション状態を開始する)
     #初回以外では、セクションを閉じてから開き直す
     if (state_section != "none") {
-      output[++output_count] = "</section>"
+      output_buffer = output_buffer "</section>" ORS
     }
-    output[++output_count] = "<section class=\"ltlbg_section\">"
+    output_buffer = output_buffer "<section class=\"ltlbg_section\">" ORS
     state_section = "section"
 
     # §の行自体にもルビなどの置換を適用したい場合はここに記述
@@ -135,7 +135,7 @@ BEGIN {
     
     line = gensub(/(§+.*)/, "  <h2 class=\"ltlbg_section_name\">\\1</h2>", "g", line);
 
-    output[++output_count] = line
+    output_buffer = output_buffer line ORS
     next
   }
 
@@ -160,8 +160,8 @@ BEGIN {
 
   # 状態が変わった（または最初の行）場合のタグ挿入
   if (state_p != current_type) {
-    if (state_p != "none") { output[++output_count] = "  </div>" }
-    output[++output_count] = "  <div class=\"" current_type "\">"
+    if (state_p != "none") { output_buffer = output_buffer "  </div>" ORS }
+    output_buffer = output_buffer "  <div class=\"" current_type "\">" ORS
     state_p = current_type
   }
   
@@ -233,21 +233,19 @@ BEGIN {
   if ($0 ~ /[」』）]$/) { in_quote = 0 }
 
   # 行の出力（メモリに溜め込む）
-  output[++output_count] = line
+  output_buffer = output_buffer line ORS
 
 }
 
 END {
   #一度もpタグが登場していない場合、閉じる必要がない(ほぼあり得ないが)
-  if (state_p != "none") { output[++output_count] = "  </div>" }
+  if (state_p != "none") { output_buffer = output_buffer "  </div>" ORS }
 
   #一度もsectionタグが登場していない場合、閉じる必要がない(割とあり得る)
-  if (state_section != "none") { output[++output_count] = "</section>" }
+  if (state_section != "none") { output_buffer = output_buffer "</section>" ORS }
 
   # メモリに溜め込んだ全ての出力を一度に出力
-  for (i = 1; i <= output_count; i++) {
-    print output[i]
-  }
+  printf "%s", output_buffer
 
 
   ##########################################################################################
