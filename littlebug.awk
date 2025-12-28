@@ -99,13 +99,10 @@ BEGIN {
   # 残ったアンパサンド
   line = gensub(/&amp;|&/, "＆ａｍｐ", "g", line);
 
-  # 全角スペースを<span class="ltlbg_sSp"></span>に置換
-  line = gensub("　", "<span class=\"ltlbg_sSp\"></span>", "g", line);
-
   # 連続する感嘆符・疑問符・記号類の後に全角スペースを挿入し、
   # それを<span class="ltlbg_wSp"></span>に置換
   # 対象 ！!?？❤💞💕♪☆★💢
-  line = gensub(/([!?！？❤💞💕♪☆★💢]+)([^」』）])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
+  line = gensub(/([!?！？❤💞💕♪☆★💢]+)　*([^」』）])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
 
   #############################################################################
   ## 段落系処理
@@ -186,12 +183,13 @@ BEGIN {
   #############################################################################
   # 句読点・記号類のspanタグ化###########################################################  
   #タグで括るタイプの修飾_1文字
+  line = gensub("[^\"]　[^\"]", "<span class=\"ltlbg_wSp\"></span>", "g", line); # 全角スペース
   line = gensub(/―/, "<span class=\"ltlbg_wSize\">―</span>", "g", line); #全角ダッシュは常にワイドタグを適用
   line = gensub(/\[-(.)-\]/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line); #強制1文字幅タグ
   line = gensub(/\[\^(.)\^\]/, "<span class=\"ltlbg_rotate\">\\1</span>", "g", line); #回転タグ
   line = gensub(/\[l\[(.)\]r\]/, "<span class=\"ltlbg_forcedGouji1/2\">\\1</span>", "g", line); #強制合字1/2タグ
   line = gensub(/[；;]/, "<span class=\"ltlbg_semicolon\">；</span>/g", "g", line); #半角セミコロンは全て全角に修正
-  line = gensub(/[：:]/, "<span class=\"ltlbg_colon\">：</span>/g", "g", line); #半角コロンは全て全角に修正
+  line = gensub(/[：:]/, "<span class=\"ltlbg_colon\">：</span>", "g", line); #半角コロンは全て全角に修正
 
   #   #タグで括るタイプの修飾_複数文字
   line = gensub(/~..~/,"<span class=\"ltlbg_tcy\">//1</span>", "g",line) #縦中横
@@ -244,28 +242,25 @@ END {
   #一度もsectionタグが登場していない場合、閉じる必要がない(割とあり得る)
   if (state_section != "none") { output_buffer = output_buffer "</section>" ORS }
 
+  ##########################################################################################
+  # htmlになるように先頭と末尾に必要なタグを付与する。
+  # またlittlebugXXX.css読み込むよう追記する
+  ##########################################################################################
+  header =        "<html>" ORS
+  header = header "  <head>" ORS
+  header = header "    <link rel=\"stylesheet\" href=\"../css/littlebugI.css\">" ORS
+  header = header "    <link rel=\"stylesheet\" href=\"../css/littlebugV.css\">" ORS
+  header = header "    <!--<link rel=\"stylesheet\" href=\"../css/littlebugH.css\">-->" ORS
+  header = header "    <link rel=\"stylesheet\" href=\"../css/littlebugU.css\">" ORS
+  header = header "  </head>" ORS
+  header = header "  <body>" ORS
+  header = header "<div class=\"ltlbg_container\">" ORS
+  header = header "<!--文章内容ここから-->" ORS
+  footer =        "<!--文章内容ここまで-->" ORS
+  footer = footer "</div><!--ltlbg_container-->" ORS
+  footer = footer "</body>" ORS
+  footer = footer "</html>" ORS
+
   # メモリに溜め込んだ全ての出力を一度に出力
-  printf "%s", output_buffer
-
-
-  ##########################################################################################
-  # 先頭にlittlebugXXX.css読み込むよう追記する
-  ##########################################################################################
-  ## <html>
-  ##   <head>
-  ##     <link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugI\.css">\n/' \
-  ##     <link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugV\.css">\n/' \
-  ##     <\!--\<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugH\.css">-->\n/' \
-  ##     <link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugU\.css">\n/' \
-  ##   </head>
-  ## <html>
-  # print "<html>"
-  # print "  <head>"
-  # print "    <link rel=\"stylesheet\" href=\"../css/littlebugI.css\">"
-  # print "    <link rel=\"stylesheet\" href=\"../css/littlebugV.css\">"
-  # print "    <!--<link rel=\"stylesheet\" href=\"../css/littlebugH.css\">-->"
-  # print "    <link rel=\"stylesheet\" href=\"../css/littlebugU.css\">"
-  # print "  </head>"
-  # print "  <body>"
-  # print "    <div class=\"ltlbg_container\">"
+  printf "%s", header output_buffer footer
 }
