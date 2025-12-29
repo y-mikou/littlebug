@@ -99,8 +99,9 @@ BEGIN {
   # 残ったアンパサンド
   line = gensub(/&amp;|&/, "＆ａｍｐ", "g", line);
 
-  #改行前末尾に入ったゴミスペースを掃除
+  #ゴミスペースを掃除
   line = gensub(/[ 　]$/, "", "g", line);
+  line = gensub(/[ 　]([」』）〟])/, "\\1", "g", line);
 
   #記号種類の統一
   line = gensub(/[♡♥]/, "❤", "g", line);
@@ -278,7 +279,7 @@ END {
   header = header "  <body>" ORS
   header = header "<div class=\"ltlbg_container\">" ORS
   header = header "<!--文章内容ここから-->" ORS
-  
+
   footer =        "<!--文章内容ここまで-->" ORS
   footer = footer "</div><!--ltlbg_container-->" ORS
   footer = footer "</body>" ORS
