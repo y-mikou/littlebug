@@ -55,8 +55,7 @@ hr.ltlbg_hr{
 
 /*変なページ制御をしない*/
 *{
-    break-inside: always;
-    page-break-after: always;
+    break-inside: auto;
     padding: 0;
     margin-top: 0;
     margin-bottom: 0;
@@ -67,13 +66,6 @@ hr.ltlbg_hr{
     word-break: break-all;
     overflow-wrap: anywhere;
     font-feature-settings: "halt" 1;
-}
-
-
-html {
-    line-height: 1.8rem;
-    widows: 1;
-    orphans: 1;
 }
 
 /*改ページ*/

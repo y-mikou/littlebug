@@ -1,9 +1,4 @@
 /* 作品個別のスタイルを記述するためのCSS。必要に応じて改名すること */
-html {
-    font-size: 15px;
-    column-count: 1;
-}
-
 
 @page :left{
     @left-middle {

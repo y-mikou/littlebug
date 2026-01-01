@@ -1,110 +1,71 @@
-html {
-    /* 組み方向 */
-    /* 横 */ writing-mode: horizontal-tb; 
+:root{
+    --font-size: 12px;
+    --line-height: 1.75rem;
 }
 
+html {
+    /* 組み方向 */
+    /* 横 */ writing-mode: horizontal-tb;
+    column-count: 1;
+    orphans: 1;
+
+    font-size: var(--font-size);
+    line-height: var(--line-height); /* 「1行分」のマージンには1.75remを指定する。pxでは21 */
+}
 /*章(section)関連========================================================*/
 /*章*/
 section.ltlbg_section{
     /*章の区切りに差し込まれるスペース*/
-    margin-top: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: var(--line-height);
 }
 /*章名称*/
-h2.ltlbg_sectionName{
+h2.ltlbg_section_name{
     display: block;
     text-align: center;
-    font-size: 2rem;
+    font-size: 1rem; 
+    font-weight: bold;
     page-break-before: always; 
     /*章タイトルの後、文章が始まるまでのスペース*/
-    margin-bottom: 2rem;
+    margin-bottom: var(--line-height);
 }
 
 
-/*段落(ｐ)関連========================================================*/
-/*説明・会話部分の分離マージン*/
-div.ltlbg_Desc-TalkPart{
-    margin-bottom: 1rem;
+/*中段落(div)関連========================================================*/
+/*中段落間マージン*/
+div.ltlng_bracket-group{
+    margin-bottom: var(--line-height);
+}
+div.ltlng_discript-group{
+    margin-bottom: var(--line-height);
 }
 
-/*地の文用の形式段落---------------------------------------------*/
-p.ltlbg_desciption{
-    display: inline-block;
+/*小段落(p)関連========================================================*/
+/*字下げ・括弧類をdataから付与*/
+p.ltlbg_bracket{
+    margin-left: 0rem;
 }
-/*字下げ量を調整(下の例では全角スペース3つぶん)*/
-p.ltlbg_desciption::before{
-    content: "　　　";
+[data-p_header] {
+    position: relative;
 }
-
-/*ブラケットが付与される文の形式段落-----------------------------*/
-/*「」をぶら下げインデントにする。*/
-p.ltlbg_talk{
-    margin-left: 1rem;
+[data-p_header]::before {
+    content: attr(data-p_header);
+    left: -1rem;
+    right: 0;
+    bottom: 0;
+    white-space: nowrap;
+    text-indent: 0;
 }
-p.ltlbg_talk::before{
-    display: inline-block;
-    content: "「";
-    margin-left: -1rem;
+[data-p_footer] {
+    position: relative;
 }
-p.ltlbg_talk::after{
-    content: "」";
+[data-p_footer]::after {
+    content: attr(data-p_footer);
+    left: 1rem;
+    right: 0;
+    bottom: 0;
+    white-space: nowrap;
+    text-indent: 0;
 }
-/*『』をぶら下げインデントにする。*/
-p.ltlbg_talk2{
-    margin-left: 1rem;
-}
-p.ltlbg_talk2::before{
-    display: inline-block;
-    content: "『";
-    margin-left: -1rem;    
-}
-p.ltlbg_talk2::after{
-    content: "』";
-}
-/*（）をぶら下げインデントにする。*/
-p.ltlbg_think{
-    margin-left: 1rem;
-}
-p.ltlbg_think::before{
-    display: inline-block;
-    content: "（";
-    margin-left: -1rem;    
-}
-p.ltlbg_think::after{
-    content: "）";
-}
-/*〝〟をぶら下げインデントにする。*/
-p.ltlbg_wquote{
-    margin-left: 1rem;
-}
-p.ltlbg_wquote::before{
-    display: inline-block;
-    content: "〝";
-    margin-left: -1rem;    
-}
-p.ltlbg_wquote::after{
-    content: "〟";
-}
-/*―をぶら下げインデントにする。*/
-p.ltlbg_dash{
-    margin-left: 1rem;
-}
-p.ltlbg_dash::before{
-    display: inline-block;
-    content: "――";
-    margin-left: -1rem;    
-}
-/*＞をぶら下げインデントにする。*/
-p.ltlbg_citation{
-    margin-left: 1rem;
-}
-p.ltlbg_citation::before{
-    display: inline-block;
-    content: "＞";
-    margin-left: -1rem;    
-}
-
-
 
 /*特殊文字関連========================================================*/
 /*アへ濁点*/
@@ -148,92 +109,74 @@ span.ltlbg_wSp{
 
 /*ルビ・傍点関連========================================================*/
 /*ルビは基本的に全てグループルビである。
-  母字とルビの文字数の関係によって配置を変えるのみ
-  ・母字の方が長くルビが短い場合、中央寄せになる。
-  　但し母字の方が長くルビが極端に短い場合とで、文字間を変える余地を残している。
-  ・母字とルビが同じかルビが長い場合は頭を合わせて流す。行送りではみ出す場合に注意。
-  ・母字とルビが同じ場合、littlebug.shで1文字に1ルビの形に変換され、
-　　1母字1ルビ文字のモノルビのようになる。
-　・圏点は母字とルビが同じ場合と同じ扱い。
+  変換スクリプト側で、母字数とルビ字数の関係からルビのクラスを分けて設定している。
+  以下のスタイルは、そのクラスごとに作成する。
+  デフォルトでは以下の4つ。
+  ltlbg_ruby-mono……母字1文字にルビ1文字の場合
+  ltlbg_ruby-same……母字1文字あたりルビ2文字の場合
+  ltlbg_ruby-long……母字1文字あたりルビ2文字超過になる場合
+  ltlbg_ruby-short……母字1文字あたりルビ2文字未満になる場合
+  それぞれにdataを用意している。
   */
-
-/*特殊ルビ_ルビと母字が同じかルビが長い……頭を合わせて流す(text-align: centerが無い)
-  1文字モノルビのケースもこれに含まれる*/
-[data-ruby_long] {
+[data-ltlbg_ruby-mono] {
     position: relative;
 }
-[data-ruby_long]::before {
-    content: attr(data-ruby_long);
+[data-ltlbg_ruby-mono]::before {
+    content: attr(data-ltlbg_ruby-mono);
+    position: absolute;
+    left: 0.25rem;
+    right: 0;
+    bottom: 80%;
+    white-space: nowrap;
+    text-indent: 0;
+    transform-origin: left bottom;
+    letter-spacing: 1rem;
+    transform: scale(0.5, 0.5);
+}
+
+[data-ltlbg_ruby-same] {
+    position: relative;
+}
+[data-ltlbg_ruby-same]::before {
+    content: attr(data-ltlbg_ruby-same);
     position: absolute;
     left: 0;
     right: 0;
     bottom: 80%;
     white-space: nowrap;
     text-indent: 0;
-
     transform-origin: left bottom;
     transform: scale(0.5, 0.5);
 }
 
-/*特殊ルビ_ルビが少し短い……中寄せ「非常に短い」に対してletter-spacingが違うだけ*/
-[data-ruby_center] {
+[data-ltlbg_ruby-short] {
     position: relative;
 }
-[data-ruby_center]::before {
-    content: attr(data-ruby_center);
+[data-ltlbg_ruby-short]::before {
+    content: attr(data-ltlbg_ruby-short);
     position: absolute;
     left: 0;
     right: 0;
     bottom: 80%;
     white-space: nowrap;
     text-indent: 0;
-
-    text-align: center;
-    transform-origin: center bottom;
-    transform: scale(0.5, 0.5);
-    
-    margin-left: -0.25rem;
-}
-
-/*特殊ルビ_ルビが非常に短い……中寄せ「少し短い」に対してletter-spacingが違うだけ*/
-[data-ruby_short] {
-    position: relative;
-}
-[data-ruby_short]::before {
-    content: attr(data-ruby_short);
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 80%;
-    white-space: nowrap;
-    text-indent: 0;
-
-    text-align: center;
-    transform-origin: center bottom;
-    transform: scale(0.5, 0.5);
-
-    letter-spacing: 1rem;
-}
-
-/*特殊傍点……内部的にはルビと母字が同じか長いルビと同じ
-  littlebug.shで1文字に1圏点のルビに変換されている前提*/
-[data-emphasis] {
-    position: relative;
-}
-[data-emphasis]::before {
-    content: attr(data-emphasis);
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 80%;
-    white-space: nowrap;
-    text-indent: 0;
-
     transform-origin: left bottom;
     transform: scale(0.5, 0.5);
+}
 
-    margin-left: 0.25rem;
-    letter-spacing: 1rem;
+[data-ltlbg_ruby-long] {
+    position: relative;
+}
+[data-ltlbg_ruby-long]::before {
+    content: attr(data-ltlbg_ruby-long);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 80%;
+    white-space: nowrap;
+    text-indent: 0;
+    transform-origin: left bottom;
+    transform: scale(0.5, 0.5);
 }
 
 /*特殊合字========================================================*/

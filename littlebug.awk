@@ -15,17 +15,17 @@ function apply_ruby_classes(text) {
         # クラスの決定
         class = ""
         if (length(parent) == length(ruby)) {
-            class = "mono"
+            class = "ltlbg_ruby-mono"
         } else if (length(ruby) == 2 * length(parent)) {
-            class = "same"
+            class = "ltlbg_ruby-same"
         } else if (length(ruby) > 2 * length(parent)) {
-            class = "long"
+            class = "ltlbg_ruby-long"
         } else {
-            class = "short"
+            class = "ltlbg_ruby-short"
         }
 
         # 置換後のHTMLを生成
-        replacement = "<ruby class=\"" class "\">" parent "<rt>" ruby "</rt></ruby>"
+        replacement = "<ruby class=\"" class "\" data-" class "=\"" ruby "\">" parent "<rt>" ruby "</rt></ruby>"
         # 新しいテキストに置換部分を追加
         new_text = new_text replacement
 
@@ -67,6 +67,7 @@ BEGIN {
   state_p = "none"     # none, discript, bracket
   state_section = "none"     # none, section
   in_quote = 0       # 1 = 「」の内部を処理中
+  output_buffer = ""   # 出力バッファ
 }
 
 {
@@ -98,13 +99,34 @@ BEGIN {
   # 残ったアンパサンド
   line = gensub(/&amp;|&/, "＆ａｍｐ", "g", line);
 
-  # 全角スペースを<span class="ltlbg_sSp"></span>に置換
-  line = gensub("　", "<span class=\"ltlbg_sSp\"></span>", "g", line);
+  #ゴミスペースを掃除
+  line = gensub(/[ 　]$/, "", "g", line);
+  line = gensub(/[ 　]([」』）〟])/, "\\1", "g", line);
 
+  #記号種類の統一
+  line = gensub(/[♡♥]/, "❤", "g", line);
+  line = gensub(/☆/, "★", "g", line);
+  line = gensub(/□/, "■", "g", line);
+  line = gensub(/[♫♬]/, "♪", "g", line);
+  line = gensub(/―+/, "―", "g", line);
+  line = gensub(/！！/, "‼", "g", line);
+  line = gensub(/！？/, "!?", "g", line);
+  line = gensub(/？！/, "?!", "g", line);
+  line = gensub(/？？/, "??", "g", line);
+  line = gensub(/^(§+)[ 　]/, "\\1", "g", line);
+  
   # 連続する感嘆符・疑問符・記号類の後に全角スペースを挿入し、
   # それを<span class="ltlbg_wSp"></span>に置換
   # 対象 ！!?？❤💞💕♪☆★💢
-  line = gensub(/([!?！？❤💞💕♪☆★💢]+)([^」』）])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
+  line = gensub(/([!\?！？❤💞💕♪☆★💢]+)　*([^」』）!\?！？❤💞💕♪☆★💢])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
+
+  #上記特殊記号(❤,★,■,♪,!!,!?,?!,??)を、<span class="ltlbg_wdfix"></span>タグで括る
+  line = gensub(/([❤★■♪])/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line);
+  line = gensub("‼", "<span class=\"ltlbg_wdfix\">!!</span>", "g", line);
+  line = gensub("!\\?", "<span class=\"ltlbg_wdfix\">!?</span>", "g", line);
+  line = gensub("\\?!", "<span class=\"ltlbg_wdfix\">?!</span>", "g", line);
+  line = gensub("\\?\\?", "<span class=\"ltlbg_wdfix\">??</span>", "g", line);
+  
 
   #############################################################################
   ## 段落系処理
@@ -117,15 +139,15 @@ BEGIN {
     #初回の場合、pタググループは開始されていないので閉じない
     #初回以外では、セクションの境界でpタググループを必ず閉じる
     if (state_p != "none") {
-        print "  </div>"
+        output_buffer = output_buffer "  </div>" ORS
         state_p = "none"
     }
     #初回の場合、セクションを開始する(セクション状態を開始する)
     #初回以外では、セクションを閉じてから開き直す
     if (state_section != "none") {
-      print "</section>"
+      output_buffer = output_buffer "</section>" ORS
     }
-    print "<section class=\"ltlbg_section\">"
+    output_buffer = output_buffer "<section class=\"ltlbg_section\">" ORS
     state_section = "section"
 
     # §の行自体にもルビなどの置換を適用したい場合はここに記述
@@ -134,7 +156,7 @@ BEGIN {
     
     line = gensub(/(§+.*)/, "  <h2 class=\"ltlbg_section_name\">\\1</h2>", "g", line);
 
-    print line
+    output_buffer = output_buffer line ORS
     next
   }
 
@@ -159,8 +181,8 @@ BEGIN {
 
   # 状態が変わった（または最初の行）場合のタグ挿入
   if (state_p != current_type) {
-    if (state_p != "none") { print "  </div>" }
-    print "  <div class=\"" current_type "\">"
+    if (state_p != "none") { output_buffer = output_buffer "  </div>" ORS }
+    output_buffer = output_buffer "  <div class=\"" current_type "\">" ORS
     state_p = current_type
   }
   
@@ -174,23 +196,23 @@ BEGIN {
   # ３．閉じ括弧のみ (セリフ内形式段落から戻る行)
   # ４．全角スペースで始まる行(地の文形式段落と同じ扱い。セリフ内であるか否かを問わない)
   # それぞれに対応するpタグを生成する。
-  line = gensub(/^([「『（])([^」』）]+)([」』）])$/, "    <p class=\"bracket\" data-header=\"\\1\" data-footer=\"\\3\">\\2</p><!--bracket-->", "g", line);
-  line = gensub(/^([「『（])([^」』）]+)$/, "    <p class=\"bracket\" data-header=\"\\1\" data-footer=\"-\">\\2</p><!--bracket-->", "g", line);
-  line = gensub(/^[^「『（](.+)[」』）]$/, "    <p class=\"bracket\" data-header=\"-\" data-footer=\"」\">\\1</p><!--bracket-->", "g", line);
-  line = gensub(/^　(.+)$/, "    <p class=\"discript\" data-header=\"　\" data-footer=\"-\">\\1</p><!--descript-->", "g", line);
-
+  line = gensub(/^([「『（])([^」』）]+)([」』）])$/, "    <p class=\"ltlbg_bracket\" data-p_header=\"\\1\" data-p_footer=\"\\3\">\\2</p><!--bracket-->", "g", line); #両方
+  line = gensub(/^([「『（])([^」』）]+)$/, "    <p class=\"ltlbg_bracket\" data-p_header=\"\\1\" data-p_footer=\"\">\\2</p><!--bracket-->", "g", line); #開括弧のみ
+  line = gensub(/^([^「『（]+)([」』）])$/, "    <p class=\"ltlbg_bracket\"　data-p_footer=\"\\2\">\\1</p><!--bracket-->", "g", line); #閉じ括弧のみ
+  line = gensub(/^　(.+)$/, "    <p class=\"ltlbg_desciption\" data-p_header=\"〼\">\\1</p><!--descript-->", "g", line); #地の文(括弧類グループの内部含む)
 
   #############################################################################
   ## 通常の変換
   #############################################################################
   # 句読点・記号類のspanタグ化###########################################################  
   #タグで括るタイプの修飾_1文字
+  line = gensub("[^\"]　[^\"]", "<span class=\"ltlbg_wSp\"></span>", "g", line); # 全角スペース
   line = gensub(/―/, "<span class=\"ltlbg_wSize\">―</span>", "g", line); #全角ダッシュは常にワイドタグを適用
   line = gensub(/\[-(.)-\]/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line); #強制1文字幅タグ
   line = gensub(/\[\^(.)\^\]/, "<span class=\"ltlbg_rotate\">\\1</span>", "g", line); #回転タグ
   line = gensub(/\[l\[(.)\]r\]/, "<span class=\"ltlbg_forcedGouji1/2\">\\1</span>", "g", line); #強制合字1/2タグ
-  line = gensub(/[；;]/, "<span class=\"ltlbg_semicolon\">；</span>/g", "g", line); #半角セミコロンは全て全角に修正
-  line = gensub(/[：:]/, "<span class=\"ltlbg_colon\">：</span>/g", "g", line); #半角コロンは全て全角に修正
+  line = gensub(/[；;]/, "<span class=\"ltlbg_semicolon\">；</span>", "g", line); #半角セミコロンは全て全角に修正
+  line = gensub(/[：:]/, "<span class=\"ltlbg_colon\">：</span>", "g", line); #半角コロンは全て全角に修正
 
   #   #タグで括るタイプの修飾_複数文字
   line = gensub(/~..~/,"<span class=\"ltlbg_tcy\">//1</span>", "g",line) #縦中横
@@ -203,8 +225,6 @@ BEGIN {
   line = gensub(/\[newpage\]/, "<br class=\"ltlbg_newpage\">", "g", line); # 改ページ
   line = gensub(/---/, "<span class=\"ltlbg_hr\"></span>", "g", line); # 水平線
   line = gensub(/／＼|〱/, "<span class=\"ltlbg_odori1\"></span><span class=\"ltlbg_odori2\"></span>", "g", line); #踊り字。
-  
-
   
   ###########################################################
   # ルビ・圏点……上部の関数で実装
@@ -224,44 +244,47 @@ BEGIN {
   line = gensub(/＆ｑｕｏｔ/, "\\&quot;", "g", line);
   line = gensub(/＆＃０４７/, "\\&#047;", "g", line);
   line = gensub(/＆＃０９２/, "\\&#092;", "g", line);
-  # line = gensub(/〿/, "<span class=\"ltlbg_sSp\"></span>", "g", line);
-  # line = gensub(/〼/, "<span class=\"ltlbg_wSp\"></span>", "g", line);
+
+  #必要があってスペースを使用する必要がある場合に代わりに使用していた以下の特殊文字を元に戻す
+  line = gensub(/〿/, " ", "g", line);
+  line = gensub(/〼/, "　", "g", line);
 
   # 行末 が」 かどうか（終了判定）
   # 行末が」であれば、現在継続中のクオート状態を解除する。
   if ($0 ~ /[」』）]$/) { in_quote = 0 }
 
-  # 行の出力
-  print line
+  # 行の出力（メモリに溜め込む）
+  output_buffer = output_buffer line ORS
 
 }
 
 END {
   #一度もpタグが登場していない場合、閉じる必要がない(ほぼあり得ないが)
-  if (state_p != "none") { print "  </div>" }
+  if (state_p != "none") { output_buffer = output_buffer "  </div>" ORS }
 
   #一度もsectionタグが登場していない場合、閉じる必要がない(割とあり得る)
-  if (state_section != "none") { print "</section>" }
-
+  if (state_section != "none") { output_buffer = output_buffer "</section>" ORS }
 
   ##########################################################################################
-  # 先頭にlittlebugXXX.css読み込むよう追記する
+  # htmlになるように先頭と末尾に必要なタグを付与する。
+  # またlittlebugXXX.css読み込むよう追記する
   ##########################################################################################
-  ## <html>
-  ##   <head>
-  ##     <link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugI\.css">\n/' \
-  ##     <link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugV\.css">\n/' \
-  ##     <\!--\<link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugH\.css">-->\n/' \
-  ##     <link rel=\"stylesheet\" href=\"\.\.\/css\/littlebugU\.css">\n/' \
-  ##   </head>
-  ## <html>
-  # print "<html>"
-  # print "  <head>"
-  # print "    <link rel=\"stylesheet\" href=\"../css/littlebugI.css\">"
-  # print "    <link rel=\"stylesheet\" href=\"../css/littlebugV.css\">"
-  # print "    <!--<link rel=\"stylesheet\" href=\"../css/littlebugH.css\">-->"
-  # print "    <link rel=\"stylesheet\" href=\"../css/littlebugU.css\">"
-  # print "  </head>"
-  # print "  <body>"
-  # print "    <div class=\"ltlbg_container\">"
+  header =        "<html>" ORS
+  header = header "  <head>" ORS
+  header = header "    <link rel=\"stylesheet\" href=\"../css/littlebugI.css\">" ORS
+  header = header "    <!--<link rel=\"stylesheet\" href=\"../css/littlebugV.css\">-->" ORS
+  header = header "    <link rel=\"stylesheet\" href=\"../css/littlebugH.css\">" ORS
+  header = header "    <link rel=\"stylesheet\" href=\"../css/littlebugU.css\">" ORS
+  header = header "  </head>" ORS
+  header = header "  <body>" ORS
+  header = header "<div class=\"ltlbg_container\">" ORS
+  header = header "<!--文章内容ここから-->" ORS
+
+  footer =        "<!--文章内容ここまで-->" ORS
+  footer = footer "</div><!--ltlbg_container-->" ORS
+  footer = footer "</body>" ORS
+  footer = footer "</html>" ORS
+
+  # メモリに溜め込んだ全ての出力を一度に出力
+  printf "%s", header output_buffer footer
 }
