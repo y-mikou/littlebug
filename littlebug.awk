@@ -84,6 +84,10 @@ BEGIN {
 	###########################################################
 	# 処理中に問題になる特殊文字の一次置換(最後に元に戻す)
 	# htmlを意識して既に文字参照型で記述されているものも含む
+	# 全角スペース
+	line = gensub(/　/, "〼", "g", line);
+	# 半角スペース
+	line = gensub(/ /, "〿", "g", line);
 	# スラッシュ
 	line = gensub(/&#047;|\//, "＆＃０４７", "g", line);
 	# バックスラッシュ
@@ -100,8 +104,8 @@ BEGIN {
 	line = gensub(/&amp;|&/, "＆ａｍｐ", "g", line);
 
 	#ゴミスペースを掃除
-	line = gensub(/[ 　]$/, "", "g", line);
-	line = gensub(/[ 　]([」』）〟])/, "\\1", "g", line);
+	line = gensub(/[〿〼]$/, "", "g", line);
+	line = gensub(/[〿〼]([」』）〟])/, "\\1", "g", line);
 
 	#記号種類の統一
 	line = gensub(/[♡♥]/, "❤", "g", line);
@@ -109,23 +113,23 @@ BEGIN {
 	line = gensub(/□/, "■", "g", line);
 	line = gensub(/[♫♬]/, "♪", "g", line);
 	line = gensub(/―+/, "―", "g", line);
-	line = gensub(/！！/, "‼", "g", line);
+	line = gensub(/！！/, "!!", "g", line);
 	line = gensub(/！？/, "!?", "g", line);
 	line = gensub(/？！/, "?!", "g", line);
 	line = gensub(/？？/, "??", "g", line);
-	line = gensub(/^(§+)[ 　]/, "\\1", "g", line);
+	line = gensub(/^(§+)[〿〼]/, "\\1", "g", line);
 	
 	# 連続する感嘆符・疑問符・記号類の後に全角スペースを挿入し、
 	# それを<span class="ltlbg_wSp"></span>に置換
 	# 対象 ！!?？❤💞💕♪☆★💢
-	line = gensub(/([!\?！？❤💞💕♪☆★💢]+)　*([^」』）!\?！？❤💞💕♪☆★💢])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
+	line = gensub(/([!\?！？❤💞💕♪☆★💢])〼*([^〼」』）!\?！？❤💞💕♪☆★💢])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
 
 	#上記特殊記号(❤,★,■,♪,!!,!?,?!,??)を、<span class="ltlbg_wdfix"></span>タグで括る
 	line = gensub(/([❤★■♪])/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line);
-	line = gensub("‼", "<span class=\"ltlbg_wdfix\">!!</span>", "g", line);
-	line = gensub("!\\?", "<span class=\"ltlbg_wdfix\">!?</span>", "g", line);
-	line = gensub("\\?!", "<span class=\"ltlbg_wdfix\">?!</span>", "g", line);
-	line = gensub("\\?\\?", "<span class=\"ltlbg_wdfix\">??</span>", "g", line);
+	line = gensub(/!!/, "<span class=\"ltlbg_wdfix\">!!</span>", "g", line);
+	line = gensub(/!\?/, "<span class=\"ltlbg_wdfix\">!?</span>", "g", line);
+	line = gensub(/\?!/, "<span class=\"ltlbg_wdfix\">?!</span>", "g", line);
+	line = gensub(/\?\?/, "<span class=\"ltlbg_wdfix\">??</span>", "g", line);
 	
 
 	#############################################################################
@@ -198,17 +202,17 @@ BEGIN {
 	# それぞれに対応するpタグを生成する。
 	line = gensub(/^([「『（])([^」』）]+)([」』）])$/, "    <p class=\"ltlbg_bracket\" data-p_header=\"\\1\" data-p_footer=\"\\3\">\\2</p><!--bracket-->", "g", line); #両方
 	line = gensub(/^([「『（])([^」』）]+)$/, "    <p class=\"ltlbg_bracket\" data-p_header=\"\\1\" data-p_footer=\"\">\\2</p><!--bracket-->", "g", line); #開括弧のみ
-	line = gensub(/^([^「『（]+)([」』）])$/, "    <p class=\"ltlbg_bracket\"　data-p_footer=\"\\2\">\\1</p><!--bracket-->", "g", line); #閉じ括弧のみ
-	line = gensub(/^　(.+)$/, "    <p class=\"ltlbg_desciption\" data-p_header=\"〼\">\\1</p><!--descript-->", "g", line); #地の文(括弧類グループの内部含む)
+	line = gensub(/^([^「『（]+)([」』）])$/, "    <p class=\"ltlbg_bracket\" data-p_footer=\"\\2\">\\1</p><!--bracket-->", "g", line); #閉じ括弧のみ
+	line = gensub(/^〼(.+)$/, "    <p class=\"ltlbg_desciption\" data-p_header=\"〼\">\\1</p><!--descript-->", "g", line); #地の文(括弧類グループの内部含む)
 
 	#############################################################################
 	## 通常の変換
 	#############################################################################
 	# 句読点・記号類のspanタグ化###########################################################  
 	#タグで括るタイプの修飾
-	line = gensub("[^\"]　[^\"]", "<span class=\"ltlbg_wSp\"></span>", "g", line); # 全角スペース
+	line = gensub("([^\"])〼([^\"])", "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line); # 全角スペース
 	line = gensub(/―/, "<span class=\"ltlbg_wSize\">―</span>", "g", line); #全角ダッシュは常にワイドタグを適用
-	line = gensub(/\[-(.+)-\]/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line); #強制1文字幅タグ
+	line = gensub(/\[-([^-]+)-\]/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line); #強制1文字幅タグ
 	line = gensub(/\*\*([^\*]+)\*\*/, "<span class=\"ltlbg_bold\">\\1</span>", "g", line); #太字
 	line = gensub(/\[\^(.+)\^\]/, "<span class=\"ltlbg_rotate\">\\1</span>", "g", line); #回転タグ
 	line = gensub(/\^(.+)\^/,"<span class=\"ltlbg_tcy\">\\1</span>", "g",line) #縦中横
@@ -245,8 +249,8 @@ BEGIN {
 	line = gensub(/＆＃０９２/, "\\&#092;", "g", line);
 
 	#必要があってスペースを使用する必要がある場合に代わりに使用していた以下の特殊文字を元に戻す
-	line = gensub(/〿/, " ", "g", line);
-	line = gensub(/〼/, "　", "g", line);
+	line = gensub("〿", " ", "g", line);
+	line = gensub("〼", "　", "g", line);
 
 	# 行末 が」 かどうか（終了判定）
 	# 行末が」であれば、現在継続中のクオート状態を解除する。
