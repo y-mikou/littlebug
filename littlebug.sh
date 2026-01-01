@@ -518,6 +518,7 @@ elif [[ "${convMode}" = '-t' ]]; then
 			# littlebug.awkの内容をヒアドキュメントとして定義
 			read -r -d '' AWK_CODE <<- 'AWK_EOF'
 			#!/usr/bin/awk -f
+
 			# ルビタグを元の短縮タグに戻す関数
 			# <ruby class="ltlbg_ruby-*" data-*="ルビ">親文字<rt>ルビ</rt></ruby> → ｜親文字《ルビ》
 			function strip_ruby_tags(text) {
@@ -590,31 +591,15 @@ elif [[ "${convMode}" = '-t' ]]; then
 					next
 				}
 				
+				# 先頭のASCII空白とタブを除去（インデント）
+				# 全角スペースは残す
+				line = gensub(/^[ \t]+/, "", "g", line)
+				
 				# セクション名タグを処理
 				# <h2 class="ltlbg_section_name">§内容</h2> → §内容
 				if (match(line, /<h2 class="ltlbg_section_name">([^<]+)<\/h2>/, m)) {
 					line = m[1]
 				}
-				
-				# 段落タグを処理
-				# <p class="ltlbg_bracket" data-p_header="「" data-p_footer="」">内容</p><!--bracket--> → 「内容」
-				if (match(line, /<p class="ltlbg_bracket" data-p_header="([^"]*)" data-p_footer="([^"]*)">([^<]*)<\/p><!--bracket-->/, m)) {
-					line = m[1] m[3] m[2]
-				}
-				# 閉じ括弧のみのパターン（全角スペースが含まれる場合）
-				if (match(line, /<p class="ltlbg_bracket"　data-p_footer="([^"]*)">([^<]*)<\/p><!--bracket-->/, m)) {
-					line = m[2] m[1]
-				}
-				
-				# 地の文タグを処理
-				# <p class="ltlbg_desciption" data-p_header="〼">内容</p><!--descript--> → 　内容
-				if (match(line, /<p class="ltlbg_desciption" data-p_header="〼">([^<]*)<\/p><!--descript-->/, m)) {
-					line = "　" m[1]
-				}
-				
-				# 先頭のスペースを除去（インデント）
-				line = gensub(/^    /, "", "g", line)
-				line = gensub(/^  /, "", "g", line)
 				
 				# ルビタグを元に戻す（内側のタグを先に処理）
 				line = strip_ruby_tags(line)
@@ -678,6 +663,17 @@ elif [[ "${convMode}" = '-t' ]]; then
 				line = gensub(/&#047;/, "/", "g", line)
 				line = gensub(/&#092;/, "\\\\", "g", line)
 				
+				# 段落タグを処理（内部タグの除去後に処理）
+				# <p class="ltlbg_bracket" data-p_header="「" data-p_footer="」">内容</p><!--bracket--> → 「内容」
+				line = gensub(/<p class="ltlbg_bracket"[^>]*data-p_header="([^"]*)"[^>]*data-p_footer="([^"]*)"[^>]*>(.*)<\/p><!--bracket-->/, "\\1\\3\\2", "g", line)
+				
+				# 閉じ括弧のみのパターン（全角スペースが含まれる場合）
+				line = gensub(/<p class="ltlbg_bracket"[^>]*data-p_footer="([^"]*)"[^>]*>(.*)<\/p><!--bracket-->/, "\\2\\1", "g", line)
+				
+				# 地の文タグを処理
+				# <p class="ltlbg_desciption" data-p_header="　">内容</p><!--descript--> → 　内容
+				line = gensub(/<p class="ltlbg_desciption"[^>]*data-p_header="([^"]*)"[^>]*>(.*)<\/p><!--descript-->/, "\\1\\2", "g", line)
+				
 				# 空行でなければ出力
 				if (line != "") {
 					print line
@@ -687,7 +683,7 @@ elif [[ "${convMode}" = '-t' ]]; then
 		}
 
 
-		destFile="${tgtFile/'.html'/'_striped.txt'}" #出力ファイルの指定する
+		destFile="${tgtFile/'.html'/'_stripped.txt'}" #出力ファイルの指定する
 		printf '' > "${destFile}"
 
 
