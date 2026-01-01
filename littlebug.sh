@@ -276,7 +276,8 @@ export lang=ja_jp.utf-8
 			#   #タグで括るタイプの修飾_複数文字
 			line = gensub(/~..~/,"<span class=\"ltlbg_tcy\">//1</span>", "g",line) #縦中横
 			line = gensub(/\*\*\([^\*]+\)\*\*/, "<span class=\"ltlbg_bold\">\\1</span>", "g", line); #太字
-			
+			line = gensub(/\[\^(.)\^\]/, "<span class=\"ltlbg_rotate\">\\1</span>", "g", line); #回転
+	
 			# タグに置換するタイプの変換
 			# タグを挿入するだけで、改ページの実装はスタイルによる
 			line = gensub(/゛/, "<span class=\"ltlbg_dakuten\"></span>", "g", line); #スケベ濁音
