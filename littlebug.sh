@@ -445,7 +445,6 @@ if [[ "${convMode}" = '' ]]; then
 			fi
 			# ルビ文字に特殊指定
 			## ルビ文字にルビ
-			# grep -E -o -n '｜[^《]+《[^｜]*｜[^《]+《[^》]+》[^》]*》' "${tgtFile}" > "${destFile}"
 			grep -E -o -n '｜[^《]+《[^》]*｜[^》]*》' "${tgtFile}" > "${destFile}"
 			## ルビ文字に太字
 			grep -E -o -n '｜[^《]+《[^《》]*《《[^》]+》》[^》]*》' "${tgtFile}" >> "${destFile}"
