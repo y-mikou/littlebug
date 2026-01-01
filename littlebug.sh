@@ -49,11 +49,9 @@ export lang=ja_jp.utf-8
 	fi
 }
 
-: "txt→html変換処理" && {
-
-	# if [[ "${convMode}" = '' ]]; then
+if [[ "${convMode}" = '' ]]; then
 	## txt→html ############################################################################################
-
+	: "txt→html変換処理" && {
 		: "AWKコード定義" && {
 			# littlebug.awkの内容をヒアドキュメントとして定義
 			read -r -d '' AWK_CODE <<- 'AWK_EOF'
@@ -277,7 +275,7 @@ export lang=ja_jp.utf-8
 			line = gensub(/~..~/,"<span class=\"ltlbg_tcy\">//1</span>", "g",line) #縦中横
 			line = gensub(/\*\*\([^\*]+\)\*\*/, "<span class=\"ltlbg_bold\">\\1</span>", "g", line); #太字
 			line = gensub(/\[\^(.)\^\]/, "<span class=\"ltlbg_rotate\">\\1</span>", "g", line); #回転
-	
+
 			# タグに置換するタイプの変換
 			# タグを挿入するだけで、改ページの実装はスタイルによる
 			line = gensub(/゛/, "<span class=\"ltlbg_dakuten\"></span>", "g", line); #スケベ濁音
@@ -360,6 +358,18 @@ export lang=ja_jp.utf-8
 			# 処理は中断せず最後まで行うが、警告表示を行う。
 			# おそらく変換処理は成功しない。
 			##############################################################################
+			# タブ文字が存在する
+			grep -E -o -n '\t' "${tgtFile}" > "${destFile}"
+			if [[ -s "${destFile}" ]]; then 
+				cat "${destFile}"
+				echo '🤔 ↑タブ文字が存在します。変換結果は保証されません。' 
+			fi
+			# 行頭に全角スペース2つ以上の空白文字
+			grep -E -o -n '^[ 　]{2,}' "${tgtFile}" > "${destFile}"
+			if [[ -s "${destFile}" ]]; then 
+				cat "${destFile}"
+				echo '🤔 ↑行頭に全角スペース2つ以上の空白文字があります。変換結果は保証されません。' 
+			fi
 			# ルビ指定に傍点の同時指定
 			# ｜《》の全体か母字部分かのどちらかに、《《》》指定が入れ子されている※ルビ文字部分への特殊指定は後続でチェックしている
 			grep -E -o -n '｜[^《]*《《[^》]+》》《[^》]+》|《《[^｜]*｜[^《]+《[^》]+》[^》]*》》' "${tgtFile}" > "${destFile}"
@@ -480,8 +490,8 @@ export lang=ja_jp.utf-8
 				cat "${destFile}"
 				echo '🤔 ↑に含まれる空行は、元ファイルの記述に関わらず、変換規則に則って削除あるいは追加されます(元のファイルは修正しません)'
 			fi
-			# 記号類の直後のスペース
-			grep -E -o -n '[!\?！？❤💞💕♪☆★💢]+　*[^」』）!\?！？❤💞💕♪☆★💢]' "${tgtFile}" > "${destFile}"
+			# 記号類の直後のスペースがない
+			grep -E -o -n '[!\?！？❤💞💕♪☆★💢][^　」』）!\?！？❤💞💕♪☆★💢]' "${tgtFile}" > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑記号類の直後に、それが連続するか行末・括弧内末尾でない限り、スペースを挿入します(元のファイルは修正しません)'
@@ -496,287 +506,197 @@ export lang=ja_jp.utf-8
 
 		echo "✨ "${destFile}"を出力しました[html化]"
 
-	# fi
+	}
 
-}
+elif [[ "${convMode}" = '-t' ]]; then
+  ## html→txt ############################################################################################
+	: "html→txt変換処理" && {
 
-# elif [[ "${convMode}" = '-h2t' ]]; then
-#   ## html→txt ############################################################################################
+		: "AWKコード定義" && {
+			# littlebug.awkの内容をヒアドキュメントとして定義
+			read -r -d '' AWK_CODE <<- 'AWK_EOF'
+			#!/usr/bin/awk -f
+			# ルビタグを元の短縮タグに戻す関数
+			# <ruby class="ltlbg_ruby-*" data-*="ルビ">親文字<rt>ルビ</rt></ruby> → ｜親文字《ルビ》
+			function strip_ruby_tags(text) {
+				new_text = ""
+				# ルビタグパターンがなくなるまでループ
+				while (match(text, /<ruby class="ltlbg_ruby-[^"]*" data-ltlbg_ruby-[^"]*="([^"]+)">([^<]+)<rt>[^<]+<\/rt><\/ruby>/, m)) {
+					new_text = new_text substr(text, 1, RSTART - 1)
+					ruby = m[1]
+					parent = m[2]
+					new_text = new_text "｜" parent "《" ruby "》"
+					text = substr(text, RSTART + RLENGTH)
+				}
+				new_text = new_text text
+				return new_text
+			}
 
-#   destFile=${tgtFile_AfterCD/".html"/"_removed.txt"} #出力ファイルの指定する
-#   touch ${destFile}                          #出力先ファイルを生成
+			# 圏点（傍点）タグを元の短縮タグに戻す関数
+			# <ruby class="emphasis">文<rt>﹅</rt></ruby>... → 《《文...》》
+			function strip_emphasis_tags(text) {
+				new_text = ""
+				# 連続する圏点タグを検出してまとめて処理
+				while (match(text, /<ruby class="emphasis">([^<])<rt>﹅<\/rt><\/ruby>/, m)) {
+					new_text = new_text substr(text, 1, RSTART - 1)
+					
+					# 最初の文字を取得
+					parent_chars = m[1]
+					matched_len = RLENGTH
+					outer_rstart = RSTART
+					remaining = substr(text, outer_rstart + matched_len)
+					
+					# 連続する圏点タグを処理
+					while (match(remaining, /^<ruby class="emphasis">([^<])<rt>﹅<\/rt><\/ruby>/, m2)) {
+						parent_chars = parent_chars m2[1]
+						matched_len = matched_len + RLENGTH
+						remaining = substr(remaining, RLENGTH + 1)
+					}
+					
+					new_text = new_text "《《" parent_chars "》》"
+					text = substr(text, outer_rstart + matched_len)
+				}
+				new_text = new_text text
+				return new_text
+			}
 
-#   ## littlebugXX.cssの読み込みを除去する
-#   cat ${tgtFile_AfterCD} \
-#   | sed -z 's/<link rel=\"stylesheet\" href=\".\+littlebug.\+css\">//' \
-#   | sed -z 's/<link rel=\"preconnect\" href=\"https:\/\/fonts\.googleapis\.com\">\n//' \
-#   | sed -z 's/<link rel=\"preconnect\" href=\"https:\/\/fonts\.gstatic\.com\" crossorigin>\n//' \
-#   | sed -z 's/<link href=\"https:\/\/fonts\.googleapis\.com\/css2\?family=Noto\+Serif\+JP:wght\@300\&display=swap\" rel=\"stylesheet">\n//' \
-#   >tmp1_ltlbgtmp
-	
-#   ############################################################################################
-#   #入れ子構造になりうるタグの復旧1。外側。修飾は最大3なので、復旧処理を3回反復する
-#   ############################################################################################
-#   for i in $(seq 0 2); do
-#     ############################################################################################
-#     #入れ子構造になりうるタグの復旧2。内側。修飾は最大3なので、復旧処理を3回反復する
-#     ############################################################################################
-#     for i in $(seq 0 2); do
-#       ## 章区切りを[chapter:XXXX]に
-#       ### 閉じタグ</section><!--ltlbg_section-->を除去
-#       ### <section class="ltlbg_section" id="XXX">を[chapter:]へ
-#       cat tmp1_ltlbgtmp \
-#       | sed -e 's/<\/section><!--ltlbg_section-->//g' \
-#       | sed -e 's/<section class="ltlbg_section">/[chapter]/g' \
-#       | sed -e 's/<section class="ltlbg_section" id="\([^"]\+\)">/[chapter:\1]/g' \
-#       | sed -e 's/\[chapter:\]/\[chapter\]/g' \
-#       >tmp2_ltlbgtmp
+			BEGIN {
+				output_buffer = ""
+				in_content = 0
+			}
 
-#       ## 閉じpタグを消し、pタグを全角空白へ置換する
-#       ## 全角空白直後の改行は削除する(元のpタグが直後に改行しているため)
-#       cat tmp2_ltlbgtmp \
-#       | sed -e 's/<\/p><!--ltlbg_p-->//g' \
-#       | sed -e 's/<p class="ltlbg_p">/<span class="ltlbg_wSp"><\/span>/g' \
-#       | sed -z 's/<span class="ltlbg_wSp"><\/span>\n<span class="ltlbg_talk">/\n<span class="ltlbg_talk">/g' \
-#       >tmp1_ltlbgtmp
+			{
+				line = $0
+				
+				# HTMLヘッダー/フッター部分をスキップ
+				if (line ~ /^<html>/ || line ~ /^<\/html>/ || 
+					line ~ /^  <head>/ || line ~ /^  <\/head>/ ||
+					line ~ /^    <link / || line ~ /^    <!--<link / ||
+					line ~ /^  <body>/ || line ~ /^<\/body>/ ||
+					line ~ /^<div class="ltlbg_container">/ || line ~ /^<\/div><!--ltlbg_container-->/ ||
+					line ~ /^<!--文章内容ここから-->/ || line ~ /^<!--文章内容ここまで-->/) {
+					next
+				}
+				
+				# sectionタグを除去
+				if (line ~ /^<section class="ltlbg_section">/ || line ~ /^<\/section>/) {
+					next
+				}
+				
+				# divタグを除去
+				if (line ~ /^  <div class="ltlng_/ || line ~ /^  <\/div>/) {
+					next
+				}
+				
+				# セクション名タグを処理
+				# <h2 class="ltlbg_section_name">§内容</h2> → §内容
+				if (match(line, /<h2 class="ltlbg_section_name">([^<]+)<\/h2>/, m)) {
+					line = m[1]
+				}
+				
+				# 段落タグを処理
+				# <p class="ltlbg_bracket" data-p_header="「" data-p_footer="」">内容</p><!--bracket--> → 「内容」
+				if (match(line, /<p class="ltlbg_bracket" data-p_header="([^"]*)" data-p_footer="([^"]*)">([^<]*)<\/p><!--bracket-->/, m)) {
+					line = m[1] m[3] m[2]
+				}
+				# 閉じ括弧のみのパターン（全角スペースが含まれる場合）
+				if (match(line, /<p class="ltlbg_bracket"　data-p_footer="([^"]*)">([^<]*)<\/p><!--bracket-->/, m)) {
+					line = m[2] m[1]
+				}
+				
+				# 地の文タグを処理
+				# <p class="ltlbg_desciption" data-p_header="〼">内容</p><!--descript--> → 　内容
+				if (match(line, /<p class="ltlbg_desciption" data-p_header="〼">([^<]*)<\/p><!--descript-->/, m)) {
+					line = "　" m[1]
+				}
+				
+				# 先頭のスペースを除去（インデント）
+				line = gensub(/^    /, "", "g", line)
+				line = gensub(/^  /, "", "g", line)
+				
+				# ルビタグを元に戻す（内側のタグを先に処理）
+				line = strip_ruby_tags(line)
+				
+				# 圏点タグを元に戻す（内側のタグを先に処理）
+				line = strip_emphasis_tags(line)
+				
+				# 特殊記号のspanタグを除去
+				# <span class="ltlbg_wdfix">内容</span> → 内容
+				line = gensub(/<span class="ltlbg_wdfix">([^<]*)<\/span>/, "\\1", "g", line)
+				
+				# 全角スペースのspanタグを除去
+				line = gensub(/<span class="ltlbg_wSp"><\/span>/, "　", "g", line)
+				
+				# 全角ダッシュのspanタグを除去
+				line = gensub(/<span class="ltlbg_wSize">―<\/span>/, "―", "g", line)
+				
+				# 太字タグを元に戻す
+				# <span class="ltlbg_bold">内容</span> → **内容**
+				line = gensub(/<span class="ltlbg_bold">([^<]*)<\/span>/, "**\\1**", "g", line)
+				
+				# 回転タグを元に戻す
+				# <span class="ltlbg_rotate">内容</span> → [^内容^]
+				line = gensub(/<span class="ltlbg_rotate">([^<]*)<\/span>/, "[^\\1^]", "g", line)
+				
+				# 縦中横タグを元に戻す
+				# <span class="ltlbg_tcy">内容</span> → ^内容^
+				line = gensub(/<span class="ltlbg_tcy">([^<]*)<\/span>/, "^\\1^", "g", line)
+				
+				# 強制合字タグを元に戻す
+				# <span class="ltlbg_forcedGouji1/2">内容</span> → [l[内容]r]
+				line = gensub(/<span class="ltlbg_forcedGouji1\/2">([^<]*)<\/span>/, "[l[\\1]r]", "g", line)
+				
+				# セミコロンタグを元に戻す
+				line = gensub(/<span class="ltlbg_semicolon">；<\/span>/, "；", "g", line)
+				
+				# コロンタグを元に戻す
+				line = gensub(/<span class="ltlbg_colon">：<\/span>/, "：", "g", line)
+				
+				# スケベ濁音タグを元に戻す
+				line = gensub(/<span class="ltlbg_dakuten"><\/span>/, "゛", "g", line)
+				
+				# キチガイ半濁音タグを元に戻す
+				line = gensub(/<span class="ltlbg_handakuten"><\/span>/, "゜", "g", line)
+				
+				# 改ページタグを元に戻す
+				line = gensub(/<br class="ltlbg_newpage">/, "[newpage]", "g", line)
+				
+				# 水平線タグを元に戻す
+				line = gensub(/<span class="ltlbg_hr"><\/span>/, "---", "g", line)
+				
+				# 踊り字タグを元に戻す
+				line = gensub(/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/, "／＼", "g", line)
+				
+				# HTML文字参照を元に戻す
+				line = gensub(/&amp;/, "\\&", "g", line)
+				line = gensub(/&lt;/, "<", "g", line)
+				line = gensub(/&gt;/, ">", "g", line)
+				line = gensub(/&#39;/, "'", "g", line)
+				line = gensub(/&quot;/, "\"", "g", line)
+				line = gensub(/&#047;/, "/", "g", line)
+				line = gensub(/&#092;/, "\\\\", "g", line)
+				
+				# 空行でなければ出力
+				if (line != "") {
+					print line
+				}
+			}
+			AWK_EOF
+		}
 
-#       ## 括弧類を復旧
-#       cat tmp1_ltlbgtmp \
-#       | sed -e 's/<\/span><!--ltlbg_talk-->/」/g' \
-#       | sed -e 's/<\/span><!--ltlbg_talk2-->/』/g' \
-#       | sed -e 's/<\/span><!--ltlbg_think-->/）/g' \
-#       | sed -e 's/<\/span><!--ltlbg_wquote-->/〟/g' \
-#       | sed -e 's/<\/span><!--ltlbg_dash-->//g' \
-#       | sed -e 's/<\/span><!--ltlbg_citation-->//g' \
-#       | sed -e 's/<span class="ltlbg_talk">/「/g' \
-#       | sed -e 's/<span class="ltlbg_talk2">/『/g' \
-#       | sed -e 's/<span class="ltlbg_think">/（/g' \
-#       | sed -e 's/<span class="ltlbg_wquote">/〝/g' \
-#       | sed -e 's/<span class="ltlbg_dash">/――/g' \
-#       | sed -e 's/<span class="ltlbg_citation">/＞/g' \
-#       >tmp2_ltlbgtmp
 
-#       ## 縦中横と横幅修正を除去
-#       cat tmp2_ltlbgtmp \
-#       | sed -e 's/<span class=\"ltlbg_tcyA\">\([^<]\{2\}\)<\/span>/\1/g' \
-#       | sed -e 's/<span class=\"ltlbg_wdfix\">\([^<]\)<\/span>/\1/g' \
-#       >tmp1_ltlbgtmp
+		destFile="${tgtFile/'.html'/'_striped.txt'}" #出力ファイルの指定する
+		printf '' > "${destFile}"
 
-#       ## コロンとセミコロンを復旧
-#       cat tmp1_ltlbgtmp \
-#       | sed -e 's/<span class="ltlbg_semicolon">；<\/span>/；/g' \
-#       | sed -e 's/<span class="ltlbg_colon">：<\/span>/：/g' \
-#       >tmp2_ltlbgtmp
 
-#       ## 括弧類の擬似段落記号を除去
-#       cat tmp2_ltlbgtmp \
-#       | sed -e 's/<p class="ltlbg_p_brctGrp">//g' \
-#       | sed -e 's/<\/p><\!--ltlbg_p_brctGrp-->//g' \
-#       >tmp1_ltlbgtmp
+		: "変換実施" && {
+			#AWKコードを実行（ヒアドキュメントで定義されたAWK_CODEを使用）
+			gawk "$AWK_CODE" "${tgtFile}" > "${destFile}"
+		}
 
-#       ## <span class="ltlbg_dakuten">を「゛」に復旧
-#       ## <span class="ltlbg_tcyM">XX</span>を復旧
-#       ## <span class="ltlbg_wSize">字</span>を復旧
-#       ## <span class="ltlbg_odori1"></span><span class="ltlbg_odori2"></span>を復旧
-#       cat tmp1_ltlbgtmp \
-#       | sed -e 's/<span class=\"ltlbg_dakuten\">\(.\)<\/span>/\1゛/g' \
-#       | sed -e 's/<span class=\"ltlbg_tcyM\">\([^<]\{1,3\}\)<\/span>/^\1^/g' \
-#       | sed -e 's/<span class=\"ltlbg_wSize\">\(.\)<\/span>/\1\1/g' \
-#       | sed -e 's/<span class=\"ltlbg_odori1\"><\/span>/／/g' \
-#       | sed -e 's/<span class=\"ltlbg_odori2\"><\/span>/＼/g' \
-#       >tmp2_ltlbgtmp
+		echo "✨ "${destFile}"を出力しました[txtもどし]"
+	}
 
-#       ## 強制合字<span class="ltlbg_forceGouji1">、<span class="ltlbg_forceGouji2">を[l[]r]へ復旧
-#       cat tmp2_ltlbgtmp \
-#       | sed -e 's/<span class=\"ltlbg_forceGouji1\">\(.\)<\/span><span class=\"ltlbg_forceGouji2\">\(.\)<\/span>/[l[\1\2]r]/g' \
-#       >tmp1_ltlbgtmp
+fi
 
-#       ## 回転指定<span class="ltlbg_rotate"></span>を[^字^]へ復旧
-#       ## 太字指定<span class="ltlbg_bold"></span>を**字**へ復旧
-#       cat tmp1_ltlbgtmp \
-#       | sed -e 's/<span class=\"ltlbg_rotate\">\(.\)<\/span>/\[\^\1\^\]/g' \
-#       | sed -e 's/<span class=\"ltlbg_bold\">\([^<]\+\)<\/span>/\*\*\1\*\*/g' \
-#       >tmp2_ltlbgtmp
-
-#       ## <h2 class="ltlbg_sectionName">\1<\/h2>を行頭◆へ
-#       ## <hr class="ltlbg_hr">を---へ。
-#       cat tmp2_ltlbgtmp \
-#       | sed -e 's/<h2 class=\"ltlbg_sectionName\">\([^<]\+\)<\/h2>/\1/g' \
-#       | sed -e 's/<hr class=\"ltlbg_hr\">/---/g' \
-#       >tmp1_ltlbgtmp
-
-#       ## モノルビを復旧
-#       cat tmp1_ltlbgtmp >tmp2_ltlbgtmp
-#       #3回繰り返すのでループ末尾で出力している中間ファイルから開始されるよう調整する
-#       cat tmp2_ltlbgtmp >tmp1_ltlbgtmp
-#     done
-
-#     ############################################################################################
-#     #複数回の置換を必要としない(途中で戻ると不都合のある)復旧
-#     ############################################################################################
-#     ## 「&lt;」  を「<」(半角)へ変換
-#     ## 「&gt;」  を「>」(半角)へ変換
-#     ## 「&amp;」 を「&」(半角)へ変換
-#     ## 「&quot;」を「'」(半角)へ変換
-#     ## 「&#39;」 を「"」(半角)へ変換
-#     cat tmp2_ltlbgtmp \
-#     | sed -e 's/&amp;/\&/g' \
-#     | sed -e 's/&lt;/</g' \
-#     | sed -e 's/&gt;/>/g' \
-#     | sed -e 's/&quot;/'\''/g' \
-#     | sed -e 's/&#39;/\"/g' \
-#     >tmp1_ltlbgtmp
-
-#     ## ここまで生じているハード空行は副産物なので削除
-#     ## その上で、<br class="ltlbg_br">、<br class="ltlbg_blankline">を削除
-#     cat tmp1_ltlbgtmp \
-#     | sed -z 's/^\n//g' \
-#     | sed -e 's/<br class=\"ltlbg_br\">//g' \
-#     | sed -e 's/^<br class=\"ltlbg_blankline\">//g' \
-#     | sed -e 's/<span class=\"ltlbg_wSp\"><\/span>/　/g' \
-#     | sed -e 's/<span class=\"ltlbg_sSp\"><\/span>/ /g' \
-#     | sed -z 's/　\n/\n/g' \
-#     >tmp2_ltlbgtmp
-
-#     #################################################################################
-#     #ルビと傍点の復旧は最後。傍点とモノルビは特殊な戻し作業を要する。
-#     #################################################################################
-#     ## モノルビ以外の<span class="ltlbg_ruby" data-ruby_XXX="XXX"></span>を復旧
-#     cat tmp2_ltlbgtmp \
-#     | sed -e 's/<ruby class="ltlbg_ruby" data-ruby_[^=]\+="\([^"]\+\)">\([^<]\+\)<rt>[^<]\+<\/rt><\/ruby>/{\2｜\1}/g' \
-#     >tmp1_ltlbgtmp
-
-#     #順序の入れ替え
-#     cat tmp1_ltlbgtmp \
-#     | sed -e 's/\*\*{\([^｜]\+\)｜\([^\}]\+\)}\*\*/{\*\*\1\*\*｜\2}/g' \
-#     > tmp2_ltlbgtmp
-
-#     ## 傍点タグを《《基底文字》》へ復旧する
-#     ## <ruby class=\"ltlbg_emphasis\" data-ruby_emphasis=\"[^]]\">〜で抽出したものを置換元とする。
-#     ## 基底文字だけを持つ中間ファイルと、ルビだけを持つ中間ファイルを作成し、置換先とする。
-#     ## 置換機能を持った中間シェルスクリプトを作成し、実行する。
-#     cat tmp2_ltlbgtmp \
-#     | sed -e 's/<ruby class=\"ltlbg_emphasis\" data-emphasis=\".\">\([^<]\+\)<rt>.<\/rt><\/ruby>/《《\1》》/g' \
-#     >tmp1_ltlbgtmp
-
-#     #3回繰り返すのでループ末尾で出力している中間ファイルから開始されるよう調整する
-#     #cat tmp2_ltlbgtmp >tmp1_ltlbgtmp
-#   done
-#   # ループ終了後の結果もtmp1_ltlbgtmpに出力される
-
-#   # モノルビ対応。#######################################################
-#   # モノルビは、ここまでの処理では{モノルビ｜ものるび}ではなく
-#   # {モ｜も}{ノ｜の}{ル｜る}{ビ｜び}となっているのでこれを復旧する。
-#   # 入力はtmp1_ltlbgtmpの想定。
-#   #######################################################################
-#   #cat tmp2_ltlbgtmp >tmp1_ltlbgtmp
-#   cat tmp1_ltlbgtmp >monorubyInput_ltlbgtmp 
-
-#   cat monorubyInput_ltlbgtmp \
-#   | grep -E -o '(\{[^｜]+｜[^}]+\}){2,}' \
-#   | uniq \
-#   | sed -e 's/\//\\\//g' \
-#   | sed -e 's/\[/\\\[/g' \
-#   | sed -e 's/\]/\\\]/g' \
-#   | sed -e 's/\^/\\\^/g' \
-#   | sed -e 's/\~/\\\~/g' \
-#   | sed -e 's/\*/\\\*/g' \
-#   | sed -e 's/\"/\\\"/g' \
-#   > tgt_ltlbgtmp
-
-#   if [ -s tgt_ltlbgtmp ]; then
-#     cat tgt_ltlbgtmp \
-#     | while read line || [ -n "${line}" ]; do \
-#         echo ${line} \
-#         | grep -E -o '\{[^｜]+｜' \
-#         | sed -e 's/^{//g' \
-#         | sed -e 's/｜$//g' \
-#         | sed -z 's/\n//g' \
-#         | sed -e 's/^/\{/g' \
-#             | sed -e 's/\//\\\//g' \
-#             | sed -e 's/\[/\\\[/g' \
-#             | sed -e 's/\]/\\\]/g' \
-#             | sed -e 's/\^/\\\^/g' \
-#             | sed -e 's/\~/\\\~/g' \
-#             | sed -e 's/\*/\\\*/g' \
-#             | sed -e 's/\"/\\\"/g' \
-
-#         echo -n '｜'
-
-#         echo ${line} \
-#         | grep -E -o '｜[^}]+\}' \
-#         | sed -e 's/^｜//g' \
-#         | sed -e 's/}$//g' \
-#         | sed -z 's/\n//g' \
-#         | sed -e 's/$/\}/g' \
-#             | sed -e 's/\//\\\//g' \
-#             | sed -e 's/\[/\\\[/g' \
-#             | sed -e 's/\]/\\\]/g' \
-#             | sed -e 's/\^/\\\^/g' \
-#             | sed -e 's/\~/\\\~/g' \
-#             | sed -e 's/\*/\\\*/g' \
-#             | sed -e 's/\"/\\\"/g' \
-
-#         echo ''
-#     done \
-#     > rep_ltlbgtmp
-
-#     paste -d '/' tgt_ltlbgtmp rep_ltlbgtmp \
-#     | sed -e 's/^/| sed -e '\''s\//g' \
-#     | sed -e 's/$/\/g'\'' \\/g' \
-#     | sed -z 's/^/cat monorubyInput_ltlbgtmp \\\n/g' \
-#     > tmp.sh
-#     bash tmp.sh >monorubyOutput_ltlbgtmp
-#   else 
-#     cat monorubyInput_ltlbgtmp >monorubyOutput_ltlbgtmp
-#   fi
-#   cat monorubyOutput_ltlbgtmp >tmp1_ltlbgtmp
-#   ########################モノルビ対応ここまで。出力はtmp1_ltlbgtmp
-
-#   #傍点対応#################################################################################
-#   # 傍点は1字ずつ設定されているのでここまでの処理では
-#   # 《モノルビ》ではなく《モ》《ノ》《ル》《ルビ》となっているのでこれを復旧する
-#   # 入力はtmp1_ltlbgtmpの想定
-#   ##########################################################################################
-#   #cat tmp2_ltlbgtmp >tmp1_ltlbgtmp
-#   cat tmp1_ltlbgtmp >emphasisInput_ltlbgtmp 
-#   cat emphasisInput_ltlbgtmp \
-#   | grep -E -o '(《《[^》]+》》[ 　]?){2,}' \
-#   | uniq \
-#   >emphtmp_ltlbgtmp
-
-#   #《《》》が連続している(複数文字の傍点)が存在しなければ実施しない
-#   if [[ -s emphtmp_ltlbgtmp ]]; then 
-#     cat emphtmp_ltlbgtmp \
-#     | sed -e 's/\//\\\//g' \
-#     | sed -e 's/\[/\\\[/g' \
-#     | sed -e 's/\]/\\\]/g' \
-#     | sed -e 's/\^/\\\^/g' \
-#     | sed -e 's/\~/\\\~/g' \
-#     | sed -e 's/\*/\\\*/g' \
-#     | sed -e 's/\"/\\\"/g' \
-#     | sed -e 's/^/| sed -e '\''s\//g' \
-#     >tgt_ltlbgtmp
-
-#     cat emphtmp_ltlbgtmp \
-#     | sed -e 's/[《》]//g' \
-#     | sed -e 's/^/《《/g' \
-#     | sed -e 's/$/》》/g' \
-#     | sed -e 's/$/\/g'\'' \\/g' \
-#     >rep_ltlbgtmp
-
-#     paste -d '/t' tgt_ltlbgtmp rep_ltlbgtmp \
-#     | sed -z 's/^/cat emphasisInput_ltlbgtmp \\\n/g' \
-#     >tmp.sh
-#     bash tmp.sh > emphasisOutput_ltlbgtmp
-#   else
-#     cat emphasisInput_ltlbgtmp >emphasisOutput_ltlbgtmp
-#   fi
-
-#   cat emphasisOutput_ltlbgtmp >tmp1_ltlbgtmp
-#   ########################傍点対応ここまで。出力はtmp1_ltlbgtmpの想定
-
-#   cat tmp1_ltlbgtmp >${destFile}
-#   echo "✨ "${destFile}"を出力しました[txtもどし]"
-# fi
 exit 0
