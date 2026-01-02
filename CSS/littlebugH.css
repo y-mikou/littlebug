@@ -1,0 +1,231 @@
+html {
+    /* 組み方向 */
+    /* 横 */ writing-mode: horizontal-tb; 
+}
+
+/*章*/
+section.ltlbg_section{
+    margin-bottom: 5rem;
+}
+/*章名称*/
+h2.ltlbg_sectionName{
+    display: block;
+    text-align: center;
+    page-break-before: always; 
+    margin-bottom: 5rem;
+}
+
+
+/*段落*/
+p.ltlbg_p{
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: -1rem;
+}
+p.ltlbg_p::before{
+    content: "　　　";
+}
+
+/*擬似段落(div)*/
+div.ltlbg_div_brctGrp{
+    margin-top: 0.8rem;
+    margin-bottom: 0.8rem;
+}
+
+/*アへ濁点*/
+/*フォントによって位置がずれる。ユーザ側で調整してください*/
+span.ltlbg_dakuten::after {
+    display: inline-block;
+    transform: translate(-0.1rem,0);
+    content: "゛";
+    letter-spacing: -1rem;
+}
+
+/*二倍化。自動変換対象ではないが、～などを伸ばすのにも使える。*/
+span.ltlbg_wSize{
+    display: inline-block;
+    transform-origin: left;
+    transform: scale(1.8, 1) translateX(1px);
+    margin-right: 1rem;
+}
+
+/*踊り字*/
+span.ltlbg_odori1::after{
+    display: inline-block;
+    transform: rotate(90deg);
+    content: "〵";
+}
+span.ltlbg_odori2::before{
+    display: inline-block;
+    transform: rotate(90deg);
+    content: "〳";
+}
+
+/*半角SP*/
+span.ltlbg_sSp{
+    margin-right: 0.5rem;
+}
+
+/*全角SP*/
+span.ltlbg_wSp{
+    margin-right: 1.0rem;
+}
+
+/*会話「」をぶら下げインデントにする。*/
+p.ltlbg_talk{
+    display: inline-block;
+}
+p.ltlbg_talk::before{
+    display: inline-block;
+    content: "「";
+    margin-left: -1rem;    
+}
+p.ltlbg_talk::after{
+    content: "」";
+}
+/*会話『』をぶら下げインデントにする。*/
+p.ltlbg_talk2{
+    display: inline-block;
+}
+p.ltlbg_talk2::before{
+    display: inline-block;
+    content: "『";
+    margin-left: -1rem;    
+}
+p.ltlbg_talk2::after{
+    content: "』";
+}
+/*思考（）をぶら下げインデントにする。*/
+p.ltlbg_think{
+    display: inline-block;
+}
+p.ltlbg_think::before{
+    display: inline-block;
+    content: "（";
+    margin-left: -1rem;    
+}
+p.ltlbg_think::after{
+    content: "）";
+}
+/*強調〝〟をぶら下げインデントにする。*/
+p.ltlbg_wquote{
+    display: inline-block;
+}
+p.ltlbg_wquote::before{
+    display: inline-block;
+    content: "〝";
+    margin-left: -1rem;    
+}
+p.ltlbg_wquote::after{
+    content: "〟";
+}
+/*会話―をぶら下げインデントにする。*/
+p.ltlbg_dash{
+    display: inline-block;
+}
+p.ltlbg_dash::before{
+    display: inline-block;
+    content: "――";
+    margin-left: -1rem;    
+}
+/*引用記号＞をぶら下げインデントにする。*/
+p.ltlbg_citation{
+    display: inline-block;
+}
+p.ltlbg_citation::before{
+    display: inline-block;
+    content: "＞";
+    margin-left: -1rem;    
+}
+
+/*特殊ルビ_ルビが長い*/
+[data-ruby_long] {
+    position: relative;
+}
+[data-ruby_long]::before {
+    content: attr(data-ruby_long);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 80%;
+    white-space: nowrap;
+    text-indent: 0;
+
+    transform-origin: left bottom;
+    transform: scale(0.5, 0.5);
+}
+
+/*特殊ルビ_ルビが少し短い*/
+[data-ruby_center] {
+    position: relative;
+}
+[data-ruby_center]::before {
+    content: attr(data-ruby_center);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 80%;
+    white-space: nowrap;
+    text-indent: 0;
+
+    text-align: center;
+    transform-origin: center bottom;
+    transform: scale(0.5, 0.5);
+    
+    margin-left: -0.25rem;
+}
+
+/*特殊ルビ_ルビが短い*/
+[data-ruby_short] {
+    position: relative;
+}
+[data-ruby_short]::before {
+    content: attr(data-ruby_short);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 80%;
+    white-space: nowrap;
+    text-indent: 0;
+
+    text-align: center;
+    transform-origin: center bottom;
+    transform: scale(0.5, 0.5);
+
+    letter-spacing: 1rem;
+}
+
+/*特殊傍点*/
+[data-emphasis] {
+    position: relative;
+}
+[data-emphasis]::before {
+    content: attr(data-emphasis);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 80%;
+    white-space: nowrap;
+    text-indent: 0;
+
+    transform-origin: left bottom;
+    transform: scale(0.5, 0.5);
+
+    margin-left: 0.25rem;
+    letter-spacing: 1rem;
+}
+
+/*forceGouji1と2で1文字を作ります。
+  偏と旁の比率はユーザ側でいじってください。
+  複数必要な場合は増やしてください。*/
+span.ltlbg_forceGouji1{
+    transform-origin: center right;
+    transform: scale(0.6,1 )  translate(-0.7rem,0);
+    display: inline-block;    
+}
+span.ltlbg_forceGouji2{
+    transform-origin: center left;
+    transform: scale(0.8,1 ) translate(-1rem,0);
+    display: inline-block;
+    margin-right: -1rem;
+}

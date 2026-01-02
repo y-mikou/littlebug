@@ -43,8 +43,13 @@ p.ltlbg_p::before{
     content: "　";
 }
 
+<<<<<<<< HEAD:css/littlebugV.css
 /*擬似段落*/
 p.ltlbg_p_brctGrp{
+========
+/*擬似段落(div)*/
+div.ltlbg_div_brctGrp{
+>>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
     margin-right: 2rem;
     margin-left: 2rem;
     break-inside: avoid-page;
@@ -130,66 +135,114 @@ span.ltlbg_colon{
 }
 
 /*会話「」をぶら下げインデントにする。*/
+<<<<<<<< HEAD:css/littlebugV.css
 span.ltlbg_talk{
     break-inside: avoid-page;
     break-after: avoid;
 }
 span.ltlbg_talk::before{
+========
+p.ltlbg_talk{
+    break-inside: avoid-page;
+    break-after: avoid;
+}
+p.ltlbg_talk::before{
+>>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
     content: "「";
 }
-span.ltlbg_talk::after{
+p.ltlbg_talk::after{
     content: "」";
 }
 /*会話『』をぶら下げインデントにする。*/
+<<<<<<<< HEAD:css/littlebugV.css
 span.ltlbg_talk2{
     break-inside: avoid-page;
     break-after: avoid;
 }
 span.ltlbg_talk2::before{
+========
+p.ltlbg_talk2{
+    break-inside: avoid-page;
+    break-after: avoid;
+}
+p.ltlbg_talk2::before{
+>>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
     content: "『";
 }
-span.ltlbg_talk2::after{
+p.ltlbg_talk2::after{
     content: "』";
 }
 /*思考（）をぶら下げインデントにする。*/
+<<<<<<<< HEAD:css/littlebugV.css
 span.ltlbg_think{
     break-inside: avoid-page;
     break-after: avoid;
 }
 span.ltlbg_think::before{
+========
+p.ltlbg_think{
+    break-inside: avoid-page;
+    break-after: avoid;
+}
+p.ltlbg_think::before{
+>>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
     content: "（";
 }
-span.ltlbg_think::after{
+p.ltlbg_think::after{
     content: "）";
 } 
 /*強調〝〟をぶら下げインデントにする。*/
+<<<<<<<< HEAD:css/littlebugV.css
 span.ltlbg_wquote{
     break-inside: avoid-page;
     break-after: avoid;
 }
 span.ltlbg_wquote::before{
+========
+p.ltlbg_wquote{
+    break-inside: avoid-page;
+    break-after: avoid;
+}
+p.ltlbg_wquote::before{
+>>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
     content: "〝";
     margin-top: -1rem;
 }
-span.ltlbg_wquote::after{
+p.ltlbg_wquote::after{
     content: "〟";
 }
 /*会話―をぶら下げインデントにする。*/
+<<<<<<<< HEAD:css/littlebugV.css
 span.ltlbg_dash{
     break-inside: avoid-page;
     break-after: avoid;
 }
 span.ltlbg_dash::before{
+========
+p.ltlbg_dash{
+    break-inside: avoid-page;
+    break-after: avoid;
+}
+p.ltlbg_dash::before{
+>>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
     content: "―";
     transform: scale(1, 2) translate(0rem, -0.3rem);
     margin-top: -1rem;
 }
 /*引用記号＞をぶら下げインデントにする。*/
+<<<<<<<< HEAD:css/littlebugV.css
 span.ltlbg_citation{
     break-inside: avoid-page;
     break-after: avoid;
 }
 span.ltlbg_citation::before{
+========
+p.ltlbg_citation{
+    break-inside: avoid-page;
+    break-after: avoid;
+}
+p.ltlbg_citation::before{
+>>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
     content: "＞";
     margin-top: -1rem;
 }
