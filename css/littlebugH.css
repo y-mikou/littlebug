@@ -72,8 +72,16 @@ p.ltlbg_bracket{
 /*フォントによって位置がずれる。ユーザ側で調整してください*/
 span.ltlbg_dakuten::after {
     display: inline-block;
-    transform: translate(-0.1rem,0);
+    transform: translate(-0.2rem,0);
     content: "゛";
+    letter-spacing: -1rem;
+}
+/*キチガイ半濁音*/
+/*フォントによって位置がずれる。ユーザ側で調整してください*/
+span.ltlbg_handakuten::after {
+    display: inline-block;
+    transform: translate(-0.2rem,0);
+    content: "゜";
     letter-spacing: -1rem;
 }
 /*二倍化。自動変換対象ではないが、～などを伸ばすのにも使える。*/
@@ -190,7 +198,7 @@ span.ltlbg_forceGouji1{
 }
 span.ltlbg_forceGouji2{
     transform-origin: center left;
-    transform: scale(0.8,1 ) translate(-1rem,0);
+    transform: scale(0.8,1 ) translate(-0.8rem,0);
     display: inline-block;
     margin-right: -1rem;
 }

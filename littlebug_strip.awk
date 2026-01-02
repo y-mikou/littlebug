@@ -86,7 +86,7 @@ BEGIN {
     if (match(line, /<h2 class="ltlbg_section_name">([^<]+)<\/h2>/, m)) {
         line = m[1]
         if (is_sukebe_section == 1) {
-            sub(/^§/, "§❤", line)
+            sub(/^§/, "§§", line)
         }
     }
     

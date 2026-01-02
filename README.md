@@ -88,7 +88,7 @@
 | 要素 | マークアップ | HTMLタグ / class | 説明 |
 | :--- | :--- | :--- | :--- |
 | **セクション** | 行頭に `§` | `<section class="ltlbg_section">`<br>`<h2 class="ltlbg_section_name">` | 章や節の区切りとしての大段落。 |
-| **特殊セクション** | 行頭に `§❤` | `<section class="ltlbg_section_sukebe">`<br>`<h2 class="ltlbg_section_name">` | 特殊なセクション。変換時に`❤`は除去される。用途はクラス名から察してください |
+| **特殊セクション** | 行頭に `§§` | `<section class="ltlbg_section_sukebe">`<br>`<h2 class="ltlbg_section_name">` | 特殊なセクション。変換時に`❤`は除去される。用途はクラス名から察してください |
 | **地の文** | 行頭全角スペースの行とその連続 | `<p class="ltlbg_desciption">`<br>`<div class="ltlng_discript-group">` | 通常の形式小段落とその塊を示す中段落。 |
 | **会話文** | 行頭が `「`, `『`, `（`の行とその連続 | `<p class="ltlbg_bracket">`<br>`<div class="ltlng_bracket-group">` | 会話や思考などの形式小段落とその塊を示す中段落。 |
 
