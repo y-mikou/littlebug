@@ -136,7 +136,6 @@ BEGIN {
 	line = gensub(/\?!/, "<span class=\"ltlbg_wdfix\">?!</span>", "g", line);
 	line = gensub(/\?\?/, "<span class=\"ltlbg_wdfix\">??</span>", "g", line);
 	
-
 	#############################################################################
 	## 段落系処理
 	#############################################################################
@@ -156,7 +155,16 @@ BEGIN {
 		if (state_section != "none") {
 			output_buffer = output_buffer "</section>" ORS
 		}
-		output_buffer = output_buffer "<section class=\"ltlbg_section\">" ORS
+
+		# sectionクラスを決定する
+		section_class = "ltlbg_section"
+		if ($0 ~ /^§+❤/) {
+			section_class = "ltlbg_section_sukebe"
+			# ❤を除去
+			sub(/❤/, "", line)
+		}
+
+		output_buffer = output_buffer "<section class=\"" section_class "\">" ORS
 		state_section = "section"
 
 		# §の行自体にもルビなどの置換を適用したい場合はここに記述
@@ -224,13 +232,13 @@ BEGIN {
 	line = gensub(/\[l\[(.+)\]r\]/, "<span class=\"ltlbg_forcedGouji1/2\">\\1</span>", "g", line); #強制合字1/2タグ
 	line = gensub(/[；;]/, "<span class=\"ltlbg_semicolon\">；</span>", "g", line); #半角セミコロンは全て全角に修正
 	line = gensub(/[：:]/, "<span class=\"ltlbg_colon\">：</span>", "g", line); #半角コロンは全て全角に修正
-
+	line = gensub(/\[-[^-]{1,2}-\]/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line); #1文字幅化
 	
 	# タグに置換するタイプの変換
 	# タグを挿入するだけで、改ページの実装はスタイルによる
 	line = gensub(/゛/, "<span class=\"ltlbg_dakuten\"></span>", "g", line); #スケベ濁音
 	line = gensub(/゜/, "<span class=\"ltlbg_handakuten\"></span>", "g", line); #キチガイ半濁音
-	line = gensub(/\[newpage\]/, "<br class=\"ltlbg_newpage\">", "g", line); # 改ページ
+	line = gensub(/\[newpage\]/, "<div class=\"ltlbg_newpage\"></div><!--ltlbg_newpage-->", "g", line); # 改ページ
 	line = gensub(/---/, "<span class=\"ltlbg_hr\"></span>", "g", line); # 水平線
 	line = gensub(/／＼|〱/, "<span class=\"ltlbg_odori1\"></span><span class=\"ltlbg_odori2\"></span>", "g", line); #踊り字。
 	
@@ -254,8 +262,8 @@ BEGIN {
 	line = gensub(/＆＃０９２/, "\\&#092;", "g", line);
 
 	#必要があってスペースを使用する必要がある場合に代わりに使用していた以下の特殊文字を元に戻す
-	line = gensub("〿", " ", "g", line);
-	line = gensub("〼", "　", "g", line);
+	line = gensub("〿", "<span class="ltlbg_sSp"></span>", "g", line);
+	line = gensub("〼", "<span class="ltlbg_wSp"></span>", "g", line);
 
 	# 行末 が」 かどうか（終了判定）
 	# 行末が」であれば、現在継続中のクオート状態を解除する。
