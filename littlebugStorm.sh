@@ -7,5 +7,5 @@ export lang=ja_jp.utf-8
 
 for FILE in ${1}/*
 do
-  bash littlebug.sh 1 $FILE
+  bash littlebug.sh $FILE
 done
