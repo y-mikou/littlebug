@@ -445,13 +445,13 @@ if [[ "${convMode}" = '' ]]; then
 			fi
 			# ルビ文字に特殊指定
 			## ルビ文字にルビ
-			grep -E -o -n '｜[^《]+《[^｜]*｜[^《]+《[^》]+》[^》]*》' "${tgtFile}" > "${destFile}"
+			grep -E -o -n '｜[^《]+《[^》]*｜[^》]*》' "${tgtFile}" > "${destFile}"
 			## ルビ文字に太字
-			grep -E -o -n '｜[^《]+《[^《]*《《[^》]+》》[^》]*》' "${tgtFile}" >> "${destFile}"
+			grep -E -o -n '｜[^《]+《[^《》]*《《[^》]+》》[^》]*》' "${tgtFile}" >> "${destFile}"
 			## ルビ文字に回転
-			grep -E -o -n '｜[^《]+《[^\[]*\[\^\[^\^]\^\][^》]*》' "${tgtFile}" >> "${destFile}"
+			grep -E -o -n '｜[^《]+《[^\[》]*\[\^\[^\^]\^\][^》]*》' "${tgtFile}" >> "${destFile}"
 			## ルビ文字に合字
-			grep -E -o -n '｜[^《]+《[^[]*[l[[^]]{2}]r][^》]*》' "${tgtFile}" >> "${destFile}"
+			grep -E -o -n '｜[^《]+《[^[》]*[l[[^]]{2}]r][^》]*》' "${tgtFile}" >> "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑でルビ文字に修飾が指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
