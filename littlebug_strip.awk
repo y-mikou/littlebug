@@ -82,9 +82,12 @@ BEGIN {
     line = gensub(/^[ \t]+/, "", "g", line)
     
     # セクション名タグを処理
-    # <h2 class="ltlbg_section_name">§内容</h2> → §内容
+    # <h2 class="ltlbg_section_name">§内容</h2> → §内容 or §❤内容
     if (match(line, /<h2 class="ltlbg_section_name">([^<]+)<\/h2>/, m)) {
         line = m[1]
+        if (is_sukebe_section == 1) {
+            sub(/^§/, "§❤", line)
+        }
     }
     
     # ルビタグを元に戻す（内側のタグを先に処理）
@@ -96,9 +99,6 @@ BEGIN {
     # 特殊記号のspanタグを除去
     # <span class="ltlbg_wdfix">内容</span> → 内容
     line = gensub(/<span class="ltlbg_wdfix">([^<]*)<\/span>/, "\\1", "g", line)
-    
-    # 全角スペースのspanタグを除去
-    line = gensub(/<span class="ltlbg_wSp"><\/span>/, "　", "g", line)
     
     # 全角ダッシュのspanタグを除去
     line = gensub(/<span class="ltlbg_wSize">―<\/span>/, "―", "g", line)
@@ -132,7 +132,7 @@ BEGIN {
     line = gensub(/<span class="ltlbg_handakuten"><\/span>/, "゜", "g", line)
     
     # 改ページタグを元に戻す
-    line = gensub(/<br class="ltlbg_newpage">/, "[newpage]", "g", line)
+    line = gensub(/<div class="ltlbg_newpage"><\/div><!--ltlbg_newpage-->/, "[newpage]", "g", line)
     
     # 水平線タグを元に戻す
     line = gensub(/<span class="ltlbg_hr"><\/span>/, "---", "g", line)
@@ -149,6 +149,11 @@ BEGIN {
     line = gensub(/&#047;/, "/", "g", line)
     line = gensub(/&#092;/, "\\\\", "g", line)
     
+    # 全角スペースのspanタグを除去
+    line = gensub(/<span class="ltlbg_wSp"><\/span>/, "　", "g", line)
+    # 半角スペースのspanタグを除去
+    line = gensub(/<span class="ltlbg_sSp"><\/span>/, " ", "g", line)
+
     # 段落タグを処理（内部タグの除去後に処理）
     # <p class="ltlbg_bracket" data-p_header="「" data-p_footer="」">内容</p><!--bracket--> → 「内容」
     line = gensub(/<p class="ltlbg_bracket"[^>]*data-p_header="([^"]*)"[^>]*data-p_footer="([^"]*)"[^>]*>(.*)<\/p><!--bracket-->/, "\\1\\3\\2", "g", line)

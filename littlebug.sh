@@ -187,7 +187,6 @@ if [[ "${convMode}" = '' ]]; then
 				line = gensub(/!\?/, "<span class=\"ltlbg_wdfix\">!?</span>", "g", line);
 				line = gensub(/\?!/, "<span class=\"ltlbg_wdfix\">?!</span>", "g", line);
 				line = gensub(/\?\?/, "<span class=\"ltlbg_wdfix\">??</span>", "g", line);
-				
 
 				#############################################################################
 				## 段落系処理
@@ -208,7 +207,16 @@ if [[ "${convMode}" = '' ]]; then
 					if (state_section != "none") {
 						output_buffer = output_buffer "</section>" ORS
 					}
-					output_buffer = output_buffer "<section class=\"ltlbg_section\">" ORS
+
+					# sectionクラスを決定する
+					section_class = "ltlbg_section"
+					if ($0 ~ /^§+❤/) {
+						section_class = "ltlbg_section_sukebe"
+						# ❤を除去
+						sub(/❤/, "", line)
+					}
+
+					output_buffer = output_buffer "<section class=\"" section_class "\">" ORS
 					state_section = "section"
 
 					# §の行自体にもルビなどの置換を適用したい場合はここに記述
@@ -276,13 +284,13 @@ if [[ "${convMode}" = '' ]]; then
 				line = gensub(/\[l\[(.+)\]r\]/, "<span class=\"ltlbg_forcedGouji1/2\">\\1</span>", "g", line); #強制合字1/2タグ
 				line = gensub(/[；;]/, "<span class=\"ltlbg_semicolon\">；</span>", "g", line); #半角セミコロンは全て全角に修正
 				line = gensub(/[：:]/, "<span class=\"ltlbg_colon\">：</span>", "g", line); #半角コロンは全て全角に修正
-
+				line = gensub(/\[-[^-]{1,2}-\]/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line); #1文字幅化
 				
 				# タグに置換するタイプの変換
 				# タグを挿入するだけで、改ページの実装はスタイルによる
 				line = gensub(/゛/, "<span class=\"ltlbg_dakuten\"></span>", "g", line); #スケベ濁音
 				line = gensub(/゜/, "<span class=\"ltlbg_handakuten\"></span>", "g", line); #キチガイ半濁音
-				line = gensub(/\[newpage\]/, "<br class=\"ltlbg_newpage\">", "g", line); # 改ページ
+				line = gensub(/\[newpage\]/, "<div class=\"ltlbg_newpage\"></div><!--ltlbg_newpage-->", "g", line); # 改ページ
 				line = gensub(/---/, "<span class=\"ltlbg_hr\"></span>", "g", line); # 水平線
 				line = gensub(/／＼|〱/, "<span class=\"ltlbg_odori1\"></span><span class=\"ltlbg_odori2\"></span>", "g", line); #踊り字。
 				
@@ -306,8 +314,8 @@ if [[ "${convMode}" = '' ]]; then
 				line = gensub(/＆＃０９２/, "\\&#092;", "g", line);
 
 				#必要があってスペースを使用する必要がある場合に代わりに使用していた以下の特殊文字を元に戻す
-				line = gensub("〿", " ", "g", line);
-				line = gensub("〼", "　", "g", line);
+				line = gensub("〿", "<span class="ltlbg_sSp"></span>", "g", line);
+				line = gensub("〼", "<span class="ltlbg_wSp"></span>", "g", line);
 
 				# 行末 が」 かどうか（終了判定）
 				# 行末が」であれば、現在継続中のクオート状態を解除する。
@@ -566,6 +574,7 @@ elif [[ "${convMode}" = '-t' ]]; then
 			BEGIN {
 				output_buffer = ""
 				in_content = 0
+				is_sukebe_section = 0
 			}
 
 			{
@@ -581,8 +590,17 @@ elif [[ "${convMode}" = '-t' ]]; then
 					next
 				}
 				
-				# sectionタグを除去
-				if (line ~ /^<section class="ltlbg_section">/ || line ~ /^<\/section>/) {
+				# sectionタグを処理
+				if (match(line, /<section class="([^"]+)">/, m)) {
+					if (m[1] == "ltlbg_section_sukebe") {
+						is_sukebe_section = 1
+					} else {
+						is_sukebe_section = 0
+					}
+					next
+				}
+				if (line ~ /^<\/section>/) {
+					is_sukebe_section = 0
 					next
 				}
 				
@@ -596,9 +614,12 @@ elif [[ "${convMode}" = '-t' ]]; then
 				line = gensub(/^[ \t]+/, "", "g", line)
 				
 				# セクション名タグを処理
-				# <h2 class="ltlbg_section_name">§内容</h2> → §内容
+				# <h2 class="ltlbg_section_name">§内容</h2> → §内容 or §❤内容
 				if (match(line, /<h2 class="ltlbg_section_name">([^<]+)<\/h2>/, m)) {
 					line = m[1]
+					if (is_sukebe_section == 1) {
+						sub(/^§/, "§❤", line)
+					}
 				}
 				
 				# ルビタグを元に戻す（内側のタグを先に処理）
@@ -610,10 +631,7 @@ elif [[ "${convMode}" = '-t' ]]; then
 				# 特殊記号のspanタグを除去
 				# <span class="ltlbg_wdfix">内容</span> → 内容
 				line = gensub(/<span class="ltlbg_wdfix">([^<]*)<\/span>/, "\\1", "g", line)
-				
-				# 全角スペースのspanタグを除去
-				line = gensub(/<span class="ltlbg_wSp"><\/span>/, "　", "g", line)
-				
+								
 				# 全角ダッシュのspanタグを除去
 				line = gensub(/<span class="ltlbg_wSize">―<\/span>/, "―", "g", line)
 				
@@ -646,7 +664,7 @@ elif [[ "${convMode}" = '-t' ]]; then
 				line = gensub(/<span class="ltlbg_handakuten"><\/span>/, "゜", "g", line)
 				
 				# 改ページタグを元に戻す
-				line = gensub(/<br class="ltlbg_newpage">/, "[newpage]", "g", line)
+			    line = gensub(/<div class="ltlbg_newpage"><\/div><!--ltlbg_newpage-->/, "[newpage]", "g", line)
 				
 				# 水平線タグを元に戻す
 				line = gensub(/<span class="ltlbg_hr"><\/span>/, "---", "g", line)
@@ -662,6 +680,11 @@ elif [[ "${convMode}" = '-t' ]]; then
 				line = gensub(/&quot;/, "\"", "g", line)
 				line = gensub(/&#047;/, "/", "g", line)
 				line = gensub(/&#092;/, "\\\\", "g", line)
+
+				# 全角スペースのspanタグを除去
+				line = gensub(/<span class="ltlbg_wSp"><\/span>/, "　", "g", line)
+				# 半角スペースのspanタグを除去
+				line = gensub(/<span class="ltlbg_sSp"><\/span>/, " ", "g", line)
 				
 				# 段落タグを処理（内部タグの除去後に処理）
 				# <p class="ltlbg_bracket" data-p_header="「" data-p_footer="」">内容</p><!--bracket--> → 「内容」
