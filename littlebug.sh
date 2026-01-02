@@ -1,7 +1,6 @@
 #!/bin/bash
 export lang=ja_jp.utf-8
 
-<<<<<<< HEAD
 : "終了時クリンナップ" && {
 	# 作業用一時ディレクトリの後始末用関数とトラップ設定
 	function cleanup_tmpdir() {
