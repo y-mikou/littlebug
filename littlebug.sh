@@ -4,7 +4,8 @@ export lang=ja_jp.utf-8
 : "終了時クリンナップ" && {
 	# 作業用一時ディレクトリの後始末用関数とトラップ設定
 	function cleanup_tmpdir() {
-		:
+		echo "⛓️‍💥 中断されました"
+		#今は中間ファイルなどを使用していないため特に掃除はない
 	}
 	trap cleanup_tmpdir INT
 	trap cleanup_tmpdir EXIT
