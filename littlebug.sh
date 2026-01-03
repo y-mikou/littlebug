@@ -56,6 +56,11 @@ if [[ "${convMode}" = '' ]]; then
 			# littlebug.awkの内容をヒアドキュメントとして定義
 			read -r -d '' AWK_CODE <<- 'AWK_EOF'
 			#!/usr/bin/awk -f
+			#########################################################
+			## littlebug.sh内で呼び出されている、
+			## 独自タグプレーンテキスト→独自クラスhtmlタグ付与を実施する
+			## gun awk プログラム
+			#########################################################
 
 			# ルビタグにクラスを付与して置換する関数
 			# gawk拡張のmatch()第三引数を使用
@@ -142,9 +147,9 @@ if [[ "${convMode}" = '' ]]; then
 				# 処理中に問題になる特殊文字の一次置換(最後に元に戻す)
 				# htmlを意識して既に文字参照型で記述されているものも含む
 				# 全角スペース
-				line = gensub(/　/, "〼", "g", line);
+				line = gensub("　", "〼", "g", line);
 				# 半角スペース
-				line = gensub(/ /, "〿", "g", line);
+				line = gensub(" ", "〿", "g", line);
 				# スラッシュ
 				line = gensub(/&#047;|\//, "＆＃０４７", "g", line);
 				# バックスラッシュ
@@ -163,6 +168,8 @@ if [[ "${convMode}" = '' ]]; then
 				#ゴミスペースを掃除
 				line = gensub(/[〿〼]$/, "", "g", line);
 				line = gensub(/[〿〼]([」』）〟])/, "\\1", "g", line);
+				#不要な一文字幅化を除去(指定がなくても変換される/指定があると変換が二重に行われる)
+				line = gensub(/\[-(!!|!\?|\?!|\?\?)-\]/, "\\1", "g", line);
 
 				#記号種類の統一
 				line = gensub(/[♡♥]/, "❤", "g", line);
@@ -179,15 +186,12 @@ if [[ "${convMode}" = '' ]]; then
 				# 連続する感嘆符・疑問符・記号類の後に全角スペースを挿入し、
 				# それを<span class="ltlbg_wSp"></span>に置換
 				# 対象 ！!?？❤💞💕♪☆★💢
-				line = gensub(/([!\?！？❤💞💕♪☆★💢])([^〼」』）!\?！？❤💞💕♪☆★💢])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
+				line = gensub(/([!\?！？❤💞💕♪☆★💢])〼*([^〼」』）!\?！？❤💞💕♪☆★💢、。])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
 
 				#上記特殊記号(❤,★,■,♪,!!,!?,?!,??)を、<span class="ltlbg_wdfix"></span>タグで括る
-				line = gensub(/([❤★■♪])/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line);
-				line = gensub(/!!/, "<span class=\"ltlbg_wdfix\">!!</span>", "g", line);
-				line = gensub(/!\?/, "<span class=\"ltlbg_wdfix\">!?</span>", "g", line);
-				line = gensub(/\?!/, "<span class=\"ltlbg_wdfix\">?!</span>", "g", line);
-				line = gensub(/\?\?/, "<span class=\"ltlbg_wdfix\">??</span>", "g", line);
-
+				line = gensub(/([❤★■♪])/, "<span class=\"ltlbg_wdfix_auto\">\\1</span>", "g", line);
+				line = gensub(/(!!|!\?|\?!|\?\?)/, "<span class=\"ltlbg_wsymbol\">\\1</span>", "g", line);
+				
 				#############################################################################
 				## 段落系処理
 				#############################################################################
@@ -210,10 +214,10 @@ if [[ "${convMode}" = '' ]]; then
 
 					# sectionクラスを決定する
 					section_class = "ltlbg_section"
-					if ($0 ~ /^§+❤/) {
+					if ($0 ~ /^§§/) {
 						section_class = "ltlbg_section_sukebe"
 						# ❤を除去
-						sub(/❤/, "", line)
+						sub(/§§/, "§", line)
 					}
 
 					output_buffer = output_buffer "<section class=\"" section_class "\">" ORS
@@ -224,6 +228,9 @@ if [[ "${convMode}" = '' ]]; then
 					line = apply_emphasis_dots(line)
 					
 					line = gensub(/(§+.*)/, "  <h2 class=\"ltlbg_section_name\">\\1</h2>", "g", line);
+
+					line = gensub(/〿/, "<span class=\"ltlbg_sSp\"></span>", "g", line);
+					line = gensub(/〼/, "　", "g", line);
 
 					output_buffer = output_buffer line ORS
 					next
@@ -277,14 +284,14 @@ if [[ "${convMode}" = '' ]]; then
 				#タグで括るタイプの修飾
 				line = gensub("([^\"])〼([^\"])", "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line); # 全角スペース
 				line = gensub(/―/, "<span class=\"ltlbg_wSize\">―</span>", "g", line); #全角ダッシュは常にワイドタグを適用
-				line = gensub(/\[-([^-]+)-\]/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line); #強制1文字幅タグ
+				line = gensub(/\[-([^\-\[]+)-\]/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line); #強制1文字幅タグ
 				line = gensub(/\*\*([^\*]+)\*\*/, "<span class=\"ltlbg_bold\">\\1</span>", "g", line); #太字
-				line = gensub(/\[\^(.+)\^\]/, "<span class=\"ltlbg_rotate\">\\1</span>", "g", line); #回転タグ
-				line = gensub(/\^(.+)\^/,"<span class=\"ltlbg_tcy\">\\1</span>", "g",line) #縦中横
-				line = gensub(/\[l\[(.+)\]r\]/, "<span class=\"ltlbg_forcedGouji1/2\">\\1</span>", "g", line); #強制合字1/2タグ
+				line = gensub(/\[\^([^\^\[]+)\^\]/, "<span class=\"ltlbg_rotate\">\\1</span>", "g", line); #回転タグ
+				line = gensub(/\^([^\^]+)\^/,"<span class=\"ltlbg_tcy\">\\1</span>", "g",line) #縦中横
+				line = gensub(/\[%\[([^\[\]])([^\[\]])\]%\]/, "<span class=\"ltlbg_forceGouji1\">\\1</span><span class=\"ltlbg_forceGouji2\">\\2</span>", "g", line); #強制合字1/2タグ
 				line = gensub(/[；;]/, "<span class=\"ltlbg_semicolon\">；</span>", "g", line); #半角セミコロンは全て全角に修正
 				line = gensub(/[：:]/, "<span class=\"ltlbg_colon\">：</span>", "g", line); #半角コロンは全て全角に修正
-				line = gensub(/\[-[^-]{1,2}-\]/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line); #1文字幅化
+				line = gensub(/\[-[^-\[\]]{1,2}-\]/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line); #1文字幅化
 				
 				# タグに置換するタイプの変換
 				# タグを挿入するだけで、改ページの実装はスタイルによる
@@ -314,8 +321,8 @@ if [[ "${convMode}" = '' ]]; then
 				line = gensub(/＆＃０９２/, "\\&#092;", "g", line);
 
 				#必要があってスペースを使用する必要がある場合に代わりに使用していた以下の特殊文字を元に戻す
-				line = gensub("〿", "<span class="ltlbg_sSp"></span>", "g", line);
-				line = gensub("〼", "<span class="ltlbg_wSp"></span>", "g", line);
+				line = gensub(/〿/, "<span class=\"ltlbg_sSp\"></span>", "g", line);
+				line = gensub(/〼/, "　", "g", line);
 
 				# 行末 が」 かどうか（終了判定）
 				# 行末が」であれば、現在継続中のクオート状態を解除する。
@@ -339,10 +346,17 @@ if [[ "${convMode}" = '' ]]; then
 				##########################################################################################
 				header =        "<html>" ORS
 				header = header "  <head>" ORS
-				header = header "    <link rel=\"stylesheet\" href=\"../css/littlebugI.css\">" ORS
-				header = header "    <!--<link rel=\"stylesheet\" href=\"../css/littlebugV.css\">-->" ORS
-				header = header "    <link rel=\"stylesheet\" href=\"../css/littlebugH.css\">" ORS
-				header = header "    <link rel=\"stylesheet\" href=\"../css/littlebugU.css\">" ORS
+				header = header "    <link rel=\"stylesheet\" href=\"./css/littlebugI.css\">" ORS
+				header = header "    <!--<link rel=\"stylesheet\" href=\"./css/littlebugV.css\">-->" ORS
+				header = header "    <link rel=\"stylesheet\" href=\"./css/littlebugH.css\">" ORS
+				header = header "    <link rel=\"stylesheet\" href=\"./css/littlebugU.css\">" ORS
+
+				#vvvv google fonts vvvvvvv
+				header = header "    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">" ORS
+				header = header "    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>" ORS
+				header = header "    <link href=\"https://fonts.googleapis.com/css2?family=BIZ+UDMincho&display=swap\" rel=\"stylesheet\">" ORS
+				#^^^^^ google fonts ^^^^^^
+
 				header = header "  </head>" ORS
 				header = header "  <body>" ORS
 				header = header "<div class=\"ltlbg_container\">" ORS
@@ -465,7 +479,7 @@ if [[ "${convMode}" = '' ]]; then
 				echo '🤔 ↑でルビ文字に修飾が指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
 			fi
 			# 不要なスペース(改行直前のスペース、閉じ括弧直前のスペース)
-			grep -E -o -n '[ 　]$|[ 　]([」』）〟])|^(§+)[ 　]' "${tgtFile}" > "${destFile}"
+			grep -E -o -n '[ 　]$|[ 　]([」』）〟])|^(§+)[ 　]' "${tgtFile}" | sort | uniq > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑に不要なスペース(改行直前のスペース、閉じ括弧直前のスペース、セクション記号直後のスペース)が含まれています。'
@@ -473,40 +487,51 @@ if [[ "${convMode}" = '' ]]; then
 			fi
 			#組版時に置換される記号類
 			##表記ゆれする可能性がある記号の統一
-			grep -E -o -n '[♡♥☆□♫♬]' "${tgtFile}" > "${destFile}"
+			grep -E -o -n '[♡♥☆□♫♬]' "${tgtFile}" | sort | uniq > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑に含まれる記号は変換後、別の記号に置換されます。（元ファイルは修正しません）'
 			fi
 			##組版時に置換される連続「―」
-			grep -E -o -n '―{2,}' "${tgtFile}" > "${destFile}"
+			grep -E -o -n '―{2,}' "${tgtFile}" | sort | uniq > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑に含まれる、連続する「―」は、倍サイズの一つの「―」へ変換されます(元ファイルは修正しません)'
 			fi
 			##！？のペア
-			grep -E -o -n '！！|！？|？！|？？' "${tgtFile}" > "${destFile}"
+			grep -E -o -n '！！|！？|？！|？？' "${tgtFile}" | sort | uniq > "${destFile}"
+			if [[ -s "${destFile}" ]]; then 
+				cat "${destFile}"
+				echo '🤔 ↑に含まれる、！!、！？などのペアは変換後、半角のペアに変換されます(元のファイルは修正しません)'
+			fi
+			grep -E -o -n '\[-!!-\]|\[-!\?-\]|\[-\?!-\]|\[-\?\?-\]' "${tgtFile}" | sort | uniq > "${destFile}"
+			if [[ -s "${destFile}" ]]; then 
+				cat "${destFile}"
+				echo '🤔 ↑に含まれる、半角の!？ペアは自動的に一文字幅化されるので[- -]の指定は不要です(元のファイルは修正しません)'
+			fi
+			grep -E -o -n '^(§+)[ 　]' "${tgtFile}" | sort | uniq > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑に含まれる、！!、！？などのペアは変換後、１文字幅に収まるように半角のペアに変換されます(元のファイルは修正しません)'
 			fi
-			grep -E -o -n '^(§+)[ 　]' "${tgtFile}" > "${destFile}"
-			if [[ -s "${destFile}" ]]; then 
-				cat "${destFile}"
-				echo '🤔 ↑に含まれる、！!、！？などのペアは変換後、１文字幅に収まるように半角のペアに変換されます(元のファイルは修正しません)'
-			fi
-			grep -E -o -n '^$' "${tgtFile}" > "${destFile}"
+			grep -E -o -n '^$' "${tgtFile}" | sort | uniq > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑に含まれる空行は、元ファイルの記述に関わらず、変換規則に則って削除あるいは追加されます(元のファイルは修正しません)'
 			fi
 			# 記号類の直後のスペースがない
-			grep -E -o -n '[!\?！？❤💞💕♪☆★💢][^　」』）!\?！？❤💞💕♪☆★💢]' "${tgtFile}" > "${destFile}"
+			grep -E -o -n '[!\?！？❤💞💕♪☆★💢][^　」』）!\?！？❤💞💕♪☆★💢]' "${tgtFile}" | sort | uniq > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑記号類の直後に、それが連続するか行末・括弧内末尾でない限り、スペースを挿入します(元のファイルは修正しません)'
 			fi
-
+			# 半角英数記号が単独で存在する
+			grep -E -o -n '[0-9a-zA-Z]{2}*[0-9a-zA-Z]' "${tgtFile}" | sort | uniq > "${destFile}"
+			sed -i "/newpage/d" "${destFile}" #[newpage]は指定タグなので許容
+			if [[ -s "${destFile}" ]]; then 
+				cat "${destFile}"
+				echo '🤔 ↑に、半角英数記号が単独(または奇数)で登場します。'
+			fi
 		}
 
 		: "変換実施" && {
@@ -614,11 +639,11 @@ elif [[ "${convMode}" = '-t' ]]; then
 				line = gensub(/^[ \t]+/, "", "g", line)
 				
 				# セクション名タグを処理
-				# <h2 class="ltlbg_section_name">§内容</h2> → §内容 or §❤内容
+				# <h2 class="ltlbg_section_name">§内容</h2> → §内容 or §§内容
 				if (match(line, /<h2 class="ltlbg_section_name">([^<]+)<\/h2>/, m)) {
 					line = m[1]
 					if (is_sukebe_section == 1) {
-						sub(/^§/, "§❤", line)
+						sub(/^§/, "§§", line)
 					}
 				}
 				
@@ -628,9 +653,11 @@ elif [[ "${convMode}" = '-t' ]]; then
 				# 圏点タグを元に戻す（内側のタグを先に処理）
 				line = strip_emphasis_tags(line)
 				
-				# 特殊記号のspanタグを除去
-				# <span class="ltlbg_wdfix">内容</span> → 内容
-				line = gensub(/<span class="ltlbg_wdfix">([^<]*)<\/span>/, "\\1", "g", line)
+				# 一文字幅化のspanタグを戻す
+				# <span class="ltlbg_wdfix">内容</span> → [-内容-]
+				line = gensub(/<span class="ltlbg_wdfix">([^<]*)<\/span>/, "[-\\1-]", "g", line)
+				# <span class="ltlbg_wdfix_auto">内容</span> → 内容
+				line = gensub(/<span class="ltlbg_wdfix_auto">([^<]*)<\/span>/, "\\1", "g", line)
 								
 				# 全角ダッシュのspanタグを除去
 				line = gensub(/<span class="ltlbg_wSize">―<\/span>/, "―", "g", line)
@@ -648,8 +675,8 @@ elif [[ "${convMode}" = '-t' ]]; then
 				line = gensub(/<span class="ltlbg_tcy">([^<]*)<\/span>/, "^\\1^", "g", line)
 				
 				# 強制合字タグを元に戻す
-				# <span class="ltlbg_forcedGouji1/2">内容</span> → [l[内容]r]
-				line = gensub(/<span class="ltlbg_forcedGouji1\/2">([^<]*)<\/span>/, "[l[\\1]r]", "g", line)
+				# <span class="ltlbg_forceGouji1">字1</span><span class="ltlbg_forceGouji2">字2</span> → [%[字1字2]%]
+				line = gensub(/<span class="ltlbg_forceGouji1">([^<]*)<\/span><span class="ltlbg_forceGouji2">([^<]*)<\/span>/, "[%[\\1\\2]%]", "g", line)
 				
 				# セミコロンタグを元に戻す
 				line = gensub(/<span class="ltlbg_semicolon">；<\/span>/, "；", "g", line)
@@ -671,6 +698,9 @@ elif [[ "${convMode}" = '-t' ]]; then
 				
 				# 踊り字タグを元に戻す
 				line = gensub(/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/, "／＼", "g", line)
+
+				# 連続する感嘆符・疑問符を元に戻す
+				line = gensub(/<span class="ltlbg_wsymbol">([^<]+)<\/span>/, "\\1", "g", line);
 				
 				# HTML文字参照を元に戻す
 				line = gensub(/&amp;/, "\\&", "g", line)

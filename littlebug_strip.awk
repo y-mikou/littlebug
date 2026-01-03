@@ -1,9 +1,4 @@
 #!/usr/bin/awk -f
-#########################################################
-## littlebug.sh内で呼び出されている、
-# littlebug.awkで生成されたHTMLファイルを元のテキスト形式に戻す逆変換
-## gun awk プログラム
-#########################################################
 
 # ルビタグを元の短縮タグに戻す関数
 # <ruby class="ltlbg_ruby-*" data-*="ルビ">親文字<rt>ルビ</rt></ruby> → ｜親文字《ルビ》
@@ -52,6 +47,7 @@ function strip_emphasis_tags(text) {
 BEGIN {
     output_buffer = ""
     in_content = 0
+    is_sukebe_section = 0
 }
 
 {
@@ -67,8 +63,17 @@ BEGIN {
         next
     }
     
-    # sectionタグを除去
-    if (line ~ /^<section class="ltlbg_section">/ || line ~ /^<\/section>/) {
+    # sectionタグを処理
+    if (match(line, /<section class="([^"]+)">/, m)) {
+        if (m[1] == "ltlbg_section_sukebe") {
+            is_sukebe_section = 1
+        } else {
+            is_sukebe_section = 0
+        }
+        next
+    }
+    if (line ~ /^<\/section>/) {
+        is_sukebe_section = 0
         next
     }
     
@@ -82,11 +87,11 @@ BEGIN {
     line = gensub(/^[ \t]+/, "", "g", line)
     
     # セクション名タグを処理
-    # <h2 class="ltlbg_section_name">§内容</h2> → §内容 or §❤内容
+    # <h2 class="ltlbg_section_name">§内容</h2> → §内容 or §§内容
     if (match(line, /<h2 class="ltlbg_section_name">([^<]+)<\/h2>/, m)) {
         line = m[1]
         if (is_sukebe_section == 1) {
-            sub(/^§/, "§❤", line)
+            sub(/^§/, "§§", line)
         }
     }
     
@@ -96,10 +101,12 @@ BEGIN {
     # 圏点タグを元に戻す（内側のタグを先に処理）
     line = strip_emphasis_tags(line)
     
-    # 特殊記号のspanタグを除去
-    # <span class="ltlbg_wdfix">内容</span> → 内容
-    line = gensub(/<span class="ltlbg_wdfix">([^<]*)<\/span>/, "\\1", "g", line)
-    
+    # 一文字幅化のspanタグを戻す
+    # <span class="ltlbg_wdfix">内容</span> → [-内容-]
+    line = gensub(/<span class="ltlbg_wdfix">([^<]*)<\/span>/, "[-\\1-]", "g", line)
+    # <span class="ltlbg_wdfix_auto">内容</span> → 内容
+    line = gensub(/<span class="ltlbg_wdfix_auto">([^<]*)<\/span>/, "\\1", "g", line)
+                    
     # 全角ダッシュのspanタグを除去
     line = gensub(/<span class="ltlbg_wSize">―<\/span>/, "―", "g", line)
     
@@ -116,8 +123,8 @@ BEGIN {
     line = gensub(/<span class="ltlbg_tcy">([^<]*)<\/span>/, "^\\1^", "g", line)
     
     # 強制合字タグを元に戻す
-    # <span class="ltlbg_forcedGouji1/2">内容</span> → [l[内容]r]
-    line = gensub(/<span class="ltlbg_forcedGouji1\/2">([^<]*)<\/span>/, "[l[\\1]r]", "g", line)
+    # <span class="ltlbg_forceGouji1">字1</span><span class="ltlbg_forceGouji2">字2</span> → [%[字1字2]%]
+    line = gensub(/<span class="ltlbg_forceGouji1">([^<]*)<\/span><span class="ltlbg_forceGouji2">([^<]*)<\/span>/, "[%[\\1\\2]%]", "g", line)
     
     # セミコロンタグを元に戻す
     line = gensub(/<span class="ltlbg_semicolon">；<\/span>/, "；", "g", line)
@@ -139,7 +146,11 @@ BEGIN {
     
     # 踊り字タグを元に戻す
     line = gensub(/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/, "／＼", "g", line)
-    
+
+    # 連続する感嘆符・疑問符を元に戻す
+	line = gensub(/<span class="ltlbg_wsymbol">([^<]+)<\/span>/, "\\1", "g", line);
+
+
     # HTML文字参照を元に戻す
     line = gensub(/&amp;/, "\\&", "g", line)
     line = gensub(/&lt;/, "<", "g", line)
@@ -148,12 +159,12 @@ BEGIN {
     line = gensub(/&quot;/, "\"", "g", line)
     line = gensub(/&#047;/, "/", "g", line)
     line = gensub(/&#092;/, "\\\\", "g", line)
-    
+
     # 全角スペースのspanタグを除去
     line = gensub(/<span class="ltlbg_wSp"><\/span>/, "　", "g", line)
     # 半角スペースのspanタグを除去
     line = gensub(/<span class="ltlbg_sSp"><\/span>/, " ", "g", line)
-
+    
     # 段落タグを処理（内部タグの除去後に処理）
     # <p class="ltlbg_bracket" data-p_header="「" data-p_footer="」">内容</p><!--bracket--> → 「内容」
     line = gensub(/<p class="ltlbg_bracket"[^>]*data-p_header="([^"]*)"[^>]*data-p_footer="([^"]*)"[^>]*>(.*)<\/p><!--bracket-->/, "\\1\\3\\2", "g", line)

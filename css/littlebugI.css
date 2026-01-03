@@ -1,5 +1,9 @@
 /* 作品個別のスタイルを記述するためのCSS。必要に応じて改名すること */
 
+html{
+    font-family: "BIZ UDMincho", serif;
+}
+
 @page :left{
     @left-middle {
         content: "";
@@ -9,19 +13,18 @@
 }
 @page :right{
     @top-right {
-        font-family: 'BIZ UDMincho';
-        content: "// DeGrad[u]ation //";
+        content: "// 作品名だよ //";
         writing-mode: horizontal-tb;
         transform: translate(-30px,0) rotate(0);
     }
 }
 
-@page sukebe:left{
+@page ltlbg_section_sukebe:left{
     background: url(../img/sukebeLabel_L.jpg) no-repeat ;
     background-size: 120px;
     background-position: left -12px top -12px;
 }
-@page sukebe:right{
+@page ltlbg_section_sukebe:right{
     background: url(../img/sukebeLabel_R.jpg) no-repeat ;
     background-size: 120px;
     background-position: right -12px top -12px;

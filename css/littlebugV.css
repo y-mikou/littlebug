@@ -56,12 +56,14 @@ div.ltlbg_div_brctGrp{
     break-after: avoid;
 }
 
-/* 縦中横。AもMもスタイル自体は同じ*/
-span.ltlbg_tcyA {
+/*記号二連続...縦書きでは縦中横、横書きでは幅1文字化*/
+span.ltlbg_wsymbol{
     text-combine-upright: all;
     display: inline-block;
 }
-span.ltlbg_tcyM {
+
+/* 縦中横*/
+span.ltlbg_tcy {
     text-combine-upright: all;
     display: inline-block;
 }
