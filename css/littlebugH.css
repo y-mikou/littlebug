@@ -8,7 +8,6 @@ html {
     /* 横 */ writing-mode: horizontal-tb;
     column-count: 1;
     orphans: 1;
-
     font-size: var(--font-size);
     line-height: var(--line-height); /* 「1行分」のマージンには1.75remを指定する。pxでは21 */
 }
@@ -102,6 +101,15 @@ span.ltlbg_odori2::before{
     transform: rotate(90deg);
     content: "〳";
 }
+
+/*記号二連続...縦書きでは縦中横、横書きでは幅1文字化*/
+span.ltlbg_wsymbol{
+    display: inline-block;
+    text-align: center;
+    width: 1rem;
+    height: 1rem;
+}
+
 
 /*スペース系の退避========================================================*/
 /*横書きの場合はright、縦書きのときはbottomにmarginを差し込む*/

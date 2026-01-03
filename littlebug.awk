@@ -111,6 +111,8 @@ BEGIN {
 	#ゴミスペースを掃除
 	line = gensub(/[〿〼]$/, "", "g", line);
 	line = gensub(/[〿〼]([」』）〟])/, "\\1", "g", line);
+	#不要な一文字幅化を除去(指定がなくても変換される/指定があると変換が二重に行われる)
+	line = gensub(/\[-(!!|!\?|\?!|\?\?)-\]/, "\\1", "g", line);
 
 	#記号種類の統一
 	line = gensub(/[♡♥]/, "❤", "g", line);
@@ -127,15 +129,12 @@ BEGIN {
 	# 連続する感嘆符・疑問符・記号類の後に全角スペースを挿入し、
 	# それを<span class="ltlbg_wSp"></span>に置換
 	# 対象 ！!?？❤💞💕♪☆★💢
-	line = gensub(/([!\?！？❤💞💕♪☆★💢])〼*([^〼」』）!\?！？❤💞💕♪☆★💢])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
+	line = gensub(/([!\?！？❤💞💕♪☆★💢])〼*([^〼」』）!\?！？❤💞💕♪☆★💢、。])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
 
 	#上記特殊記号(❤,★,■,♪,!!,!?,?!,??)を、<span class="ltlbg_wdfix"></span>タグで括る
-	line = gensub(/([❤★■♪])/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line);
-	line = gensub(/!!/, "<span class=\"ltlbg_wdfix\">!!</span>", "g", line);
-	line = gensub(/!\?/, "<span class=\"ltlbg_wdfix\">!?</span>", "g", line);
-	line = gensub(/\?!/, "<span class=\"ltlbg_wdfix\">?!</span>", "g", line);
-	line = gensub(/\?\?/, "<span class=\"ltlbg_wdfix\">??</span>", "g", line);
-	
+	line = gensub(/([❤★■♪])/, "<span class=\"ltlbg_wdfix_auto\">\\1</span>", "g", line);
+	line = gensub(/(!!|!\?|\?!|\?\?)/, "<span class=\"ltlbg_wsymbol\">\\1</span>", "g", line);
+
 	#############################################################################
 	## 段落系処理
 	#############################################################################
@@ -232,7 +231,7 @@ BEGIN {
 	line = gensub(/\*\*([^\*]+)\*\*/, "<span class=\"ltlbg_bold\">\\1</span>", "g", line); #太字
 	line = gensub(/\[\^([^\^\[]+)\^\]/, "<span class=\"ltlbg_rotate\">\\1</span>", "g", line); #回転タグ
 	line = gensub(/\^([^\^]+)\^/,"<span class=\"ltlbg_tcy\">\\1</span>", "g",line) #縦中横
-	line = gensub(/\[l\[([^\[\]])([^\[\]])\]r\]/, "<span class=\"ltlbg_forceGouji1\">\\1</span><span class=\"ltlbg_forceGouji2\">\\2</span>", "g", line); #強制合字1/2タグ
+	line = gensub(/\[%\[([^\[\]])([^\[\]])\]%\]/, "<span class=\"ltlbg_forceGouji1\">\\1</span><span class=\"ltlbg_forceGouji2\">\\2</span>", "g", line); #強制合字1/2タグ
 	line = gensub(/[；;]/, "<span class=\"ltlbg_semicolon\">；</span>", "g", line); #半角セミコロンは全て全角に修正
 	line = gensub(/[：:]/, "<span class=\"ltlbg_colon\">：</span>", "g", line); #半角コロンは全て全角に修正
 	line = gensub(/\[-[^-\[\]]{1,2}-\]/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", line); #1文字幅化
@@ -294,6 +293,13 @@ END {
 	header = header "    <!--<link rel=\"stylesheet\" href=\"./css/littlebugV.css\">-->" ORS
 	header = header "    <link rel=\"stylesheet\" href=\"./css/littlebugH.css\">" ORS
 	header = header "    <link rel=\"stylesheet\" href=\"./css/littlebugU.css\">" ORS
+
+	#vvvv google fonts vvvvvvv
+    header = header "    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">" ORS
+    header = header "    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>" ORS
+    header = header "    <link href=\"https://fonts.googleapis.com/css2?family=BIZ+UDMincho&display=swap\" rel=\"stylesheet\">" ORS
+	#^^^^^ google fonts ^^^^^^
+
 	header = header "  </head>" ORS
 	header = header "  <body>" ORS
 	header = header "<div class=\"ltlbg_container\">" ORS

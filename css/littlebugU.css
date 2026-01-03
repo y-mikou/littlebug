@@ -39,7 +39,6 @@ hr.ltlbg_hr{
         bleed: 3mm;
         /*marks: crop cross;*/
         @bottom-center {
-            font-family: 'BIZ UDMincho';
             content: "- " counter(page) " -";
         }
     }
@@ -84,6 +83,12 @@ span.ltlbg_emphasis{
 }
 
 /*1文字幅*/
+span.ltlbg_wdfix_auto{
+    display: inline-block;
+    text-align: center;
+    width: 1rem;
+    height: 1rem;
+}
 span.ltlbg_wdfix{
     display: inline-block;
     text-align: center;
