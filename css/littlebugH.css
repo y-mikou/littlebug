@@ -69,6 +69,20 @@ p.ltlbg_bracket{
 }
 
 /*特殊文字関連========================================================*/
+/*コロン・セミコロン。縦書きのとき回転が必要。横書きのとき幅の調整が必要*/
+span.ltlbg_colon {
+    display: inline-block;
+    text-align: center;
+    width: 1rem;
+    height: 1rem;
+}
+span.ltlbg_semicolon {
+    display: inline-block;
+    text-align: center;
+    width: 1rem;
+    height: 1rem;
+}
+
 /*アへ濁点*/
 /*フォントによって位置がずれる。ユーザ側で調整してください*/
 span.ltlbg_dakuten::after {
@@ -112,6 +126,10 @@ span.ltlbg_wsymbol{
     height: 1rem;
 }
 
+/*水平線*/
+hr.ltlbg_hr{
+    border-top: 1px solid #8c8b8b;
+}
 
 /*スペース系の退避========================================================*/
 /*横書きの場合はright、縦書きのときはbottomにmarginを差し込む*/

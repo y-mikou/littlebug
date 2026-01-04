@@ -241,7 +241,7 @@ BEGIN {
 	line = gensub(/゛/, "<span class=\"ltlbg_dakuten\"></span>", "g", line); #スケベ濁音
 	line = gensub(/゜/, "<span class=\"ltlbg_handakuten\"></span>", "g", line); #キチガイ半濁音
 	line = gensub(/\[newpage\]/, "<div class=\"ltlbg_newpage\"></div><!--ltlbg_newpage-->", "g", line); # 改ページ
-	line = gensub(/---/, "<span class=\"ltlbg_hr\"></span>", "g", line); # 水平線
+	line = gensub(/---/, "<hr class=\"ltlbg_hr\">", "g", line); # 水平線
 	line = gensub(/／＼|〱/, "<span class=\"ltlbg_odori1\"></span><span class=\"ltlbg_odori2\"></span>", "g", line); #踊り字。
 	
 	###########################################################

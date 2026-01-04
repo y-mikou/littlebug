@@ -142,7 +142,7 @@ BEGIN {
     line = gensub(/<div class="ltlbg_newpage"><\/div><!--ltlbg_newpage-->/, "[newpage]", "g", line)
     
     # 水平線タグを元に戻す
-    line = gensub(/<span class="ltlbg_hr"><\/span>/, "---", "g", line)
+    line = gensub(/<hr class="ltlbg_hr">/, "---", "g", line)
     
     # 踊り字タグを元に戻す
     line = gensub(/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/, "／＼", "g", line)
