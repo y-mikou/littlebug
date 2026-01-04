@@ -1,59 +1,71 @@
-/* 縦書き様に読み込むCSS */
+:root{
+    --font-size: 12px;
+    --line-height: 1.75rem;
+}
 
 html {
     /* 組み方向 */
-    /* 縦 */ writing-mode: vertical-rl;
-    
-    orphans: 0;
-    widows: 0;
-    /* 方眼紙模様に必須のスタイル */
-    background-image: linear-gradient(0deg, transparent calc(100% - 1px), #f0f0f0 calc(100% - 1px)),
-                        linear-gradient(90deg, transparent calc(100% - 1px), #f0f0f0 calc(100% - 1px));
-    background-size: 1rem 1rem;
-    background-repeat: repeat;
-    background-position: center center;
-    
-    /* 以下任意のスタイル */
-    padding: 0rem;
+    writing-mode: vertical-rl;
+    column-count: 1;
+    orphans: 1;
+    widows: 1;
+    font-size: var(--font-size);
+    line-height: var(--line-height); /* 「1行分」のマージンには1.75remを指定する。pxでは21 */
 }
 
+/*章(section)関連========================================================*/
 /*章*/
 section.ltlbg_section{
-    margin-top: 0.3rem;
-    margin-right: 2.8rem;
-
+    /*章の区切りに差し込まれるスペース*/
+    margin-left: var(--line-height);
 }
+
 /*章名称*/
-h2.ltlbg_sectionName{
-    font-size: 1rem;
-    margin-left: 2rem;
-    margin-right: 2rem;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+h2.ltlbg_section_name{
+    display: block;
+    text-align: center;
+    font-size: 1rem; 
+    font-weight: bold;
+    page-break-before: always; 
+    /*章タイトルの後、文章が始まるまでのスペース*/
+    margin-left: var(--line-height);
 }
 
-/*段落*/
-p.ltlbg_p{
-    margin: 0;
-    break-inside: avoid-page;
-    break-after: avoid;
-    }
-p.ltlbg_p::before{
-    content: "　";
+/*中段落(div)関連========================================================*/
+/*中段落間マージン*/
+div.ltlng_bracket-group{
+    margin-left: var(--line-height);
+}
+div.ltlng_discript-group{
+    margin-left: var(--line-height);
 }
 
-<<<<<<<< HEAD:css/littlebugV.css
-/*擬似段落*/
-p.ltlbg_p_brctGrp{
-========
-/*擬似段落(div)*/
-div.ltlbg_div_brctGrp{
->>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
-    margin-right: 2rem;
-    margin-left: 2rem;
-    break-inside: avoid-page;
-    break-after: avoid;
+/*小段落(p)関連========================================================*/
+/*字下げ・括弧類をdataから付与*/
+p.ltlbg_bracket{
+    margin-left: 0rem;
+}
+[data-p_header] {
+    position: relative;
+}
+[data-p_header]::before {
+    content: attr(data-p_header);
+    left: -1rem;
+    right: 0;
+    bottom: 0;
+    white-space: nowrap;
+    text-indent: 0;
+}
+[data-p_footer] {
+    position: relative;
+}
+[data-p_footer]::after {
+    content: attr(data-p_footer);
+    left: 1rem;
+    right: 0;
+    bottom: 0;
+    white-space: nowrap;
+    text-indent: 0;
 }
 
 /*記号二連続...縦書きでは縦中横、横書きでは幅1文字化*/
@@ -76,11 +88,15 @@ span.ltlbg_dakuten{
 span.ltlbg_dakuten::after {
     display: inline-block;
     content: "゛";
-    transform: translate(1rem,-1rem);
-
-    /*デフォルトのフォントを使用する場合、
-      VivliosyleViewerでは以下の値になる
-    transform: translate(0.3rem,-1.6rem);*/
+    transform: translate(0rem,calc( var(--line-height) * -1));
+}
+/*キチガイ半濁音*/
+/*フォントによって位置がずれる。ユーザ側で調整してください*/
+span.ltlbg_handakuten::after {
+    display: inline-block;
+    content: "゜";
+    transform: translate(0rem,calc( var(--line-height) * -1));
+    letter-spacing: -1rem;
 }
 
 
@@ -92,10 +108,12 @@ span.ltlbg_wSize{
     margin-bottom: 1rem;
 }
 
-/*踊り字*/
+/*踊り字
+  フォントによって位置がずれる。ユーザ側で調整してください。*/
 span.ltlbg_odori1::after{
     display: inline-block;
     content: "〳";
+    letter-spacing: -0.1rem;
 }
 span.ltlbg_odori2::before{
     display: inline-block;
@@ -136,194 +154,81 @@ span.ltlbg_colon{
     line-height: 1rem;
 }
 
-/*会話「」をぶら下げインデントにする。*/
-<<<<<<<< HEAD:css/littlebugV.css
-span.ltlbg_talk{
-    break-inside: avoid-page;
-    break-after: avoid;
-}
-span.ltlbg_talk::before{
-========
-p.ltlbg_talk{
-    break-inside: avoid-page;
-    break-after: avoid;
-}
-p.ltlbg_talk::before{
->>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
-    content: "「";
-}
-p.ltlbg_talk::after{
-    content: "」";
-}
-/*会話『』をぶら下げインデントにする。*/
-<<<<<<<< HEAD:css/littlebugV.css
-span.ltlbg_talk2{
-    break-inside: avoid-page;
-    break-after: avoid;
-}
-span.ltlbg_talk2::before{
-========
-p.ltlbg_talk2{
-    break-inside: avoid-page;
-    break-after: avoid;
-}
-p.ltlbg_talk2::before{
->>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
-    content: "『";
-}
-p.ltlbg_talk2::after{
-    content: "』";
-}
-/*思考（）をぶら下げインデントにする。*/
-<<<<<<<< HEAD:css/littlebugV.css
-span.ltlbg_think{
-    break-inside: avoid-page;
-    break-after: avoid;
-}
-span.ltlbg_think::before{
-========
-p.ltlbg_think{
-    break-inside: avoid-page;
-    break-after: avoid;
-}
-p.ltlbg_think::before{
->>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
-    content: "（";
-}
-p.ltlbg_think::after{
-    content: "）";
-} 
-/*強調〝〟をぶら下げインデントにする。*/
-<<<<<<<< HEAD:css/littlebugV.css
-span.ltlbg_wquote{
-    break-inside: avoid-page;
-    break-after: avoid;
-}
-span.ltlbg_wquote::before{
-========
-p.ltlbg_wquote{
-    break-inside: avoid-page;
-    break-after: avoid;
-}
-p.ltlbg_wquote::before{
->>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
-    content: "〝";
-    margin-top: -1rem;
-}
-p.ltlbg_wquote::after{
-    content: "〟";
-}
-/*会話―をぶら下げインデントにする。*/
-<<<<<<<< HEAD:css/littlebugV.css
-span.ltlbg_dash{
-    break-inside: avoid-page;
-    break-after: avoid;
-}
-span.ltlbg_dash::before{
-========
-p.ltlbg_dash{
-    break-inside: avoid-page;
-    break-after: avoid;
-}
-p.ltlbg_dash::before{
->>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
-    content: "―";
-    transform: scale(1, 2) translate(0rem, -0.3rem);
-    margin-top: -1rem;
-}
-/*引用記号＞をぶら下げインデントにする。*/
-<<<<<<<< HEAD:css/littlebugV.css
-span.ltlbg_citation{
-    break-inside: avoid-page;
-    break-after: avoid;
-}
-span.ltlbg_citation::before{
-========
-p.ltlbg_citation{
-    break-inside: avoid-page;
-    break-after: avoid;
-}
-p.ltlbg_citation::before{
->>>>>>>> c42a8a122b3e8c07e63fa9eaccb13d5d8d9cc7ad:CSS/littlebugV.css
-    content: "＞";
-    margin-top: -1rem;
-}
-
-/*特殊ルビ_ルビが長い*/
-[data-ruby_long] {
+/*ルビ・傍点関連========================================================*/
+/*ルビ・傍点関連========================================================*/
+/*ルビは基本的に全てグループルビである。
+  変換スクリプト側で、母字数とルビ字数の関係からルビのクラスを分けて設定している。
+  以下のスタイルは、そのクラスごとに作成する。
+  デフォルトでは以下の4つ。
+  ltlbg_ruby-mono……母字1文字にルビ1文字の場合
+  ltlbg_ruby-same……母字1文字あたりルビ2文字の場合
+  ltlbg_ruby-long……母字1文字あたりルビ2文字超過になる場合
+  ltlbg_ruby-short……母字1文字あたりルビ2文字未満になる場合
+  それぞれにdataを用意している。
+  フォントによって位置がずれる。ユーザ側で調整してください。
+  */
+[data-ltlbg_ruby-mono] {
     position: relative;
 }
-[data-ruby_long]::before {
-    content: attr(data-ruby_long);
+[data-ltlbg_ruby-mono]::before {
+    content: attr(data-ltlbg_ruby-mono);
     position: absolute;
+    left: 0;
+    right: 0;
     top: 0;
     bottom: 0;
-    left: 70%;
     white-space: nowrap;
     text-indent: 0;
+    transform-origin: left top;
+    letter-spacing: 1rem;
+    transform: scale(0.5, 0.5);
+}
 
+[data-ltlbg_ruby-same] {
+    position: relative;
+}
+[data-ltlbg_ruby-same]::before {
+    content: attr(data-ltlbg_ruby-same);
+    position: absolute;
+    left: 0;
+    right: -2.5rem;
+    top: 0;
+    bottom: 0;
+    white-space: nowrap;
+    text-indent: 0;
     transform-origin: left top;
     transform: scale(0.5, 0.5);
-
 }
 
-/*特殊ルビ_ルビが少し短い*/
-[data-ruby_center] {
+[data-ltlbg_ruby-short] {
     position: relative;
 }
-[data-ruby_center]::before {
-    content: attr(data-ruby_center);
+[data-ltlbg_ruby-short]::before {
+    content: attr(data-ltlbg_ruby-short);
     position: absolute;
+    left: 0;
+    right: 0;
     top: 0;
     bottom: 0;
-    left: 70%;
     white-space: nowrap;
     text-indent: 0;
-
-    display: flex;
-    justify-content: center;
-    transform-origin: left center;
+    transform-origin: left top;
     transform: scale(0.5, 0.5);
 }
 
-/*特殊ルビ_ルビが短い*/
-[data-ruby_short] {
+[data-ltlbg_ruby-long] {
     position: relative;
 }
-[data-ruby_short]::before {
-    content: attr(data-ruby_short);
+[data-ltlbg_ruby-long]::before {
+    content: attr(data-ltlbg_ruby-long);
     position: absolute;
+    left: 0;
+    right: -2.5rem;
     top: 0;
     bottom: 0;
-    left: 80%;
     white-space: nowrap;
     text-indent: 0;
-
-    display: flex;
-    justify-content: center;
-    transform-origin: left center;
-    transform: scale(0.6, 0.6);
-
-    margin-top: 0.4rem;
-    letter-spacing: 0.5rem;
-}
-
-/*特殊傍点*/
-[data-emphasis] {
-    position: relative;
-}
-[data-emphasis]::before {
-    content: attr(data-emphasis);
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 70%;
-    white-space: nowrap;
-    text-indent: 0;
-
-    display: flex;
-    justify-content: center;
-    transform-origin: left center;
+    transform-origin: left top;
     transform: scale(0.5, 0.5);
 }
 
@@ -331,13 +236,13 @@ p.ltlbg_citation::before{
   偏と旁の比率はユーザ側でいじってください。
   複数必要な場合は増やしてください。*/
 span.ltlbg_forceGouji1{
-    transform-origin: center right;
-    transform: scale(0.4,1 )  translate(-2rem,0);
+    transform-origin: center left;
+    transform: scale(0.5,1 )  translate(0.2rem,0);
     display: inline-block;    
 }
 span.ltlbg_forceGouji2{
-    transform-origin: center left;
-    transform: scale(0.6,1 ) translate(1rem,-1rem);
+    transform-origin: center center;
+    transform: scale(0.8,1 ) translate(0.2rem,-1rem);
     display: inline-block;
     margin-bottom: -1rem;
 }

@@ -6,8 +6,10 @@
 html {
     /* 組み方向 */
     /* 横 */ writing-mode: horizontal-tb;
+    
     column-count: 1;
     orphans: 1;
+    widows: 1;
     font-size: var(--font-size);
     line-height: var(--line-height); /* 「1行分」のマージンには1.75remを指定する。pxでは21 */
 }
