@@ -8,7 +8,6 @@ export lang=ja_jp.utf-8
 		#今は中間ファイルなどを使用していないため特に掃除はない
 	}
 	trap cleanup_tmpdir INT
-	trap cleanup_tmpdir EXIT
 }
 
 : ”初期チェック” && {
@@ -18,15 +17,21 @@ export lang=ja_jp.utf-8
 			return 1
 	fi
 
-	declare tgtFile="$(basename "${1}")"   #引数で指定されたファイルを対象とする
+	declare tgtFile="${1}"   #引数で指定されたファイルを対象とする
+	declare tgtFileName="$(basename "${tgtFile}")"   #引数で指定されたファイルを対象とする
 	if [[ "${tgtFile/ /}" = '' ]];then
 		echo "💩変換元ファイルを指定してください"
 		exit 1
 	fi
 
 	if [[ ! -e "${tgtFile}" ]]; then
-		echo "💩 ${tgtFile}なんてファイルいないです"
+		echo "💩 ${tgtFileName}なんてファイルいないです"
 		exit 1
+	fi
+
+	if [[ $(file "${tgtFile}") =~ 'with CRLF' ]] ; then
+		echo "💩 引数1に指定された${tgtFileName}は改行コードがCRLFです。LFに置換します。"
+		sed -i 's/\r//' "${tgtFile}"
 	fi
 
 	convMode="${2}"  #'-t2h'でtxt→html、'-h2t'でhtml→txt、それ以外は今の所はエラー
@@ -299,7 +304,7 @@ if [[ "${convMode}" = '' ]]; then
 				line = gensub(/゛/, "<span class=\"ltlbg_dakuten\"></span>", "g", line); #スケベ濁音
 				line = gensub(/゜/, "<span class=\"ltlbg_handakuten\"></span>", "g", line); #キチガイ半濁音
 				line = gensub(/\[newpage\]/, "<div class=\"ltlbg_newpage\"></div><!--ltlbg_newpage-->", "g", line); # 改ページ
-				line = gensub(/---/, "<span class=\"ltlbg_hr\"></span>", "g", line); # 水平線
+				line = gensub(/---/, "<hr class=\"ltlbg_hr\">", "g", line); # 水平線
 				line = gensub(/／＼|〱/, "<span class=\"ltlbg_odori1\"></span><span class=\"ltlbg_odori2\"></span>", "g", line); #踊り字。
 				
 				###########################################################
@@ -355,7 +360,8 @@ if [[ "${convMode}" = '' ]]; then
 				#vvvv google fonts vvvvvvv
 				header = header "    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">" ORS
 				header = header "    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>" ORS
-				header = header "    <link href=\"https://fonts.googleapis.com/css2?family=BIZ+UDMincho&display=swap\" rel=\"stylesheet\">" ORS
+				header = header "    <link href=\"https://fonts.googleapis.com/css2?family=BIZ+UDGothic&family=BIZ+UDMincho&family=Noto+Serif+JP&display=swap\" rel=\"stylesheet\">" ORS
+
 				#^^^^^ google fonts ^^^^^^
 
 				header = header "  </head>" ORS
@@ -695,7 +701,7 @@ elif [[ "${convMode}" = '-t' ]]; then
 			    line = gensub(/<div class="ltlbg_newpage"><\/div><!--ltlbg_newpage-->/, "[newpage]", "g", line)
 				
 				# 水平線タグを元に戻す
-				line = gensub(/<span class="ltlbg_hr"><\/span>/, "---", "g", line)
+				line = gensub(/<hr class="ltlbg_hr">/, "---", "g", line)
 				
 				# 踊り字タグを元に戻す
 				line = gensub(/<span class="ltlbg_odori1"><\/span><span class="ltlbg_odori2"><\/span>/, "／＼", "g", line)

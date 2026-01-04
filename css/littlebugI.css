@@ -1,8 +1,11 @@
 /* 作品個別のスタイルを記述するためのCSS。必要に応じて改名すること */
 
 html{
-    font-family: "BIZ UDMincho", serif;
+  font-family: "BIZ UDMincho", serif;
+  font-weight: 400;
+  font-style: normal;
 }
+
 
 @page :left{
     @left-middle {
