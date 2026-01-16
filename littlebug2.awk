@@ -75,17 +75,17 @@ BEGIN {
 	output_buffer = ""   # 出力バッファ
 }
 
-###パターンごとに処理を記述###
-# 空行は出力しない
+##パターンごとに処理を記述###
+#空行は出力しない
 /^[ 　]*$/ { next; }
 
 # 行末、閉じ括弧直前のゴミスペースを掃除
-/[ 　]$/        {$0 = gensub(/[ 　]$/, "", "g", $0)}
-/[ 　]([」』）〟])/ {$0 = gensub(/[ 　]([」』）〟])/, "\\1", "g", $0)}
+/[ 　]$/        { $0 = gensub(/[ 　]$/, "", "g", $0)}
+/[ 　]([」』）〟])/ { $0 = gensub(/[ 　]([」』）〟])/, "\\1", "g", $0)}
 
 # 特殊な記号を一時置換
-/　/          { $0 = gensub("　", "〼", "g", $0) }
-/ /           { $0 = gensub(" ", "〿", "g", $0) }
+"　"          { $0 = gensub("　", "〼", "g", $0) }
+" "           { $0 = gensub(" ", "〿", "g", $0) }
 /&#047;|\//   { $0 = gensub("＆＃０４７", "&#047;", "g", $0) }
 /&#092;|\\/   { $0 = gensub("＆＃０９２", "&#092;", "g", $0) }
 /&gt;|>/      { $0 = gensub("＆ｇｔ", "&gt;", "g", $0) }
@@ -143,24 +143,27 @@ BEGIN {
 		if ($0 ~ /^§§/) {
 			section_class = "ltlbg_section_sukebe"
 			# ❤を除去
-			sub(/§§/, "§", line)
+			sub(/§§/, "§", $0)
 		}
 
 		output_buffer = output_buffer "<section class=\"" section_class "\">" ORS
 		state_section = "section"
 
 		# §の行自体にもルビなどの置換を適用したい場合はここに記述
-		line = apply_ruby_classes(line)
-		line = apply_emphasis_dots(line)
+		$0 = apply_ruby_classes($0)
+		$0 = apply_emphasis_dots($0)
 		
-		line = gensub(/(§+.*)/, "  <h2 class=\"ltlbg_section_name\">\\1</h2>", "g", line);
+		$0 = gensub(/(§+.*)/, "  <h2 class=\"ltlbg_section_name\">\\1</h2>", "g", $0);
 
-		line = gensub(/〿/, "<span class=\"ltlbg_sSp\"></span>", "g", line);
-		line = gensub(/〼/, "　", "g", line);
+		$0 = gensub(/〿/, "<span class=\"ltlbg_sSp\"></span>", "g", $0);
+		$0 = gensub(/〼/, "　", "g", $0);
 
-		output_buffer = output_buffer line ORS
+		output_buffer = output_buffer $0 ORS
 		next
 	}
+}
+
+/^[「『（]/ {
 	# div(中段落)  ################################################################
 	# 当形式では「地の文の塊」と「セリフの塊」を分けて管理し、その塊を意味段落の一種としてdivで括る。
 	# 地の文の塊……discript-groupクラス
@@ -201,14 +204,14 @@ BEGIN {
 /^([「『（])([^」』）]+)([」』）])$/ { $0 = gensub(/^([「『（])([^」』）]+)([」』）])$/, "    <p class=\"ltlbg_bracket\" data-p_header=\"\\1\" data-p_footer=\"\\3\">\\2</p><!--bracket-->", "g", $0) } #括弧両方がある行
 /^([「『（])([^」』）]+)$/        { $0 = gensub(/^([「『（])([^」』）]+)$/, "    <p class=\"ltlbg_bracket\" data-p_header=\"\\1\" data-p_footer=\"\">\\2</p><!--bracket-->", "g", $0) } #開括弧のみの行
 /^([^「『（]+)([」』）])$/       { $0 = gensub(/^([^「『（]+)([」』）])$/, "    <p class=\"ltlbg_bracket\" data-p_footer=\"\\2\">\\1</p><!--bracket-->", "g", $0) } #閉じ括弧のみの行
-/^〼(.+)$/                  { $0 = gensub(/^〼(.+)$/, "    <p class=\"ltlbg_desciption\" data-p_header=\"〼\">\\1</p><!--descript-->", "g", $0) } #地の文(括弧類グループの内部含む)
+/^〼/                  { $0 = gensub(/^〼(.+)$/, "    <p class=\"ltlbg_desciption\" data-p_header=\"〼\">\\1</p><!--descript-->", "g", $0) } #地の文(括弧類グループの内部含む)
 
 
 #############################################################################
 ## 通常の変換
 #############################################################################
 ### タグで括るタイプの修飾 ###
-/[^\"]〼[^\"]/                 { $0 = gensub("([^\"])〼([^\"])", "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", $0) } # 全角スペース
+/[^"]〼[^"]/                 { $0 = gensub("([^\"])〼([^\"])", "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", $0) } # 全角スペース
 /―/                           { $0 = gensub(/―/, "<span class=\"ltlbg_wSize\">―</span>", "g", $0) } #全角ダッシュは常にワイドタグを適用
 /\[-([^\-\[]+)-\]/             { $0 = gensub(/\[-([^\-\[]+)-\]/, "<span class=\"ltlbg_wdfix\">\\1</span>", "g", $0) } #強制1文字幅タグ
 /\*\*([^\*]+)\*\*/             { $0 = gensub(/\*\*([^\*]+)\*\*/, "<span class=\"ltlbg_bold\">\\1</span>", "g", $0) } #太字
@@ -236,9 +239,7 @@ BEGIN {
 #############################################################################
 ## 特殊文字の復旧
 
-
 {
-	line = $0
 	# タグに置換するタイプの変換
 	# タグを挿入するだけで、改ページの実装はスタイルによる
 	# line = gensub(/゛/, "<span class=\"ltlbg_dakuten\"></span>", "g", line); #スケベ濁音
@@ -257,27 +258,27 @@ BEGIN {
 	#############################################################################
 	## 行末処理
 	#############################################################################
-	## 特殊文字の復旧
-	line = gensub(/＆ａｍｐ/, "\\&amp;", "g", line);
-	line = gensub(/＆ｌｔ/, "\\&lt;", "g", line);
-	line = gensub(/＆ｇｔ/, "\\&gt;", "g", line);
-	line = gensub(/＆＃３９/, "\\&#39;", "g", line);
-	line = gensub(/＆ｑｕｏｔ/, "\\&quot;", "g", line);
-	line = gensub(/＆＃０４７/, "\\&#047;", "g", line);
-	line = gensub(/＆＃０９２/, "\\&#092;", "g", line);
+	# 特殊文字の復旧
+	$0 = gensub(/＆ａｍｐ/, "\\&amp;", "g", $0);
+	$0 = gensub(/＆ｌｔ/, "\\&lt;", "g", $0);
+	$0 = gensub(/＆ｇｔ/, "\\&gt;", "g", $0);
+	$0 = gensub(/＆＃３９/, "\\&#39;", "g", $0);
+	$0 = gensub(/＆ｑｕｏｔ/, "\\&quot;", "g", $0);
+	$0 = gensub(/＆＃０４７/, "\\&#047;", "g", $0);
+	$0 = gensub(/＆＃０９２/, "\\&#092;", "g", $0);
 
 	#必要があってスペースを使用する必要がある場合に代わりに使用していた以下の特殊文字を元に戻す
-	line = gensub(/〿/, "<span class=\"ltlbg_sSp\"></span>", "g", line);
-	line = gensub(/〼/, "　", "g", line);
+	$0 = gensub(/〿/, "<span class=\"ltlbg_sSp\"></span>", "g", $0);
+	$0 = gensub(/〼/, "　", "g", $0);
 
 	# 行末 が」 かどうか（終了判定）
 	# 行末が」であれば、現在継続中のクオート状態を解除する。
 	if ($0 ~ /[」』）]$/) { in_quote = 0 }
 
-	# 行の出力（メモリに溜め込む）
-	output_buffer = output_buffer line ORS
-
 }
+
+# 行の出力（メモリに溜め込む）
+{ output_buffer = output_buffer $0 ORS }
 
 END {
 	#一度もpタグが登場していない場合、閉じる必要がない(ほぼあり得ないが)
