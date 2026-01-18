@@ -1,6 +1,7 @@
 :root{
     --font-size: 12px;
     --line-height: 1.75rem;
+    --header-indent: -2rem;
 }
 
 html {
@@ -13,6 +14,9 @@ html {
     font-size: var(--font-size);
     line-height: var(--line-height); /* 「1行分」のマージンには1.75remを指定する。pxでは21 */
 }
+body {
+    margin: 10% ;
+}
 /*章(section)関連========================================================*/
 /*章*/
 section.ltlbg_section{
@@ -22,12 +26,12 @@ section.ltlbg_section{
 /*章名称*/
 h2.ltlbg_section_name{
     display: block;
-    text-align: center;
     font-size: 1rem; 
     font-weight: bold;
     page-break-before: always; 
     /*章タイトルの後、文章が始まるまでのスペース*/
     margin-bottom: var(--line-height);
+    margin-left: var(--header-indent);
 }
 
 

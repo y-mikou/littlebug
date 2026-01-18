@@ -177,8 +177,11 @@ if [[ "${convMode}" = '' ]]; then
 				#不要な一文字幅化を除去(指定がなくても変換される/指定があると変換が二重に行われる)
 				line = gensub(/\[-(!!|!\?|\?!|\?\?)-\]/, "\\1", "g", line);
 
-				#記号種類の統一
-				line = gensub(/[♡♥]/, "❤", "g", line);
+				# 記号種類の統一
+				## UTF-8合字は置換元に設定するとawkではうまく機能しないため、合字以外の文字に置換して文字分離を回避するする。
+				## 置換先として設定する分には機能するため、後続の行末処理で置換先として復帰させる。
+				## ※環境のLC_ALLがUTF-8になっていれば問題は誘発されない
+				line = gensub(/[❤️♡♥❤]/, "♥", "g", line); #後で❤️に復帰する対象
 				line = gensub(/☆/, "★", "g", line);
 				line = gensub(/□/, "■", "g", line);
 				line = gensub(/[♫♬]/, "♪", "g", line);
@@ -187,17 +190,17 @@ if [[ "${convMode}" = '' ]]; then
 				line = gensub(/！？/, "!?", "g", line);
 				line = gensub(/？！/, "?!", "g", line);
 				line = gensub(/？？/, "??", "g", line);
-				line = gensub(/^(§+)[〿〼]/, "\\1", "g", line);
+				line = gensub(/^(§+)[〿〼]+/, "\\1〼", "g", line);
 				
 				# 連続する感嘆符・疑問符・記号類の後に全角スペースを挿入し、
 				# それを<span class="ltlbg_wSp"></span>に置換
-				# 対象 ！!?？❤💞💕♪☆★💢
-				line = gensub(/([!\?！？❤💞💕♪☆★💢])〼*([^〼」』）!\?！？❤💞💕♪☆★💢、。])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
+				# 対象 ！!?？♥💞💕♪☆★💢
+				line = gensub(/([!\?！？♥💞💕♪☆★💢])〼*([^」』）!\?！？♥💞💕♪☆★💢、。゛゜])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
 
-				#上記特殊記号(❤,★,■,♪,!!,!?,?!,??)を、<span class="ltlbg_wdfix"></span>タグで括る
-				line = gensub(/([❤★■♪])/, "<span class=\"ltlbg_wdfix_auto\">\\1</span>", "g", line);
+				#上記特殊記号(♥,★,■,♪,!!,!?,?!,??)を、<span class="ltlbg_wdfix"></span>タグで括る
+				line = gensub(/([♥★■♪])/, "<span class=\"ltlbg_wdfix_auto\">\\1</span>", "g", line);
 				line = gensub(/(!!|!\?|\?!|\?\?)/, "<span class=\"ltlbg_wsymbol\">\\1</span>", "g", line);
-				
+
 				#############################################################################
 				## 段落系処理
 				#############################################################################
@@ -334,6 +337,10 @@ if [[ "${convMode}" = '' ]]; then
 				# 行末が」であれば、現在継続中のクオート状態を解除する。
 				if ($0 ~ /[」』）]$/) { in_quote = 0 }
 
+				# UTF-8合字の復帰(UTF-8合字の判定煩雑化回避のため)
+				## 前段で文字分離を回避したUTF-8合字を復旧する
+				line = gensub("♥", "❤️", "g", line);
+
 				# 行の出力（メモリに溜め込む）
 				output_buffer = output_buffer line ORS
 
@@ -352,16 +359,15 @@ if [[ "${convMode}" = '' ]]; then
 				##########################################################################################
 				header =        "<html>" ORS
 				header = header "  <head>" ORS
-				header = header "    <link rel=\"stylesheet\" href=\"./css/littlebugI.css\">" ORS
-				header = header "    <!--<link rel=\"stylesheet\" href=\"./css/littlebugV.css\">-->" ORS
-				header = header "    <link rel=\"stylesheet\" href=\"./css/littlebugH.css\">" ORS
-				header = header "    <link rel=\"stylesheet\" href=\"./css/littlebugU.css\">" ORS
+				header = header "    <link rel=\"stylesheet\" href=\"../css/littlebugI.css\">" ORS
+				header = header "    <!--<link rel=\"stylesheet\" href=\"../css/littlebugV.css\">-->" ORS
+				header = header "    <link rel=\"stylesheet\" href=\"../css/littlebugH.css\">" ORS
+				header = header "    <link rel=\"stylesheet\" href=\"../css/littlebugU.css\">" ORS
 
 				#vvvv google fonts vvvvvvv
 				header = header "    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">" ORS
 				header = header "    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>" ORS
-				header = header "    <link href=\"https://fonts.googleapis.com/css2?family=BIZ+UDGothic&family=BIZ+UDMincho&family=Noto+Serif+JP&display=swap\" rel=\"stylesheet\">" ORS
-
+				header = header "    <link href=\"https://fonts.googleapis.com/css2?family=BIZ+UDMincho&display=swap\" rel=\"stylesheet\">" ORS
 				#^^^^^ google fonts ^^^^^^
 
 				header = header "  </head>" ORS
@@ -375,7 +381,7 @@ if [[ "${convMode}" = '' ]]; then
 				footer = footer "</html>" ORS
 
 				# メモリに溜め込んだ全ての出力を一度に出力
-				printf "%s", header output_buffer footer
+				print header output_buffer footer
 			}
 			AWK_EOF
 		}
@@ -440,9 +446,9 @@ if [[ "${convMode}" = '' ]]; then
 				cat "${destFile}"
 				echo '🤔 ↑で縦中横の一部にだけ太字が指定されています。この変換は非対応です。変換結果は保証されません。' 
 			fi
-			# 4文字以上の縦中横()
+			# 4文字以上の縦中横
 			# ただし、縦中横全体への太字と傍点はは許容するため、《》*もこれらに含めない。
-			grep -E -o -n '\^(\*\*)*[^\*《》]{4,}(\*\*)*\^' "${tgtFile}" > "${destFile}"
+			grep -E -o -n '\^(\*\*)*[^《》\^]{4,}(\*\*)*\^' "${tgtFile}" > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑で4桁以上の縦中横が指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
@@ -467,7 +473,7 @@ if [[ "${convMode}" = '' ]]; then
 				echo '🤔 ↑で強制合字には2文字だけを指定してください。この変換は非対応です。変換は実施しますが結果は保証されません。' 
 			fi
 			# アへ濁点に回転指定
-			grep -E -o -n '\[\^.゛\^\]' "${tgtFile}" > "${destFile}"
+			grep -E -o -n '\[\^.゛゜\^\]|\[\^.゜\^\]' "${tgtFile}" > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑で強制濁点に回転が指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
@@ -494,7 +500,7 @@ if [[ "${convMode}" = '' ]]; then
 			fi
 			#組版時に置換される記号類
 			##表記ゆれする可能性がある記号の統一
-			grep -E -o -n '[♡♥☆□♫♬]' "${tgtFile}" | sort | uniq > "${destFile}"
+			grep -E -o -n '[❤️♡❤☆□♫♬]' "${tgtFile}" | sort | uniq > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑に含まれる記号は変換後、別の記号に置換されます。（元ファイルは修正しません）'
@@ -527,7 +533,7 @@ if [[ "${convMode}" = '' ]]; then
 				echo '🤔 ↑に含まれる空行は、元ファイルの記述に関わらず、変換規則に則って削除あるいは追加されます(元のファイルは修正しません)'
 			fi
 			# 記号類の直後のスペースがない
-			grep -E -o -n '[!\?！？❤💞💕♪☆★💢][^　」』）!\?！？❤💞💕♪☆★💢]' "${tgtFile}" | sort | uniq > "${destFile}"
+			grep -E -o -n '[!\?！？❤️♡♥❤💞💕♪☆★💢][^　」』）!\?！？❤️♡♥❤💞💕♪☆★💢、。゛゜]' "${tgtFile}" | sort | uniq > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑記号類の直後に、それが連続するか行末・括弧内末尾でない限り、スペースを挿入します(元のファイルは修正しません)'
