@@ -33,38 +33,42 @@ hr.ltlbg_hr{
 }
 
 */
-    @page {
-        size:105mm 152mm ;
-        padding-top: 3mm;/*サイズを誤ったので無理矢理修正*/
-        bleed: 3mm;
-        /*marks: crop cross;*/
-        @bottom-center {
-            content: "- " counter(page) " -";
-        }
-    }
-    @page :left{
-        margin-right: 4rem;
-        margin-left: 4rem;
-    }
-    @page :right{
-        margin-left: 5rem;
-        margin-right: 3rem;
-    }
-
 
 /*変なページ制御をしない*/
 *{
     break-inside: auto;
+    margin: 0;
     padding: 0;
-    margin-top: 0;
-    margin-bottom: 0;
     margin-left: 0;
     margin-right: 0;
     box-sizing: border-box;
     line-break: anywhere;
     word-break: break-all;
     overflow-wrap: anywhere;
-    font-feature-settings: "halt" 1;
+    text-spacing-trim: space-all;
+}
+
+@page {
+    
+    /*本のサイズ*/
+    bleed: 3mm; 
+    size: A6;
+
+    /*フッターのレイアウトは全態で統一*/
+    @bottom-center {
+        font-family: 'BIZ UDMincho';
+        content: "- " counter(page) " -";
+    }
+}
+
+/*左右の配置*/
+@page :left{
+    margin-right: 6rem;
+    margin-left: 3rem;
+}
+@page :right{
+    margin-left: 6rem;
+    margin-right: 3rem;
 }
 
 /*改ページ*/
@@ -77,18 +81,15 @@ span.ltlbg_bold{
     font-weight:bold;
 }
 
-/*傍点 デフォルトはゴマなので、必要であれば変える*/
+/*傍点 デフォルトはゴマなので、必要であれば変える
+  基本的にlittlebugでは傍点はルビに変換されるため用いられない。
+  必要な場合にコメントインする
 span.ltlbg_emphasis{
     text-emphasis-style: filled sesame;
 }
+*/
 
 /*1文字幅*/
-span.ltlbg_wdfix_auto{
-    display: inline-block;
-    text-align: center;
-    width: 1rem;
-    height: 1rem;
-}
 span.ltlbg_wdfix{
     display: inline-block;
     text-align: center;

@@ -1,21 +1,23 @@
 :root{
-    --font-size: 12px;
-    --line-height: 1.75rem;
+    --font-size: 10px;
+    --line-height: 1.8rem;
     --header-indent: -2rem;
 }
-
 html {
     /* 組み方向 */
     /* 横 */ writing-mode: horizontal-tb;
-    
+
+    font-family: "BIZ UDMincho", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-feature-settings:space-all;
+
     column-count: 1;
     orphans: 1;
     widows: 1;
     font-size: var(--font-size);
-    line-height: var(--line-height); /* 「1行分」のマージンには1.75remを指定する。pxでは21 */
-}
-body {
-    margin: 10% ;
+    line-height: var(--line-height);
+
 }
 /*章(section)関連========================================================*/
 /*章*/
@@ -25,10 +27,14 @@ section.ltlbg_section{
 }
 /*章名称*/
 h2.ltlbg_section_name{
-    display: block;
+
     font-size: 1rem; 
-    font-weight: bold;
+
+    display: block;
+    text-align: center;
     page-break-before: always; 
+    margin-bottom: 5rem;
+        
     /*章タイトルの後、文章が始まるまでのスペース*/
     margin-bottom: var(--line-height);
     margin-left: var(--header-indent);
@@ -174,6 +180,25 @@ span.ltlbg_wSp{
     transform: scale(0.5, 0.5);
 }
 
+/*傍点用*/
+[data-ltlbg_ruby-emphasis] {
+    position: relative;
+}
+[data-ltlbg_ruby-emphasis]::before {
+    content: attr(data-ltlbg_ruby-emphasis);
+    position: absolute;
+    left: 0.25rem;
+    right: 0;
+    bottom: 80%;
+    white-space: nowrap;
+    text-indent: 0;
+    transform-origin: left bottom;
+    letter-spacing: 1rem;
+    transform: scale(0.5, 0.5);
+}
+
+
+
 [data-ltlbg_ruby-same] {
     position: relative;
 }
@@ -184,7 +209,7 @@ span.ltlbg_wSp{
     right: 0;
     bottom: 80%;
     white-space: nowrap;
-    text-indent: 0;
+    text-indent: 0rem;
     transform-origin: left bottom;
     transform: scale(0.5, 0.5);
 }
@@ -199,8 +224,8 @@ span.ltlbg_wSp{
     right: 0;
     bottom: 80%;
     white-space: nowrap;
-    text-indent: 0;
-    transform-origin: left bottom;
+    text-indent: 0.5rem;
+    transform-origin: center bottom;
     transform: scale(0.5, 0.5);
 }
 
@@ -214,7 +239,7 @@ span.ltlbg_wSp{
     right: 0;
     bottom: 80%;
     white-space: nowrap;
-    text-indent: 0;
+    text-indent: -0.5rem;
     transform-origin: left bottom;
     transform: scale(0.5, 0.5);
 }

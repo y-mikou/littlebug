@@ -51,13 +51,14 @@ function apply_emphasis_dots(text) {
 				new_text = new_text substr(text, 1, RSTART - 1)
 
 				parent_text = m[1]
-				
+				ruby = '﹅'
+				class = "ltlbg_ruby-emphasis"				
 				replacement = ""
 				
 				# 親文字を1文字ずつループ
 				for (i = 1; i <= length(parent_text); i++) {
 						char = substr(parent_text, i, 1)
-						replacement = replacement "<ruby class=\"emphasis\">" char "<rt>﹅</rt></ruby>"
+						replacement = "<ruby class=\"" class "\" data-" class "=\"" ruby "\">" parent_text "<rt>" ruby "</rt></ruby>"
 				}
 				
 				new_text = new_text replacement
