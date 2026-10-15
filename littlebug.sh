@@ -68,9 +68,10 @@ if [[ "${convMode}" = '' ]]; then
 			## gun awk プログラム
 			#########################################################
 
-			# ルビタグにクラスを付与して置換する関数
-			# gawk拡張のmatch()第三引数を使用
-			function apply_ruby_classes(text) {
+			# ルビタグにクラスを付与して置換する関数。
+			# rt の各文字を要素化しておくと、CSS 側で文字単位の均等配置ができる。
+			# gawk拡張のmatch()第三引数を使用。
+			function apply_ruby_classes(text,    new_text, parent, ruby, parent_count, ruby_count, class, ruby_chars, i, char, replacement) {
 					new_text = ""
 					# テキスト内にルビパターンがなくなるまでループ
 					while (match(text, /｜([^《]+)《([^》]+)》/, m)) {
@@ -79,22 +80,33 @@ if [[ "${convMode}" = '' ]]; then
 
 							parent = m[1]
 							ruby = m[2]
+							parent_count = length(parent)
+							ruby_count = length(ruby)
 
-							# クラスの決定
-							class = ""
-							if (length(parent) == length(ruby)) {
+							# 母字とルビの長さの関係を、CSS の配置規則に対応する4分類にする。
+							if (parent_count == ruby_count) {
 									class = "ltlbg_ruby-mono"
-							} else if (length(ruby) == 2 * length(parent)) {
+							} else if (ruby_count == 2 * parent_count) {
 									class = "ltlbg_ruby-same"
-							} else if (length(ruby) > 2 * length(parent)) {
+							} else if (ruby_count > 2 * parent_count) {
 									class = "ltlbg_ruby-long"
 							} else {
 									class = "ltlbg_ruby-short"
 							}
 
-							# 置換後のHTMLを生成
-							replacement = "<ruby class=\"" class "\" data-" class "=\"" ruby "\">" parent "<rt>" ruby "</rt></ruby>"
-							# 新しいテキストに置換部分を追加
+							# ルビを一文字ずつに分割する。短いルビ1文字だけはCSSで中央寄せにする。
+							ruby_chars = ""
+							for (i = 1; i <= ruby_count; i++) {
+									char = substr(ruby, i, 1)
+									ruby_chars = ruby_chars "<span class=\"ltlbg_ruby-char\">" char "</span>"
+							}
+							if (ruby_count == 1) {
+									class = class " ltlbg_ruby-single"
+							}
+
+							# Ruby組版エンジンがrtの幅を行幅へ含めないよう、母字とルビは明示的なspanに分ける。
+							# data属性には逆変換用の元のルビ文字列を保存する。
+							replacement = "<span class=\"ltlbg_ruby " class "\" data-ltlbg-ruby=\"" ruby "\"><span class=\"ltlbg_ruby-base\">" parent "</span><span class=\"ltlbg_ruby-text\">" ruby_chars "</span></span>"
 							new_text = new_text replacement
 
 							# 未処理のテキスト部分を更新
@@ -565,17 +577,31 @@ elif [[ "${convMode}" = '-t' ]]; then
 			read -r -d '' AWK_CODE <<- 'AWK_EOF'
 			#!/usr/bin/awk -f
 
-			# ルビタグを元の短縮タグに戻す関数
-			# <ruby class="ltlbg_ruby-*" data-*="ルビ">親文字<rt>ルビ</rt></ruby> → ｜親文字《ルビ》
-			function strip_ruby_tags(text) {
+			# ルビタグを元の短縮タグに戻す関数。
+			# 新形式は rt 内を文字ごとの span にしているため、data属性からルビを復元する。
+			# 旧形式（data-ltlbg_ruby-*）も同じ処理で受け付ける。
+			function strip_ruby_tags(text,    new_text, attrs, tail, ruby, parent, ruby_start, ruby_length, closing_tag) {
 				new_text = ""
-				# ルビタグパターンがなくなるまでループ
-				while (match(text, /<ruby class="ltlbg_ruby-[^"]*" data-ltlbg_ruby-[^"]*="([^"]+)">([^<]+)<rt>[^<]+<\/rt><\/ruby>/, m)) {
-					new_text = new_text substr(text, 1, RSTART - 1)
-					ruby = m[1]
-					parent = m[2]
+				while (match(text, /<(ruby|span) class="([^"]*ltlbg_ruby[^"]*)" ([^>]*)>(<span class="ltlbg_ruby-base">([^<]+)<\/span><span class="ltlbg_ruby-text">|([^<]+)<rt>)/, m)) {
+					ruby_start = RSTART
+					ruby_length = RLENGTH
+					attrs = m[3]
+					if (!match(attrs, /data-ltlbg[_-]ruby(-[^=]*)?="([^"]+)"/, a)) {
+						# 想定外のrubyは変換せず、検索位置だけ進める。
+						new_text = new_text substr(text, 1, ruby_start + ruby_length - 1)
+						text = substr(text, ruby_start + ruby_length)
+						continue
+					}
+					tail = substr(text, ruby_start + ruby_length)
+					closing_tag = (m[5] != "" ? "</span></span></" m[1] ">" : "</rt></ruby>")
+					if (!match(tail, closing_tag)) {
+						break
+					}
+					new_text = new_text substr(text, 1, ruby_start - 1)
+					ruby = a[2]
+					parent = (m[5] != "" ? m[5] : m[6])
 					new_text = new_text "｜" parent "《" ruby "》"
-					text = substr(text, RSTART + RLENGTH)
+					text = substr(tail, RSTART + RLENGTH)
 				}
 				new_text = new_text text
 				return new_text

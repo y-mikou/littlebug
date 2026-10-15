@@ -122,7 +122,7 @@
 
 | 効果 | マークアップ | HTMLタグ / class | 説明 |
 | :--- | :--- | :--- | :--- |
-| **ルビ** | `｜親文字《ルビ》` | `<ruby class="ltlbg_ruby-mono, -same, -long, -short">` | 親文字とルビの文字数でクラスが変動。 |
+| **ルビ** | `｜親文字《ルビ》` | `<span class="ltlbg_ruby ltlbg_ruby-mono, -same, -long, -short">` | 親文字とルビの文字数でクラスが変動。母字とルビは個別の`span`にし、ルビ文字はさらに1字ずつ`span.ltlbg_ruby-char`に分割される。 |
 | **圏点(傍点)** | `《《文字》》` | `<ruby class="emphasis">` | 文字に圏点（`﹅`）を振る。 |
 | **太字** | `**文字**` | `<span class="ltlbg_bold">` | 太字で表示。 |
 | **縦中横** | `^文字^` | `<span class="ltlbg_tcy">` | 縦書き時に半角英数記号（3文字まで）を横向きに並べる。 |

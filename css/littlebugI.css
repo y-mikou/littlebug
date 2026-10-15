@@ -1,12 +1,5 @@
 /* 作品個別のスタイルを記述するためのCSS。必要に応じて改名すること */
 
-html{
-  font-family: "BIZ UDMincho", serif;
-  font-weight: 400;
-  font-style: normal;
-}
-
-
 @page :left{
     @left-middle {
         content: "";
@@ -16,7 +9,8 @@ html{
 }
 @page :right{
     @top-right {
-        content: "// 作品名だよ //";
+        font-family: 'BIZ UDMincho';
+        content: "// Toast of 423MHz //";
         writing-mode: horizontal-tb;
         transform: translate(-30px,0) rotate(0);
     }

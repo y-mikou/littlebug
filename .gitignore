@@ -1,1 +1,4 @@
 viewer/*
+.vscode/*
+node_modules/*
+package*
