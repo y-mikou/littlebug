@@ -5,9 +5,10 @@
 ## gun awk プログラム
 #########################################################
 
-# ルビタグにクラスを付与して置換する関数
-# gawk拡張のmatch()第三引数を使用
-function apply_ruby_classes(text) {
+# ルビタグにクラスを付与して置換する関数。
+# rt の各文字を要素化しておくと、CSS 側で文字単位の均等配置ができる。
+# gawk拡張のmatch()第三引数を使用。
+function apply_ruby_classes(text,    new_text, parent, ruby, parent_count, ruby_count, class, ruby_chars, i, char, replacement) {
 		new_text = ""
 		# テキスト内にルビパターンがなくなるまでループ
 		while (match(text, /｜([^《]+)《([^》]+)》/, m)) {
@@ -16,22 +17,33 @@ function apply_ruby_classes(text) {
 
 				parent = m[1]
 				ruby = m[2]
+				parent_count = length(parent)
+				ruby_count = length(ruby)
 
-				# クラスの決定
-				class = ""
-				if (length(parent) == length(ruby)) {
+				# 母字とルビの長さの関係を、CSS の配置規則に対応する4分類にする。
+				if (parent_count == ruby_count) {
 						class = "ltlbg_ruby-mono"
-				} else if (length(ruby) == 2 * length(parent)) {
+				} else if (ruby_count == 2 * parent_count) {
 						class = "ltlbg_ruby-same"
-				} else if (length(ruby) > 2 * length(parent)) {
+				} else if (ruby_count > 2 * parent_count) {
 						class = "ltlbg_ruby-long"
 				} else {
 						class = "ltlbg_ruby-short"
 				}
 
-				# 置換後のHTMLを生成
-				replacement = "<ruby class=\"" class "\" data-" class "=\"" ruby "\">" parent "<rt>" ruby "</rt></ruby>"
-				# 新しいテキストに置換部分を追加
+				# ルビを一文字ずつに分割する。短いルビ1文字だけはCSSで中央寄せにする。
+				ruby_chars = ""
+				for (i = 1; i <= ruby_count; i++) {
+						char = substr(ruby, i, 1)
+						ruby_chars = ruby_chars "<span class=\"ltlbg_ruby-char\">" char "</span>"
+				}
+				if (ruby_count == 1) {
+						class = class " ltlbg_ruby-single"
+				}
+
+				# Ruby組版エンジンがrtの幅を行幅へ含めないよう、母字とルビは明示的なspanに分ける。
+				# data属性には逆変換用の元のルビ文字列を保存する。
+				replacement = "<span class=\"ltlbg_ruby " class "\" data-ltlbg-ruby=\"" ruby "\"><span class=\"ltlbg_ruby-base\">" parent "</span><span class=\"ltlbg_ruby-text\">" ruby_chars "</span></span>"
 				new_text = new_text replacement
 
 				# 未処理のテキスト部分を更新
@@ -51,7 +63,7 @@ function apply_emphasis_dots(text) {
 				new_text = new_text substr(text, 1, RSTART - 1)
 
 				parent_text = m[1]
-				ruby = '﹅'
+				ruby = "﹅"
 				class = "ltlbg_ruby-emphasis"				
 				replacement = ""
 				

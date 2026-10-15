@@ -154,94 +154,68 @@ span.ltlbg_wSp{
 }
 
 /*ルビ・傍点関連========================================================*/
-/*ルビは基本的に全てグループルビである。
-  変換スクリプト側で、母字数とルビ字数の関係からルビのクラスを分けて設定している。
-  以下のスタイルは、そのクラスごとに作成する。
-  デフォルトでは以下の4つ。
-  ltlbg_ruby-mono……母字1文字にルビ1文字の場合
-  ltlbg_ruby-same……母字1文字あたりルビ2文字の場合
-  ltlbg_ruby-long……母字1文字あたりルビ2文字超過になる場合
-  ltlbg_ruby-short……母字1文字あたりルビ2文字未満になる場合
-  それぞれにdataを用意している。
-  */
-[data-ltlbg_ruby-mono] {
+/*
+  ルビは母字と同じ 1em のまま .ltlbg_ruby-text を2倍の領域に置き、0.5 倍に縮小する。
+  したがってルビ1字は母字のちょうど半分になる。
+
+  ltlbg_ruby-mono  : 母字数 = ルビ数。space-around で各母字の中央へ置く。
+  ltlbg_ruby-same  : ルビ数 = 母字数×2。隙間なしでちょうど母字幅に収める。
+  ltlbg_ruby-long  : ルビ数 > 母字数×2。母字列の中心を基準に前後へはみ出させる。
+  ltlbg_ruby-short : 上記以外。母字列の前後・字間の余白を等しく配置する。
+*/
+.ltlbg_ruby {
     position: relative;
+    display: inline-block;
+    white-space: nowrap;
 }
-[data-ltlbg_ruby-mono]::before {
-    content: attr(data-ltlbg_ruby-mono);
+/* 通常フローに残すのは母字だけ。ルビ文字列はレイアウト幅を持たない。 */
+.ltlbg_ruby > .ltlbg_ruby-base {
+    display: inline;
+}
+.ltlbg_ruby > .ltlbg_ruby-text {
     position: absolute;
-    left: 0.25rem;
-    right: 0;
+    display: flex;
+    width: 200%;
+    left: 0;
     bottom: 80%;
+    font-size: 1em;
+    line-height: 1;
     white-space: nowrap;
     text-indent: 0;
     transform-origin: left bottom;
-    letter-spacing: 1rem;
-    transform: scale(0.5, 0.5);
+    transform: scale(0.5);
+    pointer-events: none;
+}
+.ltlbg_ruby .ltlbg_ruby-char {
+    display: block;
+    flex: 0 0 auto;
 }
 
-/*傍点用*/
-[data-ltlbg_ruby-emphasis] {
-    position: relative;
+/* ① 各ルビ文字の中心を、それぞれの母字の中心にそろえる。 */
+.ltlbg_ruby-mono > .ltlbg_ruby-text {
+    justify-content: space-around;
 }
-[data-ltlbg_ruby-emphasis]::before {
-    content: attr(data-ltlbg_ruby-emphasis);
-    position: absolute;
-    left: 0.25rem;
-    right: 0;
-    bottom: 80%;
-    white-space: nowrap;
-    text-indent: 0;
-    transform-origin: left bottom;
-    letter-spacing: 1rem;
-    transform: scale(0.5, 0.5);
+/* ② 2字ずつを母字幅に収める（余白は発生しない）。 */
+.ltlbg_ruby-same > .ltlbg_ruby-text {
+    justify-content: space-between;
 }
-
-
-
-[data-ltlbg_ruby-same] {
-    position: relative;
+/* ③ ルビ文字列の中心を母字列の中心に合わせ、余剰分を前後へ均等に出す。 */
+.ltlbg_ruby-long > .ltlbg_ruby-text {
+    width: max-content;
+    left: 50%;
+    right: auto;
+    margin-left: 0;
+    padding-left: 0;
+    justify-content: flex-start;
+    transform: scale(0.5) translateX(-50%);
 }
-[data-ltlbg_ruby-same]::before {
-    content: attr(data-ltlbg_ruby-same);
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 80%;
-    white-space: nowrap;
-    text-indent: 0rem;
-    transform-origin: left bottom;
-    transform: scale(0.5, 0.5);
+/* ④ 前後と字間の余白を同じにして、母字列全体の幅へ均等に配置する。 */
+.ltlbg_ruby-short > .ltlbg_ruby-text {
+    justify-content: space-evenly;
 }
-
-[data-ltlbg_ruby-short] {
-    position: relative;
-}
-[data-ltlbg_ruby-short]::before {
-    content: attr(data-ltlbg_ruby-short);
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 80%;
-    white-space: nowrap;
-    text-indent: 0.5rem;
-    transform-origin: center bottom;
-    transform: scale(0.5, 0.5);
-}
-
-[data-ltlbg_ruby-long] {
-    position: relative;
-}
-[data-ltlbg_ruby-long]::before {
-    content: attr(data-ltlbg_ruby-long);
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 80%;
-    white-space: nowrap;
-    text-indent: -0.5rem;
-    transform-origin: left bottom;
-    transform: scale(0.5, 0.5);
+/* 母字が複数でルビが1字だけの場合も、文字列全体の中央に置く。 */
+.ltlbg_ruby-short.ltlbg_ruby-single > .ltlbg_ruby-text {
+    justify-content: center;
 }
 
 /*特殊合字========================================================*/

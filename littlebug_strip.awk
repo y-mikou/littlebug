@@ -1,16 +1,29 @@
 #!/usr/bin/awk -f
 
 # ルビタグを元の短縮タグに戻す関数
-# <ruby class="ltlbg_ruby-*" data-*="ルビ">親文字<rt>ルビ</rt></ruby> → ｜親文字《ルビ》
-function strip_ruby_tags(text) {
+# 新形式は rt 内を文字ごとの span にしているため、data属性からルビを復元する。
+# 旧形式（data-ltlbg_ruby-*）も同じ処理で受け付ける。
+function strip_ruby_tags(text,    new_text, attrs, tail, ruby, parent, ruby_start, ruby_length, closing_tag) {
     new_text = ""
-    # ルビタグパターンがなくなるまでループ
-    while (match(text, /<ruby class="ltlbg_ruby-[^"]*" data-ltlbg_ruby-[^"]*="([^"]+)">([^<]+)<rt>[^<]+<\/rt><\/ruby>/, m)) {
-        new_text = new_text substr(text, 1, RSTART - 1)
-        ruby = m[1]
-        parent = m[2]
+    while (match(text, /<(ruby|span) class="([^"]*ltlbg_ruby[^"]*)" ([^>]*)>(<span class="ltlbg_ruby-base">([^<]+)<\/span><span class="ltlbg_ruby-text">|([^<]+)<rt>)/, m)) {
+        ruby_start = RSTART
+        ruby_length = RLENGTH
+        attrs = m[3]
+        if (!match(attrs, /data-ltlbg[_-]ruby(-[^=]*)?="([^"]+)"/, a)) {
+            new_text = new_text substr(text, 1, ruby_start + ruby_length - 1)
+            text = substr(text, ruby_start + ruby_length)
+            continue
+        }
+        tail = substr(text, ruby_start + ruby_length)
+        closing_tag = (m[5] != "" ? "</span></span></" m[1] ">" : "</rt></ruby>")
+        if (!match(tail, closing_tag)) {
+            break
+        }
+        new_text = new_text substr(text, 1, ruby_start - 1)
+        ruby = a[2]
+        parent = (m[5] != "" ? m[5] : m[6])
         new_text = new_text "｜" parent "《" ruby "》"
-        text = substr(text, RSTART + RLENGTH)
+        text = substr(tail, RSTART + RLENGTH)
     }
     new_text = new_text text
     return new_text
