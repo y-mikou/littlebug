@@ -88,8 +88,8 @@
 
 | 要素 | マークアップ | HTMLタグ / class | 説明 |
 | :--- | :--- | :--- | :--- |
-| **セクション** | 行頭に `§` | `<section class="ltlbg_section">`<br>`<h2 class="ltlbg_section_name">` | 章や節の区切りとしての大段落。 |
-| **特殊セクション** | 行頭に `§§` | `<section class="ltlbg_section_sukebe">`<br>`<h2 class="ltlbg_section_name">` | 特殊なセクション。変換時に`§§`は`§`に変換される。用途はクラス名から察してください。逆変換で`§§`に復元されます。 |
+| **セクション** | 行頭に `§`、`◆`、`#` のいずれか | `<section class="ltlbg_section">`<br>`<h2 class="ltlbg_section_name">` | 章や節の区切りとしての大段落。見出しには入力した記号が残ります。 |
+| **特殊セクション** | 行頭に `§§`、`◆◆`、`##` のいずれか | `<section class="ltlbg_section_sukebe">`<br>`<h2 class="ltlbg_section_name">` | HTMLの見出しでは先頭の記号が1つ減り、逆変換で元の記号が復元されます。 |
 | **地の文** | 行頭全角スペースの行とその連続 | `<p class="ltlbg_desciption">`<br>`<div class="ltlng_discript-group">` | 通常の形式小段落とその塊を示す中段落。 |
 | **会話文** | 行頭が `「`, `『`, `（`の行とその連続 | `<p class="ltlbg_bracket">`<br>`<div class="ltlng_bracket-group">` | 会話や思考などの形式小段落とその塊を示す中段落。 |
 
@@ -128,6 +128,7 @@
 | **縦中横** | `^文字^` | `<span class="ltlbg_tcy">` | 縦書き時に半角英数記号（3文字まで）を横向きに並べる。 |
 | **回転** | `[^文字^]` | `<span class="ltlbg_rotate">` | 1文字を回転させる(styleで指定)。 |
 | **1文字幅化** | `[-文字-]` | `<span class="ltlbg_wdfix">` | 1文字分の幅に収める。!!など1文字と見做したい記号や、曖昧幅を持つ文字への対応に利用 |
+| **絵文字の1文字幅化** | `💞`、`❣️` | `<span class="ltlbg_wdfix_auto ltlbg_emoji">` | 自動で全角1文字分の幅で表示し、逆変換では元の絵文字を復元します。 |
 | **強制合字** | `[%[AB]%]` | `<span class="ltlbg_forceGouji1">`<br>`<span class="ltlbg_forceGouji2">` | 2文字を1文字分の幅に詰め込むCSSを適用するためのタグを付与します。 |
 | **スケベ濁点**| 文字の後に `゛` | `<span class="ltlbg_dakuten">` | 直前の文字に濁点を付ける。 |
 | **キチガイ半濁音**| 文字の後に `゜` | `<span class="ltlbg_handakuten">` | 直前の文字に半濁点を付ける。 |

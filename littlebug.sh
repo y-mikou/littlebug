@@ -68,10 +68,23 @@ if [[ "${convMode}" = '' ]]; then
 			## gun awk プログラム
 			#########################################################
 
+			# HTML属性にはタグを付けず、表示文字だけを1文字幅にする。
+			function restore_emoji(text, formatted,    prefix, suffix) {
+				if (formatted) {
+					# タグの手前や記号の連続にはスペースを追加しない。
+					text = gensub(/([\034\035])〼*([^<〼」』）!？?！♥💕💢、。゛゜\034\035])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", text)
+					prefix = "<span class=\"ltlbg_wdfix_auto ltlbg_emoji\">"
+					suffix = "</span>"
+				}
+				gsub(/\034/, prefix "💞" suffix, text)
+				gsub(/\035/, prefix "❣️" suffix, text)
+				return text
+			}
+
 			# ルビタグにクラスを付与して置換する関数。
 			# rt の各文字を要素化しておくと、CSS 側で文字単位の均等配置ができる。
 			# gawk拡張のmatch()第三引数を使用。
-			function apply_ruby_classes(text,    new_text, parent, ruby, parent_count, ruby_count, class, ruby_chars, i, char, replacement) {
+			function apply_ruby_classes(text, new_text, parent, ruby, parent_count, ruby_count, class, ruby_chars, i, char, replacement) {
 					new_text = ""
 					# テキスト内にルビパターンがなくなるまでループ
 					while (match(text, /｜([^《]+)《([^》]+)》/, m)) {
@@ -106,7 +119,7 @@ if [[ "${convMode}" = '' ]]; then
 
 							# Ruby組版エンジンがrtの幅を行幅へ含めないよう、母字とルビは明示的なspanに分ける。
 							# data属性には逆変換用の元のルビ文字列を保存する。
-							replacement = "<span class=\"ltlbg_ruby " class "\" data-ltlbg-ruby=\"" ruby "\"><span class=\"ltlbg_ruby-base\">" parent "</span><span class=\"ltlbg_ruby-text\">" ruby_chars "</span></span>"
+							replacement = "<span class=\"ltlbg_ruby " class "\" data-ltlbg-ruby=\"" restore_emoji(ruby, 0) "\"><span class=\"ltlbg_ruby-base\">" parent "</span><span class=\"ltlbg_ruby-text\">" ruby_chars "</span></span>"
 							new_text = new_text replacement
 
 							# 未処理のテキスト部分を更新
@@ -189,11 +202,12 @@ if [[ "${convMode}" = '' ]]; then
 				#不要な一文字幅化を除去(指定がなくても変換される/指定があると変換が二重に行われる)
 				line = gensub(/\[-(!!|!\?|\?!|\?\?)-\]/, "\\1", "g", line);
 
-				# 記号種類の統一
-				## UTF-8合字は置換元に設定するとawkではうまく機能しないため、合字以外の文字に置換して文字分離を回避するする。
-				## 置換先として設定する分には機能するため、後続の行末処理で置換先として復帰させる。
-				## ※環境のLC_ALLがUTF-8になっていれば問題は誘発されない
-				line = gensub(/[❤️♡♥❤]/, "♥", "g", line); #後で❤️に復帰する対象
+				# 絵文字を一時的に1文字に退避し、ルビの文字数計算と記号置換で分割されないようにする。
+				gsub(/💞/, "\034", line)
+				gsub(/❣️/, "\035", line)
+
+				# 記号種類の統一。異体字セレクタは元の記号と一緒にだけ置換する。
+				line = gensub(/❤️|[♡♥❤]/, "♥", "g", line); #後で❤️に復帰する対象
 				line = gensub(/☆/, "★", "g", line);
 				line = gensub(/□/, "■", "g", line);
 				line = gensub(/[♫♬]/, "♪", "g", line);
@@ -202,12 +216,12 @@ if [[ "${convMode}" = '' ]]; then
 				line = gensub(/！？/, "!?", "g", line);
 				line = gensub(/？！/, "?!", "g", line);
 				line = gensub(/？？/, "??", "g", line);
-				line = gensub(/^(§+)[〿〼]+/, "\\1〼", "g", line);
+				line = gensub(/^(§+|◆+|#+)[〿〼]+/, "\\1〼", "g", line);
 				
 				# 連続する感嘆符・疑問符・記号類の後に全角スペースを挿入し、
 				# それを<span class="ltlbg_wSp"></span>に置換
-				# 対象 ！!?？♥💞💕♪☆★💢
-				line = gensub(/([!\?！？♥💞💕♪☆★💢])〼*([^」』）!\?！？♥💞💕♪☆★💢、。゛゜])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
+				# 退避した絵文字の後のスペースは、タグの生成後に処理する。
+				line = gensub(/([!\?！？♥💕♪☆★💢])〼*([^」』）!\?！？♥💕♪☆★💢、。゛゜\034\035])/, "\\1<span class=\"ltlbg_wSp\"></span>\\2", "g", line);
 
 				#上記特殊記号(♥,★,■,♪,!!,!?,?!,??)を、<span class="ltlbg_wdfix"></span>タグで括る
 				line = gensub(/([♥★■♪])/, "<span class=\"ltlbg_wdfix_auto\">\\1</span>", "g", line);
@@ -218,8 +232,8 @@ if [[ "${convMode}" = '' ]]; then
 				#############################################################################
 
 				# section(中段落)###########################################################
-				#行頭に§が登場する場合、セクション名タグを付与し、セクションタグを開始する。
-				if ($0 ~ /^§+/) {
+				# 行頭にセクション記号がある場合、見出しとセクションを作る。
+				if ($0 ~ /^(§|◆|#)/) {
 
 					#初回の場合、pタググループは開始されていないので閉じない
 					#初回以外では、セクションの境界でpタググループを必ず閉じる
@@ -235,21 +249,21 @@ if [[ "${convMode}" = '' ]]; then
 
 					# sectionクラスを決定する
 					section_class = "ltlbg_section"
-					if ($0 ~ /^§§/) {
+					if ($0 ~ /^(§§|◆◆|##)/) {
 						section_class = "ltlbg_section_sukebe"
-						# ❤を除去
-						sub(/§§/, "§", line)
+						sub(/^(§|◆|#)/, "", line)
 					}
 
 					output_buffer = output_buffer "<section class=\"" section_class "\">" ORS
 					state_section = "section"
 
-					# §の行自体にもルビなどの置換を適用したい場合はここに記述
+					# セクション見出しにもルビと圏点の置換を適用する。
 					line = apply_ruby_classes(line)
 					line = apply_emphasis_dots(line)
 					
-					line = gensub(/(§+.*)/, "  <h2 class=\"ltlbg_section_name\">\\1</h2>", "g", line);
+					line = "  <h2 class=\"ltlbg_section_name\">" line "</h2>"
 
+					line = restore_emoji(line, 1)
 					line = gensub(/〿/, "<span class=\"ltlbg_sSp\"></span>", "g", line);
 					line = gensub(/〼/, "　", "g", line);
 
@@ -332,6 +346,8 @@ if [[ "${convMode}" = '' ]]; then
 				#############################################################################
 				## 行末処理
 				#############################################################################
+				line = restore_emoji(line, 1)
+
 				## 特殊文字の復旧
 				line = gensub(/＆ａｍｐ/, "\\&amp;", "g", line);
 				line = gensub(/＆ｌｔ/, "\\&lt;", "g", line);
@@ -504,7 +520,7 @@ if [[ "${convMode}" = '' ]]; then
 				echo '🤔 ↑でルビ文字に修飾が指定されています。この変換は非対応です。変換は実施しますが結果は保証されません。' 
 			fi
 			# 不要なスペース(改行直前のスペース、閉じ括弧直前のスペース)
-			grep -E -o -n '[ 　]$|[ 　]([」』）〟])|^(§+)[ 　]' "${tgtFile}" | sort | uniq > "${destFile}"
+			grep -E -o -n '[ 　]$|[ 　]([」』）〟])|^(§+|◆+|#+)[ 　]' "${tgtFile}" | sort | uniq > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑に不要なスペース(改行直前のスペース、閉じ括弧直前のスペース、セクション記号直後のスペース)が含まれています。'
@@ -512,7 +528,7 @@ if [[ "${convMode}" = '' ]]; then
 			fi
 			#組版時に置換される記号類
 			##表記ゆれする可能性がある記号の統一
-			grep -E -o -n '[❤️♡❤☆□♫♬]' "${tgtFile}" | sort | uniq > "${destFile}"
+			grep -E -o -n '[♡☆□♫♬]|❤️?' "${tgtFile}" | sort | uniq > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑に含まれる記号は変換後、別の記号に置換されます。（元ファイルは修正しません）'
@@ -534,7 +550,7 @@ if [[ "${convMode}" = '' ]]; then
 				cat "${destFile}"
 				echo '🤔 ↑に含まれる、半角の!？ペアは自動的に一文字幅化されるので[- -]の指定は不要です(元のファイルは修正しません)'
 			fi
-			grep -E -o -n '^(§+)[ 　]' "${tgtFile}" | sort | uniq > "${destFile}"
+			grep -E -o -n '^(§+|◆+|#+)[ 　]' "${tgtFile}" | sort | uniq > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑に含まれる、！!、！？などのペアは変換後、１文字幅に収まるように半角のペアに変換されます(元のファイルは修正しません)'
@@ -545,7 +561,7 @@ if [[ "${convMode}" = '' ]]; then
 				echo '🤔 ↑に含まれる空行は、元ファイルの記述に関わらず、変換規則に則って削除あるいは追加されます(元のファイルは修正しません)'
 			fi
 			# 記号類の直後のスペースがない
-			grep -E -o -n '[!\?！？❤️♡♥❤💞💕♪☆★💢][^　」』）!\?！？❤️♡♥❤💞💕♪☆★💢、。゛゜]' "${tgtFile}" | sort | uniq > "${destFile}"
+			grep -E -o -n '([!？?！♡♥💞💕♪☆★💢]|❤️?|❣️)[^　」』）!？?！♡♥❤❣️💞💕♪☆★💢、。゛゜]' "${tgtFile}" | sort | uniq > "${destFile}"
 			if [[ -s "${destFile}" ]]; then 
 				cat "${destFile}"
 				echo '🤔 ↑記号類の直後に、それが連続するか行末・括弧内末尾でない限り、スペースを挿入します(元のファイルは修正しません)'
@@ -580,7 +596,7 @@ elif [[ "${convMode}" = '-t' ]]; then
 			# ルビタグを元の短縮タグに戻す関数。
 			# 新形式は rt 内を文字ごとの span にしているため、data属性からルビを復元する。
 			# 旧形式（data-ltlbg_ruby-*）も同じ処理で受け付ける。
-			function strip_ruby_tags(text,    new_text, attrs, tail, ruby, parent, ruby_start, ruby_length, closing_tag) {
+			function strip_ruby_tags(text, new_text, attrs, tail, ruby, parent, ruby_start, ruby_length, closing_tag) {
 				new_text = ""
 				while (match(text, /<(ruby|span) class="([^"]*ltlbg_ruby[^"]*)" ([^>]*)>(<span class="ltlbg_ruby-base">([^<]+)<\/span><span class="ltlbg_ruby-text">|([^<]+)<rt>)/, m)) {
 					ruby_start = RSTART
@@ -678,14 +694,17 @@ elif [[ "${convMode}" = '-t' ]]; then
 				line = gensub(/^[ \t]+/, "", "g", line)
 				
 				# セクション名タグを処理
-				# <h2 class="ltlbg_section_name">§内容</h2> → §内容 or §§内容
-				if (match(line, /<h2 class="ltlbg_section_name">([^<]+)<\/h2>/, m)) {
+				# 見出しタグを外し、特殊セクションでは先頭の記号を重ねる。
+				if (match(line, /^<h2 class="ltlbg_section_name">(.*)<\/h2>$/, m)) {
 					line = m[1]
 					if (is_sukebe_section == 1) {
-						sub(/^§/, "§§", line)
+						sub(/^(§|◆|#)/, "&&", line)
 					}
 				}
 				
+				# 絵文字の幅指定はルビや他の装飾タグの内側にある場合も先に外す。
+				line = gensub(/<span class="ltlbg_wdfix_auto ltlbg_emoji">([^<]*)<\/span>/, "\\1", "g", line)
+
 				# ルビタグを元に戻す（内側のタグを先に処理）
 				line = strip_ruby_tags(line)
 				

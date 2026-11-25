@@ -100,14 +100,17 @@ BEGIN {
     line = gensub(/^[ \t]+/, "", "g", line)
     
     # セクション名タグを処理
-    # <h2 class="ltlbg_section_name">§内容</h2> → §内容 or §§内容
-    if (match(line, /<h2 class="ltlbg_section_name">([^<]+)<\/h2>/, m)) {
+    # 見出しタグを外し、特殊セクションでは先頭の記号を重ねる。
+    if (match(line, /^<h2 class="ltlbg_section_name">(.*)<\/h2>$/, m)) {
         line = m[1]
         if (is_sukebe_section == 1) {
-            sub(/^§/, "§§", line)
+            sub(/^(§|◆|#)/, "&&", line)
         }
     }
     
+    # 絵文字の幅指定はルビや他の装飾タグの内側にある場合も先に外す。
+    line = gensub(/<span class="ltlbg_wdfix_auto ltlbg_emoji">([^<]*)<\/span>/, "\\1", "g", line)
+
     # ルビタグを元に戻す（内側のタグを先に処理）
     line = strip_ruby_tags(line)
     
