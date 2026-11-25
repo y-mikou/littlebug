@@ -71,7 +71,7 @@ if [[ "${convMode}" = '' ]]; then
 			# ルビタグにクラスを付与して置換する関数。
 			# rt の各文字を要素化しておくと、CSS 側で文字単位の均等配置ができる。
 			# gawk拡張のmatch()第三引数を使用。
-			function apply_ruby_classes(text,    new_text, parent, ruby, parent_count, ruby_count, class, ruby_chars, i, char, replacement) {
+			function apply_ruby_classes(text, new_text, parent, ruby, parent_count, ruby_count, class, ruby_chars, i, char, replacement) {
 					new_text = ""
 					# テキスト内にルビパターンがなくなるまでループ
 					while (match(text, /｜([^《]+)《([^》]+)》/, m)) {
@@ -580,7 +580,7 @@ elif [[ "${convMode}" = '-t' ]]; then
 			# ルビタグを元の短縮タグに戻す関数。
 			# 新形式は rt 内を文字ごとの span にしているため、data属性からルビを復元する。
 			# 旧形式（data-ltlbg_ruby-*）も同じ処理で受け付ける。
-			function strip_ruby_tags(text,    new_text, attrs, tail, ruby, parent, ruby_start, ruby_length, closing_tag) {
+			function strip_ruby_tags(text, new_text, attrs, tail, ruby, parent, ruby_start, ruby_length, closing_tag) {
 				new_text = ""
 				while (match(text, /<(ruby|span) class="([^"]*ltlbg_ruby[^"]*)" ([^>]*)>(<span class="ltlbg_ruby-base">([^<]+)<\/span><span class="ltlbg_ruby-text">|([^<]+)<rt>)/, m)) {
 					ruby_start = RSTART
